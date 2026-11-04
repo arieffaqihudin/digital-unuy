@@ -165,7 +165,7 @@ const activation = await newClient.post('/api/auth/activate', { json: { token: m
 check('Aktivasi akun staf berhasil', activation.status === 200 && activation.data?.user?.email === activationEmail)
 check('Token aktivasi tidak dapat dipakai dua kali', (await new Client('reuse').post('/api/auth/activate', { json: { token: mail?.token, password: 'AktivasiE2E#2027' } })).status === 410)
 check('Pengguna hasil aktivasi dapat login', (await login(newClient, activationEmail, 'AktivasiE2E#2026')).status === 200)
-check('Token aktivasi tidak tersimpan di log notifikasi', !JSON.stringify((await admin.get('/api/admin/notifications')).data).includes('aktivasi?token='))
+check('Token aktivasi tidak tersimpan di notifikasi', !JSON.stringify((await admin.get('/api/admin/notifications')).data).includes('aktivasi?token='))
 
 console.log('\n=== Guest submission end-to-end ===')
 const guestEmail = `guest-${stamp}@example.com`
@@ -343,6 +343,7 @@ const xssArticle = await admin.post('/api/admin/articles', {
 check('Admin membuat publikasi', xssArticle.status === 200)
 check('Konten berbahaya disanitasi saat disimpan', !xssArticle.data?.article?.content?.includes('<script'))
 check('Publikasi XSS tersanitasi di endpoint publik', !(await publicClient.get(`/api/articles/artikel-e2e-${stamp}`)).text.includes('<script>alert'))
+await admin.patch(`/api/admin/articles/${xssArticle.data?.article?.id}`, { json: { status: 'draft' } })
 
 console.log('\n=== Team CMS ===')
 const finalTeamGroups = await admin.get('/api/admin/team/groups')
@@ -388,8 +389,8 @@ console.log('\n=== Administration ===')
 check('Admin dapat membaca role & permission', (await admin.get('/api/admin/roles')).data?.roles?.length === 2)
 check('Audit log mencatat aktivitas', (await admin.get('/api/admin/audit')).data?.total > 5)
 const notifications = await admin.get('/api/admin/notifications')
-check('Log notifikasi mencatat pengiriman', notifications.status === 200 && notifications.data?.total > 3)
-check('Log notifikasi bukan penyimpanan token', !JSON.stringify(notifications.data).includes('aktivasi?token='))
+check('Pusat notifikasi mengembalikan aktivitas permohonan', notifications.status === 200 && Array.isArray(notifications.data?.items) && notifications.data.items.length > 0 && notifications.data.items.every((item) => item.href.startsWith('/admin/permohonan/')))
+check('Notifikasi bukan log email dan tidak memuat token', !JSON.stringify(notifications.data).includes('recipient') && !JSON.stringify(notifications.data).includes('aktivasi?token='))
 
 console.log(`\n${failures.length ? 'FAILED' : 'PASSED'}: ${passed} checks passed, ${failures.length} failed`)
 if (failures.length) {

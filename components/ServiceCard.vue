@@ -22,15 +22,11 @@ defineProps<{ service: ServiceDTO; index?: number; compact?: boolean }>()
     <p class="mt-2.5 line-clamp-3 flex-1 text-[14px] leading-6 text-slate-600">{{ service.shortDescription }}</p>
 
     <div class="mt-5 flex items-center justify-between gap-3 border-t border-line-warm pt-3">
-      <span class="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-        <span
-          class="h-1.5 w-1.5 rounded-full"
-          :class="service.active && service.acceptsRequests ? 'bg-unu-green' : 'bg-slate-300'"
-          aria-hidden="true"
-        />
-        {{ service.active ? (service.acceptsRequests ? 'Menerima permohonan' : 'Informasi layanan') : 'Nonaktif' }}
+      <span v-if="!service.active || !service.acceptsRequests" class="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+        <span class="h-1.5 w-1.5 rounded-full bg-slate-300" aria-hidden="true" />
+        {{ service.active ? 'Informasi layanan' : 'Nonaktif' }}
       </span>
-      <div class="flex items-center gap-3">
+      <div class="ml-auto flex items-center gap-3">
         <NuxtLink :to="`/layanan/${service.slug}`" class="text-[14px] font-semibold text-slate-500 transition hover:text-unu-green min-h-[44px] inline-flex items-center">
           Detail
         </NuxtLink>

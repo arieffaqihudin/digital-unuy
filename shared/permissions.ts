@@ -68,8 +68,8 @@ export const PERMISSION_META: {
   },
   {
     key: 'notifications.read',
-    label: 'Melihat log notifikasi',
+    label: 'Melihat notifikasi',
     group: 'Administrasi',
-    description: 'Melihat status pengiriman email dan kegagalannya.'
+    description: 'Melihat pembaruan dan tindakan yang perlu ditindaklanjuti pada permohonan.'
   }
 ]

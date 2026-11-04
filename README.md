@@ -2,7 +2,7 @@
 
 Website resmi sekaligus **Digital Service Portal** Direktorat Tim Transformasi Digital Universitas Nahdlatul Ulama Yogyakarta.
 
-Aplikasi ini bukan mockup. Katalog layanan, formulir dinamis, pengajuan, nomor tiket, tracking, dashboard admin, CMS, dokumentasi, pengguna, role, audit log, dan log notifikasi terhubung ke MongoDB melalui API server Nuxt/Nitro.
+Aplikasi ini bukan mockup. Katalog layanan, formulir dinamis, pengajuan, nomor tiket, tracking, dashboard admin, CMS, dokumentasi, pengguna, role, audit log, dan notifikasi operasional terhubung ke MongoDB melalui API server Nuxt/Nitro.
 
 ## Stack
 
@@ -53,7 +53,7 @@ Jangan gunakan kredensial ini di produksi. Ganti kata sandi dan bersihkan data s
 | `NUXT_EMAIL_FROM` | Tidak | Pengirim email |
 | `SEED_*_PASSWORD` | Tidak | Override kata sandi seed development |
 
-Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log berstatus `simulated`. Ini adalah mail sink development, bukan email terkirim. Pada produksi tanpa SMTP, pengiriman ditandai gagal dan admin dapat melihatnya di **Admin → Notifikasi**.
+Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log berstatus `simulated`. Ini adalah mail sink development, bukan email terkirim. Pada produksi tanpa SMTP, pengiriman ditandai gagal dan tercatat pada log server; menu **Notifikasi** digunakan untuk pembaruan operasional permohonan.
 
 ## Fitur yang berfungsi
 
@@ -114,7 +114,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Dokumentasi: unggah, metadata, publish/unpublish, arsip, versi baru, hubungkan ke layanan.
 - Pengguna: buat, edit, aktif/nonaktif, kirim ulang aktivasi.
 - RBAC aktif di server. Menu **Hak Akses** dan **Pengaturan** tidak ditampilkan di sidebar sesuai keputusan produk.
-- Log notifikasi dapat diakses dari ikon di kanan atas; log aktivitas memakai bahasa yang mudah dipahami.
+- Notifikasi aktivitas permohonan dapat diakses dari ikon lonceng di kanan atas; log aktivitas memakai bahasa yang mudah dipahami.
 - Pengaturan global tetap tersedia melalui API/seed, bukan melalui menu sidebar.
 - Tabel responsif: tabel desktop dan daftar kartu mobile.
 
@@ -214,14 +214,14 @@ Dengan server development berjalan:
 ```bash
 npm run test:e2e         # 84 pemeriksaan API & alur end-to-end
 npm run test:visual      # 44 pemeriksaan render & error console
-npm run test:responsive  # 144 kombinasi halaman × 10 viewport (320–1920px)
+npm run test:responsive  # 140 kombinasi halaman × 10 viewport (320–1920px)
 ```
 
 Hasil yang sudah dijalankan pada lingkungan ini:
 
-- **E2E:** 84/84 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
+- **E2E:** 105/105 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
 - **Visual:** 44/44 lulus — halaman publik, admin desktop/mobile, form pengajuan, permohonan saya. Tidak ada page error atau console error.
-- **Responsive:** 144/144 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
+- **Responsive:** 140/140 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
 - **Login standalone:** layout autentikasi tanpa public header/footer/sidebar, split-screen 50:50, light mode permanen, diuji pada 320–1440px.
 
 Screenshot pengujian disimpan di `.data/screenshots/`.

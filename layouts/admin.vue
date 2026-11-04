@@ -11,7 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   History,
-  Mail,
+  Bell,
   Search,
   Menu,
   Newspaper,
@@ -24,6 +24,7 @@ import type { Permission } from '~/shared/types'
 const { user, fetchSession, logout, can } = useAuth()
 const { settings, ensureSite } = useSite()
 const route = useRoute()
+const requestFetch = useRequestFetch()
 const mobileOpen = ref(false)
 const collapsed = ref(false)
 const accountMenuOpen = ref(false)
@@ -40,6 +41,19 @@ await useAsyncData('admin-bootstrap', async () => {
   await Promise.all([fetchSession(), ensureSite()])
   return true
 })
+
+const { data: notificationSummary, refresh: refreshNotificationSummary } = await useAsyncData('admin-notification-summary', async () => {
+  if (!can('notifications.read') || !can('requests.read')) return { actionCount: 0 }
+  try {
+    return await requestFetch<{ actionCount: number }>('/api/admin/notifications', {
+      query: { view: 'action', page: 1, pageSize: 1 }
+    })
+  } catch {
+    return { actionCount: 0 }
+  }
+})
+
+const notificationCount = computed(() => notificationSummary.value?.actionCount || 0)
 
 const menuGroups: {
   label: string
@@ -121,6 +135,7 @@ watch(
   () => {
     mobileOpen.value = false
     accountMenuOpen.value = false
+    refreshNotificationSummary()
   }
 )
 
@@ -249,12 +264,16 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
             <span class="mx-1 hidden h-5 w-px bg-admin-border md:block" aria-hidden="true" />
 
             <NuxtLink
+              v-if="can('notifications.read') && can('requests.read')"
               to="/admin/notifikasi"
               class="relative grid h-9 w-9 place-items-center rounded-lg border border-admin-border bg-white text-admin-muted transition hover:border-unu-green/30 hover:text-unu-green"
-              aria-label="Notifikasi"
+              :aria-label="notificationCount ? `Notifikasi, ${notificationCount} perlu tindakan` : 'Notifikasi'"
               title="Notifikasi"
             >
-              <Mail :size="16" aria-hidden="true" />
+              <Bell :size="16" aria-hidden="true" />
+              <span class="absolute -right-1 -top-1 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white" :class="notificationCount > 0 ? '' : 'hidden'">
+                {{ notificationCount > 99 ? '99+' : notificationCount }}
+              </span>
             </NuxtLink>
 
             <div v-if="user" ref="accountMenu" class="relative">
