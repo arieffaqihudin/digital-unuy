@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ArrowRight, ArrowUpRight, Check, MoveUpRight } from 'lucide-vue-next'
+import { ArrowRight, ArrowUpRight, MoveUpRight } from 'lucide-vue-next'
 import type {
   ArticleDTO,
   DigitalPlatformDTO,
   DocumentDTO,
-  MetricDTO,
   ProgramDTO,
   ServiceDTO,
   SiteSettingsDTO
@@ -17,7 +16,6 @@ interface HomeResponse {
   programs: ProgramDTO[]
   documents: DocumentDTO[]
   articles: ArticleDTO[]
-  metrics: MetricDTO[]
   counts: { services: number; platforms: number }
 }
 
@@ -29,14 +27,6 @@ const featuredArticle = computed(() => home.value?.articles?.[0] || null)
 const secondaryArticles = computed(() => home.value?.articles?.slice(1, 3) || [])
 const { formatDate } = useFormat()
 
-const description = computed(
-  () =>
-    home.value?.settings.hero.description ||
-    'Menghadirkan layanan dan ekosistem digital yang terintegrasi untuk mendukung tata kelola, pembelajaran, dan pengembangan universitas.'
-)
-const headline = computed(
-  () => home.value?.settings.hero.title || 'Mendorong Transformasi Digital UNU Yogyakarta'
-)
 
 const platformStatusClass = (status: string) => {
   if (status === 'Aktif') return 'border-white/15 bg-white/10 text-white'
@@ -83,128 +73,23 @@ useHead(() => ({
 
 <template>
   <div>
-    <!-- Hero: editorial split, no oversized dark block -->
-    <section class="relative overflow-hidden border-b border-line-warm bg-ivory">
-      <div class="page-shell relative py-10 sm:py-12 lg:py-16">
-        <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14">
-          <div class="animate-fade-up">
-            <p class="eyebrow"><span class="h-px w-7 bg-current" aria-hidden="true" />Direktorat Tim Transformasi Digital</p>
-            <h1 class="display-1 mt-5 max-w-[620px] text-editorial">{{ headline }}</h1>
-            <p class="mt-5 max-w-[560px] text-[15px] leading-7 text-slate-600 sm:text-[16.5px] sm:leading-8">{{ description }}</p>
-
-            <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-              <AppButton :to="home?.settings.hero.primaryUrl || '/layanan'" size="lg">
-                {{ home?.settings.hero.primaryLabel || 'Jelajahi Layanan' }}
-                <template #right><ArrowRight :size="16" aria-hidden="true" /></template>
-              </AppButton>
-              <AppButton :to="home?.settings.hero.secondaryUrl || '/tentang'" variant="secondary" size="lg">
-                {{ home?.settings.hero.secondaryLabel || 'Tentang Direktorat' }}
-              </AppButton>
-            </div>
-
-            <dl class="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-line-warm pt-5">
-              <div class="flex items-baseline gap-2">
-                <dt class="text-[12px] font-semibold uppercase tracking-[0.14em] text-slate-500">Layanan</dt>
-                <dd class="text-lg font-semibold tabular-nums">{{ home?.counts.services || '—' }}</dd>
-              </div>
-              <div class="h-5 w-px bg-line-warm" aria-hidden="true" />
-              <div class="flex items-baseline gap-2">
-                <dt class="text-[12px] font-semibold uppercase tracking-[0.14em] text-slate-500">Platform tercatat</dt>
-                <dd class="text-lg font-semibold tabular-nums">{{ home?.counts.platforms || '—' }}</dd>
-              </div>
-              <NuxtLink to="/lacak" class="ml-auto inline-flex min-h-[44px] items-center gap-1.5 text-[14px] font-semibold text-slate-600 underline-offset-4 hover:text-unu-green hover:underline">
-                Lacak permohonan <ArrowUpRight :size="13" aria-hidden="true" />
-              </NuxtLink>
-            </dl>
-          </div>
-
-          <div class="mx-auto w-full max-w-[480px] animate-fade-up lg:mr-0">
-            <CampusDigitalVisual
-              :service-count="home?.counts.services || 0"
-              :platform-count="home?.counts.platforms || 0"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Layanan: compact index cards -->
-    <section class="section-space bg-soft-white">
-      <div class="page-shell">
-        <SectionHeading
-          eyebrow="Satu Pintu"
-          title="Layanan Digital"
-          description="Temukan layanan teknologi informasi untuk mendukung kebutuhan akademik dan operasional universitas."
-        >
-          <template #action>
-            <AppButton to="/layanan" variant="secondary">Lihat Semua Layanan <template #right><ArrowRight :size="14" /></template></AppButton>
-          </template>
-        </SectionHeading>
-
-        <div v-if="pending" class="mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <div v-for="index in 6" :key="index" class="skeleton h-56 rounded-xl" />
-        </div>
-        <EmptyState v-else-if="error" class="mt-9" title="Layanan belum dapat dimuat" description="Silakan muat ulang halaman beberapa saat lagi." />
-        <div v-else-if="home?.services.length" class="mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <ServiceCard v-for="(service, index) in home.services" :key="service.id" :service="service" :index="index + 1" />
-        </div>
-        <EmptyState v-else class="mt-9" title="Belum ada layanan" description="Administrator dapat menambahkan layanan melalui dashboard." />
-      </div>
-    </section>
-
-    <!-- Tentang: editorial dark section, not a card grid -->
-    <section class="relative overflow-hidden bg-[#1F2A23] text-white">
-      <div class="absolute inset-0 opacity-[0.05]" aria-hidden="true">
-        <div class="h-full w-full public-grid-pattern" />
-      </div>
-      <div class="page-shell relative grid gap-12 py-16 md:py-20 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20 lg:py-24">
-        <div>
-          <p class="eyebrow-light"><span class="h-px w-7 bg-current" aria-hidden="true" />Tentang Direktorat</p>
-          <h2 class="display-2 mt-5 max-w-md text-white">Transformasi digital untuk universitas yang lebih baik.</h2>
-          <p class="mt-5 max-w-md text-[14.5px] leading-7 text-white/60">
-            Kami menghubungkan kebutuhan layanan, tata kelola, dan teknologi agar pekerjaan universitas berjalan lebih tertib dan mudah diakses.
-          </p>
-          <AppButton to="/tentang" variant="light" class="mt-7">Mengenal Direktorat <template #right><ArrowRight :size="15" /></template></AppButton>
-        </div>
-
-        <div class="lg:pt-2">
-          <p class="max-w-xl text-[17px] leading-8 text-white/80">
-            Direktorat bekerja di ruang antara kebutuhan sivitas akademika dan kemampuan teknologi: memahami proses, menyiapkan fondasi, lalu memastikan layanan dapat digunakan secara berkelanjutan.
-          </p>
-          <div class="mt-9 border-t border-white/10">
-            <div
-              v-for="(item, index) in [
-                'Tata kelola teknologi informasi',
-                'Digitalisasi proses bisnis universitas',
-                'Integrasi sistem dan data',
-                'Pengembangan sistem informasi',
-                'Infrastruktur dan layanan digital',
-                'Pendampingan transformasi unit kerja'
-              ]"
-              :key="item"
-              class="flex items-baseline gap-5 border-b border-white/10 py-4"
-            >
-              <span class="text-[12px] font-semibold tabular-nums text-sage/70">{{ String(index + 1).padStart(2, '0') }}</span>
-              <p class="text-[14px] font-medium text-white/80">{{ item }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <HomeHero />
+    <HomeImpactPreview />
+    <HomeApproach />
 
     <!-- Ekosistem: product showcase, visually distinct from service catalog -->
     <section class="section-space bg-ivory">
       <div class="page-shell">
-        <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div class="max-w-2xl">
-            <p class="eyebrow"><span class="h-px w-6 bg-current" aria-hidden="true" />Ekosistem Digital</p>
-            <h2 class="display-2 mt-3">Platform yang menyusun layanan kampus</h2>
-            <p class="body-copy mt-3">Bukan formulir permohonan, melainkan sistem dan platform yang tersedia atau sedang dikembangkan di lingkungan universitas.</p>
-          </div>
-          <NuxtLink to="/ekosistem-digital" class="link-arrow">Lihat direktori <ArrowUpRight :size="14" aria-hidden="true" /></NuxtLink>
-        </div>
-
-        <div v-if="featuredPlatform" class="mt-9 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+        <HomeSectionHead
+          eyebrow="Ekosistem Digital"
+          title="Platform yang menyusun layanan kampus."
+          description="Sistem dan platform yang tersedia atau sedang dikembangkan di lingkungan universitas."
+        >
+          <template #action>
+            <NuxtLink to="/ekosistem-digital" class="link-arrow">Lihat direktori <ArrowUpRight :size="14" aria-hidden="true" /></NuxtLink>
+          </template>
+        </HomeSectionHead>
+        <div v-if="featuredPlatform" class="mt-10 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <article class="relative overflow-hidden rounded-2xl bg-[#244B36] p-7 text-white sm:p-9">
             <div class="absolute inset-0 public-grid-pattern opacity-30" aria-hidden="true" />
             <div class="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" aria-hidden="true" />
@@ -258,17 +143,43 @@ useHead(() => ({
             </NuxtLink>
           </div>
         </div>
-        <EmptyState v-else class="mt-9" title="Ekosistem digital belum dicatat" description="Data platform akan tampil setelah ditambahkan melalui CMS." />
+        <EmptyState v-else class="mt-10" title="Ekosistem digital belum dicatat" description="Data platform akan tampil setelah ditambahkan melalui CMS." />
       </div>
     </section>
 
+    <!-- Layanan: compact index cards -->
+    <section class="section-space bg-white" aria-labelledby="services-title">
+      <div class="page-shell">
+        <HomeSectionHead
+          eyebrow="Layanan Digital"
+          title="Satu pintu untuk kebutuhan layanan digital."
+          description="Temukan layanan teknologi informasi untuk mendukung kebutuhan akademik dan operasional universitas."
+        >
+          <template #action>
+            <AppButton to="/layanan" variant="secondary">Lihat Semua Layanan <template #right><ArrowRight :size="14" /></template></AppButton>
+          </template>
+        </HomeSectionHead>
+
+        <div v-if="pending" class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div v-for="index in 6" :key="index" class="skeleton h-56 rounded-xl" />
+        </div>
+        <EmptyState v-else-if="error" class="mt-10" title="Layanan belum dapat dimuat" description="Silakan muat ulang halaman beberapa saat lagi." />
+        <div v-else-if="home?.services.length" class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <ServiceCard v-for="(service, index) in home.services" :key="service.id" :service="service" :index="index + 1" />
+        </div>
+        <EmptyState v-else class="mt-10" title="Belum ada layanan" description="Administrator dapat menambahkan layanan melalui dashboard." />
+      </div>
+    </section>
+
+    <HomeCaseStudy />
+
     <!-- Program: editorial list with a strong left rail -->
-    <section id="program" class="section-space scroll-mt-24 bg-white">
+    <section id="program" class="section-space scroll-mt-24 bg-ivory">
       <div class="page-shell grid gap-10 lg:grid-cols-[0.65fr_1.35fr] lg:gap-16">
         <div class="lg:sticky lg:top-28 lg:self-start">
-          <p class="eyebrow"><span class="h-px w-6 bg-current" aria-hidden="true" />Program & Inisiatif</p>
-          <h2 class="display-2 mt-3 max-w-sm">Kerja transformasi yang terarah.</h2>
-          <p class="body-copy mt-3 max-w-sm">Inisiatif yang menghubungkan kebutuhan unit kerja dengan fondasi teknologi universitas.</p>
+          <p class="eyebrow-editorial">Program & Inisiatif</p>
+          <h2 class="section-title mt-4 max-w-sm">Kerja transformasi yang terarah.</h2>
+          <p class="mt-4 max-w-sm text-[16px] leading-[1.7] text-slate-600">Inisiatif yang menghubungkan kebutuhan unit kerja dengan fondasi teknologi universitas.</p>
           <div class="mt-6 flex items-center gap-2 text-[12px] text-slate-500">
             <span class="h-1.5 w-1.5 rounded-full bg-unu-green" aria-hidden="true" />
             {{ home?.programs.length || 0 }} inisiatif ditampilkan
@@ -299,13 +210,15 @@ useHead(() => ({
       </div>
     </section>
 
+    <HomeTeam />
+
     <!-- Dokumentasi: knowledge center rows -->
     <section class="section-space bg-soft-white">
       <div class="page-shell grid gap-10 lg:grid-cols-[0.6fr_1.4fr] lg:gap-16">
         <div class="lg:sticky lg:top-28 lg:self-start">
-          <p class="eyebrow"><span class="h-px w-6 bg-current" aria-hidden="true" />Dokumentasi</p>
-          <h2 class="display-2 mt-3 max-w-xs">Rujukan yang jelas.</h2>
-          <p class="body-copy mt-3 max-w-xs">SOP, panduan, dan kebijakan untuk memahami alur layanan sebelum mengajukan.</p>
+          <p class="eyebrow-editorial">Dokumentasi & Panduan</p>
+          <h2 class="section-title mt-4 max-w-xs">Rujukan yang jelas.</h2>
+          <p class="mt-4 max-w-xs text-[16px] leading-[1.7] text-slate-600">SOP, panduan, dan kebijakan untuk memahami alur layanan sebelum mengajukan.</p>
           <AppButton to="/dokumen" variant="secondary" class="mt-6">Buka Dokumentasi</AppButton>
         </div>
         <div class="rounded-xl border border-line-warm bg-white px-5 sm:px-6">
@@ -321,40 +234,20 @@ useHead(() => ({
       </div>
     </section>
 
-    <!-- Metrics only when verified data exists -->
-    <section v-if="home?.metrics.length" class="border-y border-line-warm bg-white">
-      <div class="page-shell py-12 sm:py-14">
-        <div class="grid gap-8 lg:grid-cols-[0.65fr_1.35fr] lg:items-end">
-          <div>
-            <p class="eyebrow"><span class="h-px w-6 bg-current" aria-hidden="true" />Capaian Transformasi</p>
-            <h2 class="display-3 mt-3">Ukuran yang dapat dipertanggungjawabkan.</h2>
-            <p class="mt-2 text-[12px] leading-6 text-slate-500">Hanya metrik terverifikasi yang ditampilkan.</p>
-          </div>
-          <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <div v-for="metric in home.metrics.slice(0, 4)" :key="metric.label" class="border-t-2 border-unu-green pt-4">
-              <p class="text-3xl font-semibold tracking-[-0.03em]">{{ metric.value }}<span v-if="metric.unit" class="ml-1 text-sm font-medium text-slate-500">{{ metric.unit }}</span></p>
-              <p class="mt-2 text-[14px] font-semibold leading-5">{{ metric.label }}</p>
-              <p class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold uppercase tracking-wide text-unu-green"><Check :size="10" /> Terverifikasi</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Publikasi: featured editorial layout -->
     <section class="section-space bg-ivory">
       <div class="page-shell">
-        <SectionHeading
+        <HomeSectionHead
           eyebrow="Publikasi"
-          title="Catatan dari transformasi digital"
+          title="Catatan dari transformasi digital."
           description="Kabar, pembelajaran, dan pembaruan dari Direktorat Tim Transformasi Digital."
         >
           <template #action>
             <AppButton to="/publikasi" variant="secondary">Semua Publikasi <template #right><ArrowRight :size="14" /></template></AppButton>
           </template>
-        </SectionHeading>
+        </HomeSectionHead>
 
-        <div v-if="featuredArticle" class="mt-9 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+        <div v-if="featuredArticle" class="mt-10 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <ArticleCard :article="featuredArticle" variant="featured" />
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <ArticleCard v-for="article in secondaryArticles" :key="article.id" :article="article" variant="compact" />
@@ -363,27 +256,9 @@ useHead(() => ({
             </div>
           </div>
         </div>
-        <EmptyState v-else class="mt-9" title="Belum ada publikasi" description="Publikasi yang diterbitkan akan tampil di sini." />
+        <EmptyState v-else class="mt-10" title="Belum ada publikasi" description="Publikasi yang diterbitkan akan tampil di sini." />
       </div>
     </section>
 
-    <!-- Closing CTA -->
-    <section class="bg-[#244B36]">
-      <div class="page-shell relative overflow-hidden py-14 sm:py-16">
-        <div class="absolute inset-0 public-grid-pattern opacity-25" aria-hidden="true" />
-        <div class="absolute -right-24 -top-32 h-72 w-72 rounded-full border border-white/10" aria-hidden="true" />
-        <div class="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div class="max-w-2xl">
-            <p class="eyebrow-light"><span class="h-px w-6 bg-current" aria-hidden="true" />Mulai dari sini</p>
-            <h2 class="display-2 mt-4 text-white">Ada kebutuhan digital untuk unit atau kegiatan Anda?</h2>
-            <p class="mt-3 max-w-xl text-[14px] leading-7 text-white/60">Pilih layanan, lengkapi formulir, dan pantau setiap tahap melalui nomor tiket yang tercatat.</p>
-          </div>
-          <div class="flex flex-col gap-3 sm:flex-row lg:shrink-0">
-            <AppButton to="/layanan" variant="light" size="lg">Ajukan Layanan</AppButton>
-            <AppButton to="/dokumen" variant="ghost" size="lg" class="border-white/20 text-white hover:bg-white/10">Baca Panduan</AppButton>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
