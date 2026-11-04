@@ -27,14 +27,14 @@ const classes = computed(() => {
   <span class="inline-flex flex-wrap items-center gap-1.5">
     <span
       class="inline-flex items-center gap-1.5 rounded-full border font-semibold"
-      :class="[classes, size === 'sm' ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs']"
+      :class="[classes, size === 'sm' ? 'px-2.5 py-1 text-[14px]' : 'px-3 py-1.5 text-xs']"
     >
       <span aria-hidden="true">{{ meta.symbol }}</span>
       {{ status }}
     </span>
     <span
       v-if="substatus"
-      class="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 text-[11px] font-semibold text-gold-dark"
+      class="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 text-[14px] font-semibold text-gold-dark"
     >
       <span aria-hidden="true">◷</span>
       {{ substatus }}

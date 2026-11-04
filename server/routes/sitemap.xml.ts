@@ -1,13 +1,14 @@
-import { Article, Document, Page, Service } from '../models'
+import { Article, Document, Page, Program, Service } from '../models'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const base = String(config.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
-  const [services, documents, articles, pages] = await Promise.all([
+  const [services, documents, articles, pages, programs] = await Promise.all([
     Service.find({ active: true }).select('slug updatedAt').lean(),
     Document.find({ published: true, archived: false }).select('slug updatedAt').lean(),
     Article.find({ status: 'published' }).select('slug updatedAt').lean(),
-    Page.find({ published: true }).select('slug updatedAt').lean()
+    Page.find({ published: true }).select('slug updatedAt').lean(),
+    Program.find({}).select('slug updatedAt').lean()
   ])
 
   const urls = [
@@ -20,6 +21,7 @@ export default defineEventHandler(async (event) => {
     ...services.map((service) => ({ loc: `/layanan/${service.slug}`, lastmod: service.updatedAt })),
     ...documents.map((doc) => ({ loc: `/dokumen/${doc.slug}`, lastmod: doc.updatedAt })),
     ...articles.map((article) => ({ loc: `/publikasi/${article.slug}`, lastmod: article.updatedAt })),
+    ...programs.map((program) => ({ loc: `/program/${program.slug}`, lastmod: program.updatedAt })),
     ...pages
       .filter((page) => page.slug !== 'tentang-kami')
       .map((page) => ({ loc: `/halaman/${page.slug}`, lastmod: page.updatedAt }))

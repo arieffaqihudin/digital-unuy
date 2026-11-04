@@ -124,15 +124,15 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
 
 <template>
   <div>
-    <div class="flex flex-col gap-3 rounded-xl border border-line-warm bg-ivory p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 rounded-xl border border-admin-border bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p class="text-sm font-semibold">Formulir permohonan</p>
-        <p class="mt-0.5 text-[11px] text-ink-muted">Perubahan konfigurasi membuat versi formulir baru. Permohonan lama tetap memakai snapshot saat diajukan.</p>
+        <p class="mt-0.5 text-[14px] text-admin-muted">Perubahan konfigurasi membuat versi formulir baru. Permohonan lama tetap memakai snapshot saat diajukan.</p>
       </div>
       <AppButton type="button" size="sm" variant="secondary" @click="addField"><template #left><Plus :size="14" /></template>Tambah Field</AppButton>
     </div>
 
-    <div v-if="!local.length" class="mt-3 rounded-xl border border-dashed border-line-warm p-8 text-center text-sm text-ink-muted">
+    <div v-if="!local.length" class="mt-3 rounded-xl border border-dashed border-admin-border p-8 text-center text-sm text-admin-muted">
       Belum ada field. Tambahkan minimal satu field agar layanan dapat diaktifkan.
     </div>
 
@@ -140,25 +140,25 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
       <details
         v-for="(field, index) in local"
         :key="index"
-        class="group rounded-xl border border-line-warm bg-white"
+        class="group rounded-xl border border-admin-border bg-white"
         :open="index === local.length - 1 && !field.key"
       >
         <summary class="flex cursor-pointer list-none items-center gap-3 px-4 py-3">
-          <GripVertical :size="15" class="text-ink-muted/40" aria-hidden="true" />
-          <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-sage-soft text-[10px] font-bold">{{ index + 1 }}</span>
+          <GripVertical :size="15" class="text-admin-muted/40" aria-hidden="true" />
+          <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-unu-green-soft text-[12px] font-bold">{{ index + 1 }}</span>
           <div class="min-w-0 flex-1">
             <p class="truncate text-xs font-semibold">{{ field.label || 'Field tanpa label' }} <span v-if="field.required" class="text-red-700">*</span></p>
-            <p class="mt-0.5 truncate text-[10px] text-ink-muted">{{ fieldTypeLabel(field.type) }} · {{ field.key || 'key belum diisi' }}</p>
+            <p class="mt-0.5 truncate text-[12px] text-admin-muted">{{ fieldTypeLabel(field.type) }} · {{ field.key || 'key belum diisi' }}</p>
           </div>
           <div class="flex items-center gap-0.5" @click.prevent>
-            <button type="button" class="grid h-8 w-8 place-items-center rounded-md text-ink-muted hover:bg-ivory disabled:opacity-30" :disabled="index === 0" title="Naikkan" @click="move(index, -1)"><ArrowUp :size="13" /></button>
-            <button type="button" class="grid h-8 w-8 place-items-center rounded-md text-ink-muted hover:bg-ivory disabled:opacity-30" :disabled="index === local.length - 1" title="Turunkan" @click="move(index, 1)"><ArrowDown :size="13" /></button>
+            <button type="button" class="grid h-8 w-8 place-items-center rounded-md text-admin-muted hover:bg-slate-50 disabled:opacity-30" :disabled="index === 0" title="Naikkan" @click="move(index, -1)"><ArrowUp :size="13" /></button>
+            <button type="button" class="grid h-8 w-8 place-items-center rounded-md text-admin-muted hover:bg-slate-50 disabled:opacity-30" :disabled="index === local.length - 1" title="Turunkan" @click="move(index, 1)"><ArrowDown :size="13" /></button>
             <button type="button" class="grid h-8 w-8 place-items-center rounded-md text-red-600 hover:bg-red-50" title="Hapus field" @click="removeField(index)"><Trash2 :size="13" /></button>
           </div>
-          <ChevronDown :size="14" class="text-ink-muted transition group-open:rotate-180" aria-hidden="true" />
+          <ChevronDown :size="14" class="text-admin-muted transition group-open:rotate-180" aria-hidden="true" />
         </summary>
 
-        <div class="grid gap-4 border-t border-line-warm p-4 sm:grid-cols-2">
+        <div class="grid gap-4 border-t border-admin-border p-4 sm:grid-cols-2">
           <div>
             <label class="admin-label">Label</label>
             <input v-model="field.label" type="text" class="field-input" maxlength="160" @input="onLabelInput(field)" />
@@ -190,9 +190,9 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
 
           <div class="flex items-center gap-4 sm:col-span-2">
             <label class="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold">
-              <input v-model="field.required" type="checkbox" class="h-4 w-4 accent-charcoal" /> Wajib diisi
+              <input v-model="field.required" type="checkbox" class="h-4 w-4 accent-unu-green" /> Wajib diisi
             </label>
-            <span class="text-[11px] text-ink-muted">Pola validasi hanya untuk field teks.</span>
+            <span class="text-[14px] text-admin-muted">Pola validasi hanya untuk field teks.</span>
           </div>
 
           <template v-if="['text', 'textarea', 'email'].includes(field.type)">
@@ -205,7 +205,7 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
               <input v-model.number="field.maxLength" type="number" min="1" max="10000" class="field-input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="admin-label">Pola regex <span class="font-normal normal-case text-ink-muted">(opsional)</span></label>
+              <label class="admin-label">Pola regex <span class="font-normal normal-case text-admin-muted">(opsional)</span></label>
               <input v-model="field.pattern" type="text" class="field-input font-mono text-xs" maxlength="200" placeholder="Contoh: ^[0-9]{8}$" />
             </div>
           </template>
@@ -214,7 +214,7 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
             <div class="sm:col-span-2">
               <div class="flex items-center justify-between">
                 <label class="admin-label mb-0">Pilihan</label>
-                <button type="button" class="text-[11px] font-semibold text-gold-dark hover:underline" @click="addOption(field)">Tambah pilihan</button>
+                <button type="button" class="text-[14px] font-semibold text-unu-green hover:underline" @click="addOption(field)">Tambah pilihan</button>
               </div>
               <div class="mt-2 space-y-2">
                 <div v-for="(option, optionIndex) in field.options" :key="optionIndex" class="flex gap-2">
@@ -222,7 +222,7 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
                   <input v-model="option.value" type="text" class="field-input flex-1 font-mono text-xs" placeholder="nilai" />
                   <button type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-red-600 hover:bg-red-50" @click="removeOption(field, optionIndex)"><Trash2 :size="13" /></button>
                 </div>
-                <p v-if="!field.options?.length" class="text-[11px] text-ink-muted">Minimal satu pilihan diperlukan untuk select/radio.</p>
+                <p v-if="!field.options?.length" class="text-[14px] text-admin-muted">Minimal satu pilihan diperlukan untuk select/radio.</p>
               </div>
             </div>
           </template>
@@ -235,8 +235,8 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
             <div class="sm:col-span-2">
               <label class="admin-label">Tipe file yang diizinkan</label>
               <div class="flex flex-wrap gap-2">
-                <label v-for="mime in mimeOptions" :key="mime.value" class="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border border-line-warm px-3 text-[11px] font-medium">
-                  <input type="checkbox" class="h-3.5 w-3.5 accent-charcoal" :checked="field.accept?.includes(mime.value)" @change="toggleAccept(field, mime.value)" />
+                <label v-for="mime in mimeOptions" :key="mime.value" class="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border border-admin-border px-3 text-[14px] font-medium">
+                  <input type="checkbox" class="h-3.5 w-3.5 accent-unu-green" :checked="field.accept?.includes(mime.value)" @change="toggleAccept(field, mime.value)" />
                   {{ mime.label }}
                 </label>
               </div>
@@ -245,7 +245,7 @@ const fieldTypeLabel = (type: FieldType) => FIELD_TYPES.find((item) => item.valu
           </template>
 
           <div class="sm:col-span-2">
-            <label class="admin-label">Tampilkan hanya jika <span class="font-normal normal-case text-ink-muted">(opsional)</span></label>
+            <label class="admin-label">Tampilkan hanya jika <span class="font-normal normal-case text-admin-muted">(opsional)</span></label>
             <div class="grid gap-2 sm:grid-cols-[1fr_1fr]">
               <select :value="field.showIf?.fieldKey || ''" class="field-input" @change="field.showIf = ($event.target as HTMLSelectElement).value ? { fieldKey: ($event.target as HTMLSelectElement).value, equals: field.showIf?.equals || '' } : null">
                 <option value="">Selalu tampil</option>

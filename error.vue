@@ -26,7 +26,7 @@ useSeoMeta({ title: props.error.statusCode === 404 ? 'Halaman tidak ditemukan' :
           <AppButton to="/"><template #left><Home :size="15" /></template>Kembali ke beranda</AppButton>
           <AppButton variant="secondary" @click="$router.back()"><template #left><ArrowLeft :size="15" /></template>Halaman sebelumnya</AppButton>
         </div>
-        <p class="mt-8 text-[11px] text-ink-muted">Jika masalah berlanjut, hubungi administrator {{ settings.directorateName }}.</p>
+        <p class="mt-8 text-[14px] text-ink-muted">Jika masalah berlanjut, hubungi administrator {{ settings.directorateName }}.</p>
       </div>
     </main>
   </div>

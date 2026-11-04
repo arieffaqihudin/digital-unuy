@@ -30,28 +30,28 @@ useSeoMeta({ title: 'Konten Website', robots: 'noindex, nofollow' })
 <template>
   <div class="space-y-6">
     <div>
-      <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Pengelolaan</p>
+      <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Pengelolaan</p>
       <h2 class="mt-2 text-2xl font-semibold tracking-tight">Konten Website</h2>
-      <p class="mt-1 text-sm text-ink-muted">Kelola konten publik yang tampil di website direktorat.</p>
+      <p class="mt-1 text-sm text-admin-muted">Kelola konten publik yang tampil di website direktorat.</p>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <NuxtLink v-for="card in cards" :key="card.to" :to="card.to" class="group rounded-2xl border border-line-warm bg-white p-5 transition hover:border-charcoal/25 hover:shadow-card">
+      <NuxtLink v-for="card in cards" :key="card.to" :to="card.to" class="group rounded-xl border border-admin-border bg-white p-5 transition hover:border-slate-300 hover:shadow-card">
         <div class="flex items-start justify-between gap-3">
-          <span class="grid h-11 w-11 place-items-center rounded-xl bg-sage-soft"><component :is="card.icon" :size="20" :stroke-width="1.7" aria-hidden="true" /></span>
+          <span class="grid h-11 w-11 place-items-center rounded-xl bg-unu-green-soft"><component :is="card.icon" :size="20" :stroke-width="1.7" aria-hidden="true" /></span>
           <span class="text-2xl font-semibold">{{ card.count }}</span>
         </div>
-        <h3 class="mt-5 text-base font-semibold group-hover:text-gold-dark">{{ card.title }}</h3>
-        <p class="mt-1.5 text-xs leading-5 text-ink-muted">{{ card.description }}</p>
-        <p class="mt-4 inline-flex items-center gap-1.5 text-[11px] font-semibold text-gold-dark">Kelola <ArrowRight :size="12" /></p>
+        <h3 class="mt-5 text-base font-semibold group-hover:text-unu-green">{{ card.title }}</h3>
+        <p class="mt-1.5 text-xs leading-5 text-admin-muted">{{ card.description }}</p>
+        <p class="mt-4 inline-flex items-center gap-1.5 text-[14px] font-semibold text-unu-green">Kelola <ArrowRight :size="12" /></p>
       </NuxtLink>
     </div>
 
-    <div class="rounded-2xl border border-line-warm bg-ivory p-5">
+    <div class="rounded-xl border border-admin-border bg-slate-50 p-5">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-start gap-3">
-          <Settings :size="18" class="mt-0.5 text-gold-dark" aria-hidden="true" />
-          <div><p class="text-sm font-semibold">Identitas, hero, kontak, dan metrik</p><p class="mt-1 text-xs text-ink-muted">Pengaturan global berada di menu Pengaturan agar tidak tercampur dengan konten.</p></div>
+          <Settings :size="18" class="mt-0.5 text-unu-green" aria-hidden="true" />
+          <div><p class="text-sm font-semibold">Identitas, hero, kontak, dan metrik</p><p class="mt-1 text-xs text-admin-muted">Pengaturan global berada di menu Pengaturan agar tidak tercampur dengan konten.</p></div>
         </div>
         <AppButton to="/admin/pengaturan" variant="secondary" size="sm">Buka Pengaturan</AppButton>
       </div>

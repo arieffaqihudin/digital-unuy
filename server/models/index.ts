@@ -345,9 +345,9 @@ const siteSettingSchema = new Schema(
       eyebrow: { type: String, default: 'Transformasi Digital' },
       title: { type: String, default: 'Mendorong Transformasi Digital UNU Yogyakarta' },
       description: { type: String, default: '' },
-      primaryLabel: { type: String, default: 'Jelajahi Layanan Digital' },
+      primaryLabel: { type: String, default: 'Jelajahi Layanan' },
       primaryUrl: { type: String, default: '/layanan' },
-      secondaryLabel: { type: String, default: 'Mengenal Direktorat' },
+      secondaryLabel: { type: String, default: 'Tentang Direktorat' },
       secondaryUrl: { type: String, default: '/tentang' }
     },
     metrics: { type: [metricSchema], default: [] },

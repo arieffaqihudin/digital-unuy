@@ -66,26 +66,23 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
 
 <template>
   <div>
-    <section class="border-b border-line-warm bg-ivory">
-      <div class="page-shell py-8 sm:py-10 lg:py-14">
-        <Breadcrumbs :items="[{ label: 'Beranda', to: '/' }, { label: 'Lacak Permohonan' }]" />
-        <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end">
-          <div>
-            <p class="eyebrow"><span class="h-px w-6 bg-current" aria-hidden="true" />Pelacakan aman</p>
-            <h1 class="display-1 mt-5">Lacak permohonan Anda</h1>
-            <p class="body-lg mt-5 max-w-2xl">Masukkan nomor tiket dan token akses yang dikirim ke email Anda. Token tidak dapat ditebak dan hanya berlaku untuk permohonan terkait.</p>
-          </div>
-          <div class="rounded-2xl border border-line-warm bg-white p-5">
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-gold-dark"><ShieldCheck :size="13" aria-hidden="true" /> Mengapa token?</div>
-            <p class="mt-2 text-xs leading-6 text-ink-muted">Nomor tiket saja tidak cukup untuk membuka data permohonan. Ini melindungi informasi pribadi dan lampiran Anda.</p>
-          </div>
+    <PublicPageHeader
+      eyebrow="Pelacakan Aman"
+      title="Lacak Permohonan"
+      description="Masukkan nomor tiket dan token akses yang dikirim ke email Anda. Token tidak dapat ditebak dan hanya berlaku untuk permohonan terkait."
+      :breadcrumbs="[{ label: 'Beranda', to: '/' }, { label: 'Lacak Permohonan' }]"
+    >
+      <template #aside>
+        <div class="flex max-w-[250px] items-start gap-2.5 text-[14px] leading-5 text-slate-500">
+          <ShieldCheck :size="15" class="mt-0.5 shrink-0 text-unu-green" aria-hidden="true" />
+          <p>Nomor tiket saja tidak cukup untuk membuka data. Token melindungi informasi pribadi dan lampiran Anda.</p>
         </div>
-      </div>
-    </section>
+      </template>
+    </PublicPageHeader>
 
-    <section class="section-space bg-white">
+    <section class="section-space bg-soft-white">
       <div class="page-shell">
-        <form class="mx-auto max-w-2xl rounded-2xl border border-line-warm bg-ivory p-5 sm:p-6" @submit.prevent="track">
+        <form class="mx-auto max-w-2xl rounded-xl border border-line-warm bg-white p-5 sm:p-6" @submit.prevent="track">
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
               <label for="track-ticket" class="field-label">Nomor tiket</label>
@@ -103,7 +100,7 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
             <AlertCircle :size="15" class="mt-0.5 shrink-0" aria-hidden="true" /><p>{{ errorMessage }}</p>
           </div>
           <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-[11px] text-ink-muted">Token dikirim ke email pemohon saat permohonan dibuat.</p>
+            <p class="text-[14px] text-ink-muted">Token dikirim ke email pemohon saat permohonan dibuat.</p>
             <AppButton type="submit" :loading="loading">Lacak <template #right><ArrowRight :size="15" /></template></AppButton>
           </div>
         </form>
@@ -112,7 +109,7 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
           <div class="rounded-2xl border border-line-warm bg-white p-5 sm:p-7">
             <div class="flex flex-col gap-4 border-b border-line-warm pb-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ request.serviceName }}</p>
+                <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ request.serviceName }}</p>
                 <h2 class="mt-2 text-xl font-semibold">{{ request.ticketNumber }}</h2>
                 <p class="mt-1 text-xs text-ink-muted">Diajukan {{ formatDateTime(request.createdAt) }}</p>
               </div>
@@ -141,7 +138,7 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
               <h3 class="text-sm font-semibold">Data yang diajukan</h3>
               <dl class="mt-3 grid gap-2 sm:grid-cols-2">
                 <div v-for="entry in entries" :key="entry.key" class="rounded-xl border border-line-warm bg-ivory px-3.5 py-3">
-                  <dt class="text-[10px] font-bold uppercase tracking-wide text-ink-muted">{{ entry.label }}</dt>
+                  <dt class="text-[12px] font-bold uppercase tracking-wide text-ink-muted">{{ entry.label }}</dt>
                   <dd class="mt-1 whitespace-pre-line break-words text-sm">{{ entry.value || '—' }}</dd>
                 </div>
               </dl>
@@ -155,13 +152,13 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
                     <div v-for="attachment in attachmentsFor(field.key)" :key="attachment.id" class="flex items-center gap-3 rounded-lg border border-line-warm bg-ivory px-3 py-2.5">
                       <FileText :size="15" class="text-gold-dark" aria-hidden="true" />
                       <span class="min-w-0 flex-1 truncate text-xs font-medium">{{ attachment.originalName }}</span>
-                      <span class="text-[10px] text-ink-muted">{{ formatFileSize(attachment.size) }}</span>
+                      <span class="text-[12px] text-ink-muted">{{ formatFileSize(attachment.size) }}</span>
                     </div>
                   </div>
                   <p v-else class="text-xs text-ink-muted">{{ field.label }}: tidak ada lampiran.</p>
                 </div>
               </div>
-              <p class="mt-2 text-[11px] leading-5 text-ink-muted">Unduhan lampiran memerlukan masuk ke akun pemohon.</p>
+              <p class="mt-2 text-[14px] leading-5 text-ink-muted">Unduhan lampiran memerlukan masuk ke akun pemohon.</p>
             </div>
           </div>
 
@@ -173,7 +170,7 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
                 <div>
                   <p class="text-sm font-semibold">{{ entry.status }}<span v-if="entry.substatus" class="font-normal text-ink-muted"> · {{ entry.substatus }}</span></p>
                   <p v-if="entry.note" class="mt-1 text-xs leading-5 text-ink-muted">{{ entry.note }}</p>
-                  <p class="mt-1 text-[10px] text-ink-muted/70">{{ formatDateTime(entry.createdAt) }} · {{ entry.actorName }}</p>
+                  <p class="mt-1 text-[12px] text-ink-muted/70">{{ formatDateTime(entry.createdAt) }} · {{ entry.actorName }}</p>
                 </div>
               </li>
             </ol>
@@ -184,7 +181,7 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
             <div class="mt-4 space-y-3">
               <div v-for="comment in request.comments" :key="comment.id" class="rounded-xl border border-line-warm bg-ivory p-3.5">
                 <p class="text-xs leading-6">{{ comment.message }}</p>
-                <p class="mt-2 text-[10px] text-ink-muted">{{ comment.authorName }} · {{ formatDateTime(comment.createdAt) }}</p>
+                <p class="mt-2 text-[12px] text-ink-muted">{{ comment.authorName }} · {{ formatDateTime(comment.createdAt) }}</p>
               </div>
             </div>
           </div>

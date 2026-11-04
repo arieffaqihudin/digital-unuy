@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['@nuxtjs/tailwindcss'],
   css: [
-    '@fontsource-variable/plus-jakarta-sans',
+    '@fontsource-variable/inter',
     '~/assets/css/main.css'
   ],
   app: {
@@ -15,7 +15,10 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#1C1A1A' },
         { name: 'format-detection', content: 'telephone=no' }
       ],
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/unu-logo.png' },
+        { rel: 'apple-touch-icon', href: '/unu-logo.png' }
+      ]
     }
   },
   runtimeConfig: {

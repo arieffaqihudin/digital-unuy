@@ -131,7 +131,7 @@ useSeoMeta({ title: request.value ? `Permohonan ${request.value.ticketNumber}` :
         <Breadcrumbs :items="[{ label: 'Beranda', to: '/' }, { label: 'Permohonan Saya', to: '/permohonan-saya' }, { label: request?.ticketNumber || 'Detail' }]" />
         <div v-if="request" class="mt-6 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ request.serviceName }}</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ request.serviceName }}</p>
             <h1 class="display-2 mt-2 tracking-wide">{{ request.ticketNumber }}</h1>
             <p class="mt-2 text-xs text-ink-muted">Diajukan {{ formatDateTime(request.createdAt) }} · Diperbarui {{ formatDateTime(request.updatedAt) }}</p>
           </div>
@@ -178,7 +178,7 @@ useSeoMeta({ title: request.value ? `Permohonan ${request.value.ticketNumber}` :
                       <p class="field-help">Maksimal 10 MB. Lampiran hanya dapat diakses oleh Anda dan petugas berwenang.</p>
                     </div>
                     <div class="mt-3 flex items-center justify-between gap-3">
-                      <p class="text-[11px] text-ink-muted">Kirim keterangan setelah lampiran siap.</p>
+                      <p class="text-[14px] text-ink-muted">Kirim keterangan setelah lampiran siap.</p>
                       <AppButton type="submit" :loading="sendingResponse">Kirim Kelengkapan</AppButton>
                     </div>
                   </form>
@@ -204,7 +204,7 @@ useSeoMeta({ title: request.value ? `Permohonan ${request.value.ticketNumber}` :
               <h2 class="text-base font-semibold">Data yang diajukan</h2>
               <dl class="mt-4 grid gap-2 sm:grid-cols-2">
                 <div v-for="entry in entries" :key="entry.key" class="rounded-xl border border-line-warm bg-ivory px-3.5 py-3">
-                  <dt class="text-[10px] font-bold uppercase tracking-wide text-ink-muted">{{ entry.label }}</dt>
+                  <dt class="text-[12px] font-bold uppercase tracking-wide text-ink-muted">{{ entry.label }}</dt>
                   <dd class="mt-1 whitespace-pre-line break-words text-sm">{{ entry.value || '—' }}</dd>
                 </div>
               </dl>
@@ -222,7 +222,7 @@ useSeoMeta({ title: request.value ? `Permohonan ${request.value.ticketNumber}` :
                   <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white"><FileText :size="16" class="text-gold-dark" aria-hidden="true" /></span>
                   <span class="min-w-0 flex-1">
                     <span class="block truncate text-xs font-semibold">{{ attachment.originalName }}</span>
-                    <span class="mt-0.5 block text-[10px] text-ink-muted">{{ attachment.fieldKey === 'hasil_penyelesaian' ? 'Hasil dari petugas' : attachment.fieldKey === 'kelengkapan_pemohon' ? 'Kelengkapan dari pemohon' : 'Lampiran permohonan' }} · {{ formatFileSize(attachment.size) }}</span>
+                    <span class="mt-0.5 block text-[12px] text-ink-muted">{{ attachment.fieldKey === 'hasil_penyelesaian' ? 'Hasil dari petugas' : attachment.fieldKey === 'kelengkapan_pemohon' ? 'Kelengkapan dari pemohon' : 'Lampiran permohonan' }} · {{ formatFileSize(attachment.size) }}</span>
                   </span>
                   <Download :size="15" class="shrink-0 text-ink-muted" aria-hidden="true" />
                 </a>
@@ -235,11 +235,11 @@ useSeoMeta({ title: request.value ? `Permohonan ${request.value.ticketNumber}` :
               <ol class="mt-5 space-y-5">
                 <li v-for="(entry, index) in request.timeline" :key="entry.id" class="relative flex gap-4">
                   <span v-if="index < request.timeline.length - 1" class="absolute left-[11px] top-6 h-[calc(100%-1rem)] w-px bg-line-warm" aria-hidden="true" />
-                  <span class="relative z-10 mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-line-warm bg-white text-[9px] font-bold text-gold-dark">{{ index + 1 }}</span>
+                  <span class="relative z-10 mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-line-warm bg-white text-[12px] font-bold text-gold-dark">{{ index + 1 }}</span>
                   <div class="pb-1">
                     <p class="text-sm font-semibold">{{ entry.status }}<span v-if="entry.substatus" class="ml-2 text-xs font-normal text-ink-muted">{{ entry.substatus }}</span></p>
                     <p v-if="entry.note" class="mt-1 text-xs leading-5 text-ink-muted">{{ entry.note }}</p>
-                    <p class="mt-1 text-[10px] text-ink-muted/70">{{ formatDateTime(entry.createdAt) }} · {{ entry.actorName }}</p>
+                    <p class="mt-1 text-[12px] text-ink-muted/70">{{ formatDateTime(entry.createdAt) }} · {{ entry.actorName }}</p>
                   </div>
                 </li>
               </ol>
@@ -250,7 +250,7 @@ useSeoMeta({ title: request.value ? `Permohonan ${request.value.ticketNumber}` :
               <div v-if="request.comments.length" class="mt-4 space-y-3">
                 <div v-for="comment in request.comments" :key="comment.id" class="rounded-xl border border-line-warm bg-ivory p-3.5">
                   <p class="text-xs leading-6">{{ comment.message }}</p>
-                  <p class="mt-2 text-[10px] text-ink-muted">{{ comment.authorName }} · {{ formatDateTime(comment.createdAt) }}</p>
+                  <p class="mt-2 text-[12px] text-ink-muted">{{ comment.authorName }} · {{ formatDateTime(comment.createdAt) }}</p>
                 </div>
               </div>
               <p v-else class="mt-3 text-sm text-ink-muted">Belum ada komunikasi publik pada permohonan ini.</p>
@@ -266,7 +266,7 @@ useSeoMeta({ title: request.value ? `Permohonan ${request.value.ticketNumber}` :
 
           <aside class="space-y-4 lg:sticky lg:top-36">
             <div class="rounded-2xl border border-line-warm bg-ivory p-5">
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Ringkasan</p>
+              <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Ringkasan</p>
               <dl class="mt-4 space-y-3 text-sm">
                 <div class="flex items-start justify-between gap-4 border-b border-line-warm pb-3"><dt class="text-ink-muted">Layanan</dt><dd class="text-right font-semibold">{{ request.serviceName }}</dd></div>
                 <div class="flex items-start justify-between gap-4 border-b border-line-warm pb-3"><dt class="text-ink-muted">Petugas</dt><dd class="text-right font-semibold">{{ request.assignedToName || 'Belum ditugaskan' }}</dd></div>

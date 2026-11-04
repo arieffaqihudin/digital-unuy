@@ -15,10 +15,10 @@ const defaultSettings: SiteSettingsDTO = {
     eyebrow: 'Transformasi Digital',
     title: 'Mendorong Transformasi Digital UNU Yogyakarta',
     description:
-      'Mengembangkan ekosistem digital yang terintegrasi, memperkuat tata kelola teknologi informasi, dan menghadirkan layanan digital yang mendukung pendidikan, penelitian, pengabdian, serta pengelolaan universitas.',
-    primaryLabel: 'Jelajahi Layanan Digital',
+      'Menghadirkan layanan dan ekosistem digital yang terintegrasi untuk mendukung tata kelola, pembelajaran, dan pengembangan universitas.',
+    primaryLabel: 'Jelajahi Layanan',
     primaryUrl: '/layanan',
-    secondaryLabel: 'Mengenal Direktorat',
+    secondaryLabel: 'Tentang Direktorat',
     secondaryUrl: '/tentang'
   },
   metrics: [],

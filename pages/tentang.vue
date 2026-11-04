@@ -60,11 +60,11 @@ useSeoMeta({
             </p>
           </div>
           <div class="rounded-2xl border border-line-warm bg-white p-5 sm:p-6">
-            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Identitas</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Identitas</p>
             <p class="mt-3 text-sm font-semibold">{{ settings.directorateName }}</p>
             <p class="mt-1 text-xs leading-5 text-ink-muted">{{ settings.universityName }}</p>
             <div class="mt-5 border-t border-line-warm pt-4">
-              <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Pembaruan halaman</p>
+              <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-ink-muted">Pembaruan halaman</p>
               <p class="mt-1 text-xs">{{ page ? formatDate(page.updatedAt) : 'Belum tersedia' }}</p>
             </div>
           </div>
@@ -89,7 +89,7 @@ useSeoMeta({
           </div>
 
           <div class="mt-10 rounded-2xl border border-line-warm bg-ivory p-6">
-            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Prinsip kerja</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Prinsip kerja</p>
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
               <div class="flex gap-3">
                 <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />
@@ -128,7 +128,7 @@ useSeoMeta({
           </div>
 
           <div class="mt-4 rounded-2xl border border-line-warm bg-white p-5">
-            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Kontak resmi</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Kontak resmi</p>
             <div class="mt-3 space-y-2 text-sm leading-6 text-ink-muted">
               <p v-if="settings.address">{{ settings.address }}</p>
               <p v-if="settings.contactPhone">{{ settings.contactPhone }}</p>

@@ -10,10 +10,11 @@
     "seed": "tsx scripts/seed.ts",
     "seed:reset": "tsx scripts/seed.ts --reset",
     "test:e2e": "node scripts/e2e.mjs",
-    "test:visual": "node scripts/visual-check.mjs"
+    "test:visual": "node scripts/visual-check.mjs",
+    "test:responsive": "node scripts/responsive-audit.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
     "@tailwindcss/typography": "^0.5.20",
     "bcryptjs": "^3.0.3",
     "lucide-vue-next": "^1.0.0",

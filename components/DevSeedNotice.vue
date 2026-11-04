@@ -11,7 +11,7 @@ const { settings } = useSite()
     class="border-b border-gold/30 bg-gold/10 text-charcoal"
     role="status"
   >
-    <div class="page-shell flex items-center gap-3 py-2 text-[11px] leading-5 sm:text-xs">
+    <div class="page-shell flex items-center gap-3 py-2 text-[14px] leading-5 sm:text-xs">
       <FlaskConical :size="14" class="shrink-0 text-gold-dark" aria-hidden="true" />
       <p class="flex-1">
         <strong>Lingkungan pengembangan.</strong> Sebagian konten merupakan data contoh dan bukan data operasional resmi.

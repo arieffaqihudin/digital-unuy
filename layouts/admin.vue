@@ -38,22 +38,37 @@ const menuGroups: {
   items: { label: string; to: string; icon: any; permission?: Permission }[]
 }[] = [
   {
-    label: 'Operasional',
+    label: 'Dashboard',
     items: [
-      { label: 'Dashboard', to: '/admin', icon: LayoutDashboard },
-      { label: 'Permohonan', to: '/admin/permohonan', icon: Inbox, permission: 'requests.read' }
+      { label: 'Dashboard', to: '/admin', icon: LayoutDashboard }
     ]
   },
   {
-    label: 'Pengelolaan',
+    label: 'Layanan',
     items: [
-      { label: 'Layanan', to: '/admin/layanan', icon: Layers, permission: 'services.manage' },
-      { label: 'Konten Website', to: '/admin/konten', icon: PanelTop, permission: 'content.manage' },
+      { label: 'Manajemen Layanan', to: '/admin/layanan', icon: Layers, permission: 'services.manage' }
+    ]
+  },
+  {
+    label: 'Permohonan',
+    items: [
+      { label: 'Daftar Permohonan', to: '/admin/permohonan', icon: Inbox, permission: 'requests.read' }
+    ]
+  },
+  {
+    label: 'Konten Website',
+    items: [
+      { label: 'Ringkasan Konten', to: '/admin/konten', icon: PanelTop, permission: 'content.manage' },
       { label: 'Publikasi', to: '/admin/publikasi', icon: Newspaper, permission: 'content.manage' },
       { label: 'Ekosistem Digital', to: '/admin/ekosistem', icon: Globe2, permission: 'content.manage' },
       { label: 'Program', to: '/admin/program', icon: Workflow, permission: 'content.manage' },
-      { label: 'Halaman & Profil', to: '/admin/halaman', icon: FileText, permission: 'content.manage' },
-      { label: 'Dokumentasi', to: '/admin/dokumen', icon: BookOpen, permission: 'documents.manage' }
+      { label: 'Halaman & Profil', to: '/admin/halaman', icon: FileText, permission: 'content.manage' }
+    ]
+  },
+  {
+    label: 'Dokumentasi',
+    items: [
+      { label: 'SOP & Panduan', to: '/admin/dokumen', icon: BookOpen, permission: 'documents.manage' }
     ]
   },
   {
@@ -116,41 +131,41 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F5F3E9]">
+  <div class="admin-shell min-h-screen bg-admin-bg">
     <aside
-      class="fixed inset-y-0 left-0 z-50 hidden border-r border-charcoal/10 bg-charcoal text-white transition-[width] duration-200 lg:flex lg:flex-col"
-      :class="collapsed ? 'w-[76px]' : 'w-[264px]'"
+      class="fixed inset-y-0 left-0 z-50 hidden border-r border-admin-border bg-admin-sidebar transition-[width] duration-200 lg:flex lg:flex-col"
+      :class="collapsed ? 'w-[76px]' : 'w-[252px]'"
     >
-      <div class="flex h-[72px] items-center border-b border-white/10 px-4" :class="collapsed ? 'justify-center' : 'justify-between'">
-        <AppLogo v-if="!collapsed" inverse />
-        <NuxtLink v-else to="/admin" class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xs font-bold text-charcoal" aria-label="Dashboard admin">TD</NuxtLink>
+      <div class="flex h-[64px] items-center border-b border-admin-border px-4" :class="collapsed ? 'justify-center' : 'justify-between'">
+        <AppLogo v-if="!collapsed" />
+        <NuxtLink v-else to="/admin" class="grid h-10 w-10 place-items-center rounded-lg bg-unu-green text-[12px] font-bold text-white" aria-label="Dashboard admin">TD</NuxtLink>
         <button
           type="button"
-          class="grid h-9 w-9 place-items-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
+          class="grid h-8 w-8 place-items-center rounded-md text-admin-muted transition hover:bg-white hover:text-admin-text"
           :aria-label="collapsed ? 'Perluas sidebar' : 'Ringkas sidebar'"
           @click="collapsed = !collapsed"
         >
-          <ChevronLeft :size="16" :class="collapsed ? 'rotate-180' : ''" aria-hidden="true" />
+          <ChevronLeft :size="15" :class="collapsed ? 'rotate-180' : ''" aria-hidden="true" />
         </button>
       </div>
 
-      <nav class="no-scrollbar flex-1 overflow-y-auto px-3 py-5" aria-label="Navigasi admin">
-        <div v-for="group in visibleGroups" :key="group.label" class="mb-5">
-          <p v-if="!collapsed" class="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-sage/70">{{ group.label }}</p>
-          <div v-else class="mx-auto mb-2 h-px w-8 bg-white/10" />
+      <nav class="no-scrollbar flex-1 overflow-y-auto px-3 py-3" aria-label="Navigasi admin">
+        <div v-for="group in visibleGroups" :key="group.label" class="mb-3">
+          <p v-if="!collapsed" class="mb-1.5 px-2 text-[12px] font-bold uppercase tracking-[0.16em] text-slate-400">{{ group.label }}</p>
+          <div v-else class="mx-auto mb-2 h-px w-8 bg-admin-border" />
           <ul class="space-y-0.5">
             <li v-for="item in group.items" :key="item.to">
               <NuxtLink
                 :to="item.to"
-                class="group flex min-h-[44px] items-center gap-3 rounded-lg px-3 text-[12.5px] font-medium transition"
+                class="group relative flex min-h-[40px] items-center gap-3 rounded-md border-l-2 px-3 text-[12px] font-medium transition"
                 :class="
                   isActive(item.to)
-                    ? 'bg-white text-charcoal'
-                    : 'text-white/60 hover:bg-white/10 hover:text-white'
+                    ? 'border-unu-green bg-white text-unu-green shadow-sm'
+                    : 'border-transparent text-slate-600 hover:bg-white/70 hover:text-admin-text'
                 "
                 :title="collapsed ? item.label : undefined"
               >
-                <component :is="item.icon" :size="17" :stroke-width="1.8" class="shrink-0" aria-hidden="true" />
+                <component :is="item.icon" :size="16" :stroke-width="1.8" class="shrink-0" aria-hidden="true" />
                 <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
               </NuxtLink>
             </li>
@@ -158,11 +173,11 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
         </div>
       </nav>
 
-      <div class="border-t border-white/10 p-3">
-        <div v-if="!collapsed" class="mb-3 rounded-xl bg-white/5 p-3">
-          <p class="truncate text-xs font-semibold">{{ user?.name }}</p>
-          <p class="mt-0.5 truncate text-[10px] text-white/45">{{ user?.email }}</p>
-          <p class="mt-2 inline-flex rounded-full border border-sage/30 bg-sage/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-sage">
+      <div class="border-t border-admin-border p-3">
+        <div v-if="!collapsed" class="mb-2 rounded-lg border border-admin-border bg-white p-3">
+          <p class="truncate text-[14px] font-semibold text-admin-text">{{ user?.name }}</p>
+          <p class="mt-0.5 truncate text-[12px] text-admin-muted">{{ user?.email }}</p>
+          <p class="mt-2 inline-flex rounded-full bg-unu-green-soft px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-unu-green">
             {{ user?.role }}
           </p>
         </div>
@@ -170,19 +185,19 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
           <NuxtLink
             to="/"
             target="_blank"
-            class="inline-flex min-h-[38px] items-center gap-2 rounded-lg px-2 text-[11px] text-white/50 transition hover:bg-white/10 hover:text-white"
+            class="inline-flex min-h-[36px] items-center gap-2 rounded-md px-2 text-[12px] text-admin-muted transition hover:bg-white hover:text-admin-text"
             :title="collapsed ? 'Lihat website' : undefined"
           >
-            <ExternalLink :size="14" aria-hidden="true" />
-            <span v-if="!collapsed">Lihat website</span>
+            <ExternalLink :size="13" aria-hidden="true" />
+            <span v-if="!collapsed">Website publik</span>
           </NuxtLink>
           <button
             type="button"
-            class="inline-flex min-h-[38px] items-center gap-2 rounded-lg px-2 text-[11px] text-white/50 transition hover:bg-red-500/10 hover:text-red-200"
+            class="inline-flex min-h-[36px] items-center gap-2 rounded-md px-2 text-[12px] text-admin-muted transition hover:bg-red-50 hover:text-red-700"
             :title="collapsed ? 'Keluar' : undefined"
             @click="logout"
           >
-            <LogOut :size="14" aria-hidden="true" />
+            <LogOut :size="13" aria-hidden="true" />
             <span v-if="!collapsed">Keluar</span>
           </button>
         </div>
@@ -199,37 +214,37 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
         leave-to-class="opacity-0"
       >
         <div v-if="mobileOpen" class="fixed inset-0 z-[90] lg:hidden">
-          <div class="absolute inset-0 bg-charcoal/60 backdrop-blur-sm" @click="mobileOpen = false" />
-          <aside class="absolute inset-y-0 left-0 flex w-[86%] max-w-[320px] flex-col bg-charcoal text-white">
-            <div class="flex h-[70px] items-center justify-between border-b border-white/10 px-4">
-              <AppLogo inverse />
-              <button type="button" class="grid h-10 w-10 place-items-center rounded-lg text-white/70 hover:bg-white/10" aria-label="Tutup menu" @click="mobileOpen = false">
+          <div class="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" @click="mobileOpen = false" />
+          <aside class="absolute inset-y-0 left-0 flex w-[86%] max-w-[310px] flex-col border-r border-admin-border bg-white">
+            <div class="flex h-[64px] items-center justify-between border-b border-admin-border px-4">
+              <AppLogo />
+              <button type="button" class="grid h-10 w-10 place-items-center rounded-lg text-admin-muted hover:bg-admin-sidebar" aria-label="Tutup menu" @click="mobileOpen = false">
                 <X :size="18" aria-hidden="true" />
               </button>
             </div>
             <nav class="flex-1 overflow-y-auto px-3 py-4">
-              <div v-for="group in visibleGroups" :key="group.label" class="mb-5">
-                <p class="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-sage/70">{{ group.label }}</p>
+              <div v-for="group in visibleGroups" :key="group.label" class="mb-3">
+                <p class="mb-1.5 px-2 text-[12px] font-bold uppercase tracking-[0.16em] text-slate-400">{{ group.label }}</p>
                 <ul class="space-y-0.5">
                   <li v-for="item in group.items" :key="item.to">
                     <NuxtLink
                       :to="item.to"
-                      class="flex min-h-[44px] items-center gap-3 rounded-lg px-3 text-sm font-medium"
-                      :class="isActive(item.to) ? 'bg-white text-charcoal' : 'text-white/65'"
+                      class="flex min-h-[44px] items-center gap-3 rounded-md border-l-2 px-3 text-[14px] font-medium"
+                      :class="isActive(item.to) ? 'border-unu-green bg-unu-green-soft text-unu-green' : 'border-transparent text-slate-600'"
                     >
-                      <component :is="item.icon" :size="17" aria-hidden="true" />
+                      <component :is="item.icon" :size="16" aria-hidden="true" />
                       {{ item.label }}
                     </NuxtLink>
                   </li>
                 </ul>
               </div>
             </nav>
-            <div class="border-t border-white/10 p-4">
-              <p class="truncate text-sm font-semibold">{{ user?.name }}</p>
-              <p class="mt-0.5 truncate text-[11px] text-white/45">{{ user?.email }}</p>
+            <div class="border-t border-admin-border p-4">
+              <p class="truncate text-sm font-semibold text-admin-text">{{ user?.name }}</p>
+              <p class="mt-0.5 truncate text-[12px] text-admin-muted">{{ user?.email }}</p>
               <div class="mt-3 flex gap-2">
-                <NuxtLink to="/" target="_blank" class="flex-1 rounded-lg border border-white/15 px-3 py-2 text-center text-xs text-white/70">Website</NuxtLink>
-                <button type="button" class="flex-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold" @click="logout">Keluar</button>
+                <NuxtLink to="/" target="_blank" class="flex-1 rounded-lg border border-admin-border px-3 py-2 text-center text-[14px] text-slate-600">Website</NuxtLink>
+                <button type="button" class="flex-1 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[14px] font-semibold text-red-700" @click="logout">Keluar</button>
               </div>
             </div>
           </aside>
@@ -237,41 +252,40 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
       </Transition>
     </Teleport>
 
-    <div class="transition-[padding] duration-200" :class="collapsed ? 'lg:pl-[76px]' : 'lg:pl-[264px]'">
-      <header class="sticky top-0 z-40 border-b border-charcoal/10 bg-[#F5F3E9]/95 backdrop-blur">
-        <div class="flex h-[70px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <div class="transition-[padding] duration-200" :class="collapsed ? 'lg:pl-[76px]' : 'lg:pl-[252px]'">
+      <header class="sticky top-0 z-40 border-b border-admin-border bg-white">
+        <div class="flex h-[64px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-7">
           <div class="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line-warm bg-white lg:hidden"
+              class="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-admin-border bg-white lg:hidden"
               aria-label="Buka menu admin"
               @click="mobileOpen = true"
             >
-              <Menu :size="18" class="text-charcoal" aria-hidden="true" />
+              <Menu :size="18" class="text-admin-text" aria-hidden="true" />
             </button>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Administrasi</p>
-              <h1 class="truncate text-base font-semibold sm:text-lg">{{ currentLabel }}</h1>
+              <p class="text-[12px] font-bold uppercase tracking-[0.14em] text-slate-400">Administrasi</p>
+              <h1 class="truncate text-[15px] font-semibold text-admin-text">{{ currentLabel }}</h1>
             </div>
           </div>
-          <div class="flex items-center gap-2 sm:gap-3">
-            <span class="hidden rounded-full border border-line-warm bg-white px-3 py-1.5 text-[10px] font-semibold text-ink-muted sm:inline-flex">
-              {{ settings.directorateName }}
-            </span>
+          <div class="flex items-center gap-2">
+            <span class="hidden text-[12px] font-medium text-admin-muted md:inline">{{ settings.directorateName }}</span>
+            <span class="mx-1 hidden h-5 w-px bg-admin-border md:block" aria-hidden="true" />
             <NuxtLink
               to="/"
               target="_blank"
-              class="grid h-10 w-10 place-items-center rounded-xl border border-line-warm bg-white text-ink-muted transition hover:text-charcoal"
+              class="grid h-9 w-9 place-items-center rounded-lg border border-admin-border bg-white text-admin-muted transition hover:text-unu-green"
               aria-label="Buka website publik"
             >
-              <ExternalLink :size="16" aria-hidden="true" />
+              <ExternalLink :size="15" aria-hidden="true" />
             </NuxtLink>
-            <span class="grid h-10 w-10 place-items-center rounded-xl bg-charcoal text-[11px] font-bold text-white">{{ initials }}</span>
+            <span class="grid h-9 w-9 place-items-center rounded-lg bg-unu-green text-[12px] font-bold text-white">{{ initials }}</span>
           </div>
         </div>
       </header>
 
-      <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <main class="px-4 py-6 sm:px-6 lg:px-7 lg:py-7">
         <div class="mx-auto max-w-7xl">
           <slot />
         </div>

@@ -81,7 +81,7 @@ useSeoMeta({ title: 'Permohonan Saya', robots: 'noindex, nofollow' })
             <option value="">Semua status</option>
             <option v-for="item in REQUEST_STATUSES" :key="item" :value="item">{{ item }}</option>
           </select>
-          <span class="px-2 text-[11px] text-ink-muted">{{ result?.total ?? 0 }} permohonan</span>
+          <span class="px-2 text-[14px] text-ink-muted">{{ result?.total ?? 0 }} permohonan</span>
         </div>
 
         <div v-if="pending" class="mt-6 space-y-3">
@@ -109,21 +109,21 @@ useSeoMeta({ title: 'Permohonan Saya', robots: 'noindex, nofollow' })
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-dark">{{ item.serviceName }}</span>
+                  <span class="text-[12px] font-bold uppercase tracking-[0.14em] text-gold-dark">{{ item.serviceName }}</span>
                   <StatusBadge :status="item.status" :substatus="item.substatus" />
                 </div>
                 <h2 class="mt-2 text-lg font-semibold tracking-wide">{{ item.ticketNumber }}</h2>
-                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ink-muted">
+                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-ink-muted">
                   <span>Diajukan {{ formatDateTime(item.createdAt) }}</span>
                   <span>Diperbarui {{ formatDateTime(item.updatedAt) }}</span>
                   <span v-if="item.assignedToName">Petugas: {{ item.assignedToName }}</span>
                 </div>
               </div>
-              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal transition group-hover:text-gold-dark">
+              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal transition group-hover:text-unu-green">
                 Lihat detail <ArrowRight :size="14" aria-hidden="true" />
               </span>
             </div>
-            <div v-if="item.substatus" class="mt-4 flex items-center gap-2 rounded-lg border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold-dark">
+            <div v-if="item.substatus" class="mt-4 flex items-center gap-2 rounded-lg border border-gold/30 bg-gold/10 px-3 py-2 text-[14px] font-semibold text-gold-dark">
               <span aria-hidden="true">◷</span> Tindakan diperlukan: lengkapi data yang diminta.
             </div>
           </NuxtLink>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, resolveComponent } from 'vue'
 
 const props = withDefaults(
   defineProps<{
     to?: string
     href?: string
     type?: 'button' | 'submit' | 'reset'
-    variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger' | 'light'
+    variant?: 'primary' | 'secondary' | 'accent' | 'dark' | 'ghost' | 'danger' | 'light'
     size?: 'sm' | 'md' | 'lg'
     loading?: boolean
     disabled?: boolean
@@ -22,16 +22,19 @@ const props = withDefaults(
   }
 )
 
-const tag = computed(() => (props.to ? 'NuxtLink' : props.href ? 'a' : 'button'))
+const NuxtLinkComponent = resolveComponent('NuxtLink')
+const tag = computed(() => (props.to ? NuxtLinkComponent : props.href ? 'a' : 'button'))
 const isDisabled = computed(() => props.disabled || props.loading)
 
 const variants = {
   primary:
-    'bg-charcoal text-white border-charcoal hover:bg-charcoal-soft active:translate-y-px disabled:bg-charcoal/40 disabled:border-transparent',
+    'bg-unu-green text-white border-unu-green hover:bg-unu-green-dark hover:border-unu-green-dark active:translate-y-px disabled:bg-unu-green/40 disabled:border-transparent',
   secondary:
-    'bg-white text-charcoal border-line-warm hover:border-charcoal/40 hover:bg-ivory active:translate-y-px disabled:text-charcoal/40',
+    'bg-white text-charcoal border-slate-300 hover:border-slate-400 hover:bg-soft-white active:translate-y-px disabled:text-charcoal/40',
   accent:
     'bg-gold text-charcoal border-gold hover:bg-gold-dark hover:text-white hover:border-gold-dark active:translate-y-px disabled:bg-gold/40 disabled:border-transparent',
+  dark:
+    'bg-charcoal text-white border-charcoal hover:bg-charcoal-soft active:translate-y-px disabled:bg-charcoal/40 disabled:border-transparent',
   ghost:
     'bg-transparent text-charcoal border-transparent hover:bg-charcoal/5 active:bg-charcoal/10 disabled:text-charcoal/40',
   danger:
@@ -41,9 +44,9 @@ const variants = {
 }
 
 const sizes = {
-  sm: 'min-h-[44px] px-3.5 py-2 text-xs gap-1.5 rounded-lg',
-  md: 'min-h-[44px] px-5 py-2.5 text-sm gap-2 rounded-xl',
-  lg: 'min-h-[50px] px-6 py-3 text-sm sm:text-base gap-2 rounded-xl'
+  sm: 'min-h-[44px] px-3.5 py-2 text-[14px] gap-1.5 rounded-lg',
+  md: 'min-h-[46px] px-5 py-2.5 text-[14px] gap-2 rounded-lg',
+  lg: 'min-h-[52px] px-6 py-3 text-[15px] sm:text-[16px] gap-2 rounded-lg'
 }
 
 function onClick(event: MouseEvent) {

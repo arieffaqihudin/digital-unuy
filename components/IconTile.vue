@@ -27,7 +27,7 @@ const props = withDefaults(
   defineProps<{
     name?: string
     size?: 'sm' | 'md' | 'lg'
-    tone?: 'light' | 'dark' | 'sage'
+    tone?: 'light' | 'dark' | 'sage' | 'green'
   }>(),
   { name: 'layers', size: 'md', tone: 'sage' }
 )
@@ -66,7 +66,8 @@ const wrapper = computed(() => ({
 const tones = {
   light: 'bg-white text-charcoal ring-1 ring-line-warm',
   dark: 'bg-charcoal text-ivory',
-  sage: 'bg-sage-soft text-charcoal ring-1 ring-sage'
+  sage: 'bg-sage-soft text-charcoal ring-1 ring-sage',
+  green: 'bg-unu-green-soft text-unu-green ring-1 ring-unu-green/15'
 }
 </script>
 

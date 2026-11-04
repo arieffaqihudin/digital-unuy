@@ -212,14 +212,17 @@ shared/
 Dengan server development berjalan:
 
 ```bash
-npm run test:e2e      # 81 pemeriksaan API & alur end-to-end
-npm run test:visual   # 44 pemeriksaan render, console error, dan overflow responsif
+npm run test:e2e         # 81 pemeriksaan API & alur end-to-end
+npm run test:visual      # 44 pemeriksaan render & error console
+npm run test:responsive  # 112 kombinasi halaman × 10 viewport (320–1920px)
 ```
 
 Hasil yang sudah dijalankan pada lingkungan ini:
 
 - **E2E:** 81/81 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
-- **Visual/responsive:** 44/44 lulus — 390px, 1440px, halaman publik, halaman admin desktop/mobile, form pengajuan, permohonan saya. Tidak ada horizontal overflow, page error, atau console error.
+- **Visual:** 44/44 lulus — halaman publik, admin desktop/mobile, form pengajuan, permohonan saya. Tidak ada page error atau console error.
+- **Responsive:** 112/112 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
+- **Login standalone:** layout autentikasi tanpa public header/footer/sidebar, split-screen 50:50, light mode permanen, diuji pada 320–1440px.
 
 Screenshot pengujian disimpan di `.data/screenshots/`.
 
@@ -227,7 +230,7 @@ Screenshot pengujian disimpan di `.data/screenshots/`.
 
 Hal-hal berikut **belum** diklaim selesai:
 
-1. **Aset resmi belum tersedia.** Repo tidak menyediakan file logo/foto resmi UNU. Saat ini digunakan wordmark netral, dan admin dapat mengisi URL logo resmi melalui Pengaturan. Ganti wordmark dengan aset resmi sebelum go-live.
+1. **Logo resmi sudah digunakan** pada header, footer (versi putih), dan halaman login. Foto dokumentasi resmi belum tersedia; ilustrasi editorial saat ini bersifat kustom, bukan foto aktivitas kampus.
 2. **Kontak, alamat, dan media sosial sengaja kosong pada seed** agar tidak menampilkan data rekaan. Isi melalui **Admin → Pengaturan**.
 3. **SMTP belum dikonfigurasi.** Email development masuk ke `.data/mail-outbox` dan ditandai `simulated`, bukan terkirim. Konfigurasikan `NUXT_SMTP_*` untuk email nyata.
 4. **Penyimpanan file masih filesystem lokal.** Untuk produksi multi-instance, gunakan object storage privat (S3/R2/GCS) melalui adapter. Jangan memindahkan folder upload ke `public/`.
@@ -236,7 +239,7 @@ Hal-hal berikut **belum** diklaim selesai:
 7. **Tidak ada antivirus scanner.** Validasi file memakai allowlist MIME, ekstensi, ukuran, dan magic bytes. Untuk produksi, tambahkan pemindaian malware pada pipeline upload.
 8. **Audit log bersifat append-only di level aplikasi**, bukan WORM/immutable storage.
 9. **Belum ada integrasi object storage, SSO, SIAKAD, Feeder, atau sistem eksternal lain.** Adapter/env telah disiapkan hanya untuk MongoDB, SMTP, dan storage lokal.
-10. **Pengujian browser** dilakukan dengan Chrome headless (390/1440). Safari/Firefox dan audit aksesibilitas formal (axe/WCAG penuh) masih perlu dijalankan sebelum go-live.
+10. **Pengujian browser** dilakukan dengan Chrome headless pada 10 viewport (320–1920px). Safari/Firefox dan audit aksesibilitas formal (axe/WCAG penuh) masih perlu dijalankan sebelum go-live.
 11. **Data seed development** harus diganti dengan data operasional yang terverifikasi. Metrik capaian sengaja kosong sampai admin menandainya terverifikasi.
 12. **Audit aksesibilitas otomatis** (misalnya axe) belum dijalankan; kontras warna utama sudah disesuaikan, tetapi verifikasi formal tetap diperlukan.
 

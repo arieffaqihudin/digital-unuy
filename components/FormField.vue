@@ -81,7 +81,7 @@ const acceptLabel = computed(() => {
             :checked="String(modelValue ?? '') === option.value"
             :required="field.required"
             :disabled="disabled"
-            class="h-4 w-4 accent-charcoal"
+            class="h-4 w-4 accent-unu-green"
             @change="update(option.value)"
           />
           {{ option.label }}
@@ -96,7 +96,7 @@ const acceptLabel = computed(() => {
         :checked="modelValue === true || modelValue === 'true'"
         :required="field.required"
         :disabled="disabled"
-        class="mt-0.5 h-4 w-4 shrink-0 accent-charcoal"
+        class="mt-0.5 h-4 w-4 shrink-0 accent-unu-green"
         :aria-describedby="describedBy"
         :aria-invalid="Boolean(error)"
         @change="update(($event.target as HTMLInputElement).checked)"
@@ -126,12 +126,12 @@ const acceptLabel = computed(() => {
       />
       <label
         :for="id"
-        class="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border border-dashed border-line-warm bg-white px-4 py-3 transition hover:border-gold hover:bg-gold/5"
+        class="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border border-dashed border-line-warm bg-white px-4 py-3 transition hover:border-unu-green hover:bg-unu-green-soft"
       >
-        <UploadCloud :size="18" class="shrink-0 text-gold-dark" aria-hidden="true" />
+        <UploadCloud :size="18" class="shrink-0 text-unu-green" aria-hidden="true" />
         <span class="min-w-0 flex-1">
           <span class="block truncate text-sm font-medium">{{ selectedFileName || 'Pilih file' }}</span>
-          <span class="mt-0.5 block text-[11px] text-ink-muted">{{ acceptLabel }} · maks. {{ field.fileMaxMB || 10 }} MB</span>
+          <span class="mt-0.5 block text-[14px] text-ink-muted">{{ acceptLabel }} · maks. {{ field.fileMaxMB || 10 }} MB</span>
         </span>
       </label>
       <button v-if="selectedFileName" type="button" class="mt-1.5 text-xs font-semibold text-red-700 underline-offset-4 hover:underline" @click="clearFile">

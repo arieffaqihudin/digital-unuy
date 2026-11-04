@@ -48,7 +48,7 @@ useSeoMeta({ title: 'Aktivasi Akun', robots: 'noindex, nofollow' })
       <div class="w-full max-w-lg">
         <div class="rounded-3xl border border-line-warm bg-white p-6 shadow-card sm:p-8">
           <template v-if="success">
-            <span class="grid h-14 w-14 place-items-center rounded-2xl bg-sage-soft text-charcoal"><CheckCircle2 :size="27" aria-hidden="true" /></span>
+            <span class="grid h-14 w-14 place-items-center rounded-2xl bg-unu-green-soft text-unu-green"><CheckCircle2 :size="27" aria-hidden="true" /></span>
             <h1 class="mt-5 text-2xl font-semibold">Akun berhasil diaktifkan</h1>
             <p class="mt-2 text-sm leading-6 text-ink-muted">Kata sandi telah dibuat dan sesi Anda sudah aktif. Tautan aktivasi tidak dapat digunakan lagi.</p>
             <AppButton :to="activatedRole === 'admin' || activatedRole === 'superadmin' ? '/admin' : '/permohonan-saya'" size="lg" block class="mt-6">
@@ -64,7 +64,7 @@ useSeoMeta({ title: 'Aktivasi Akun', robots: 'noindex, nofollow' })
           </template>
 
           <template v-else>
-            <span class="grid h-14 w-14 place-items-center rounded-2xl bg-sage-soft text-charcoal"><KeyRound :size="26" aria-hidden="true" /></span>
+            <span class="grid h-14 w-14 place-items-center rounded-2xl bg-unu-green-soft text-unu-green"><KeyRound :size="26" aria-hidden="true" /></span>
             <h1 class="mt-5 text-2xl font-semibold">Aktivasi akun</h1>
             <p class="mt-2 text-sm leading-6 text-ink-muted">Buat kata sandi baru. Tautan ini hanya dapat digunakan satu kali dan memiliki masa berlaku.</p>
 
@@ -92,7 +92,7 @@ useSeoMeta({ title: 'Aktivasi Akun', robots: 'noindex, nofollow' })
               </div>
               <AppButton type="submit" :loading="loading" size="lg" block>Aktifkan akun <template #right><ArrowRight :size="16" /></template></AppButton>
             </form>
-            <p class="mt-5 text-center text-[11px] leading-5 text-ink-muted">Masalah dengan tautan? Hubungi administrator direktorat untuk mengirim ulang undangan.</p>
+            <p class="mt-5 text-center text-[14px] leading-5 text-ink-muted">Masalah dengan tautan? Hubungi administrator direktorat untuk mengirim ulang undangan.</p>
           </template>
         </div>
       </div>

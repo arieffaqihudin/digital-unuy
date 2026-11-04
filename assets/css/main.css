@@ -5,8 +5,10 @@
 @layer base {
   :root {
     --color-ivory: #faf8ed;
+    --color-soft-white: #fafaf9;
     --color-charcoal: #1c1a1a;
-    --color-gold: #c99517;
+    --color-gold: #bf8b15;
+    --color-green: #337449;
     --color-sage: #d7d49a;
     --color-white: #ffffff;
     --header-height: 76px;
@@ -19,11 +21,12 @@
 
   body {
     @apply bg-ivory font-sans text-charcoal antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    @apply bg-gold/25 text-charcoal;
+    @apply bg-unu-green/20 text-charcoal;
   }
 
   h1,
@@ -32,7 +35,7 @@
   h4,
   h5,
   h6 {
-    @apply font-semibold tracking-tight text-charcoal;
+    @apply font-bold tracking-[-0.025em] text-charcoal;
     text-wrap: balance;
   }
 
@@ -47,7 +50,7 @@
   textarea,
   summary,
   [tabindex]:not([tabindex='-1']) {
-    @apply outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ivory;
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-unu-green focus-visible:ring-offset-2 focus-visible:ring-offset-ivory;
   }
 
   button,
@@ -59,14 +62,6 @@
   select,
   textarea {
     font-size: 16px;
-  }
-
-  @media (min-width: 768px) {
-    input,
-    select,
-    textarea {
-      font-size: 14px;
-    }
   }
 }
 
@@ -84,59 +79,95 @@
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-gold-dark;
+    @apply inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gold-dark;
   }
 
   .eyebrow-light {
-    @apply inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-sage;
+    @apply inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-sage;
+  }
+
+  .eyebrow-green {
+    @apply inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-unu-green;
   }
 
   .display-1 {
-    @apply text-[2.5rem] leading-[1.05] sm:text-5xl lg:text-6xl xl:text-[4.4rem];
+    @apply text-[2.375rem] font-bold leading-[1.12] tracking-[-0.035em] sm:text-[3rem] lg:text-[3.25rem] xl:text-[3.5rem];
+  }
+
+  .page-title {
+    @apply text-[1.75rem] font-bold leading-[1.2] tracking-[-0.03em] sm:text-[2rem];
   }
 
   .display-2 {
-    @apply text-3xl leading-[1.1] sm:text-4xl lg:text-5xl;
+    @apply text-[1.5rem] font-bold leading-[1.24] tracking-[-0.03em] sm:text-[1.75rem] lg:text-[2rem];
   }
 
   .display-3 {
-    @apply text-2xl leading-tight sm:text-3xl lg:text-4xl;
+    @apply text-[1.375rem] font-bold leading-[1.28] tracking-[-0.02em] sm:text-[1.625rem];
+  }
+
+  .heading-md {
+    @apply text-[20px] font-semibold leading-[1.4] tracking-[-0.015em];
+  }
+
+  .heading-sm {
+    @apply text-[18px] font-semibold leading-[1.4] tracking-[-0.01em];
+  }
+
+  .card-title {
+    @apply text-[18px] font-semibold leading-[1.4] tracking-[-0.01em];
   }
 
   .body-lg {
-    @apply text-base leading-7 text-ink-muted sm:text-lg sm:leading-8;
+    @apply text-[17px] leading-[1.6] text-slate-ink/80 sm:text-[18px];
+  }
+
+  .body-copy {
+    @apply text-[16px] leading-[1.65] text-slate-ink/80;
+  }
+
+  .body-sm {
+    @apply text-[14px] leading-[1.55] text-slate-600;
+  }
+
+  .meta-copy {
+    @apply text-[12px] leading-[1.5] text-slate-500;
+  }
+
+  .nav-copy {
+    @apply text-[14px] font-medium leading-[1.4];
   }
 
   .card-surface {
-    @apply rounded-2xl border border-line-warm bg-white shadow-card;
-  }
-
-  .field-label {
-    @apply mb-1.5 block text-sm font-semibold text-charcoal;
-  }
-
-  .field-input {
-    @apply block min-h-[44px] w-full rounded-xl border border-line-warm bg-white px-3.5 py-2.5 text-sm text-charcoal placeholder:text-ink-muted/60 transition hover:border-charcoal/25 focus:border-gold focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:bg-ivory disabled:text-ink-muted;
-  }
-
-  .field-help {
-    @apply mt-1.5 text-xs leading-5 text-ink-muted;
-  }
-
-  .field-error {
-    @apply mt-1.5 flex items-start gap-1.5 text-xs font-medium text-red-700;
-  }
-
-  .admin-card {
     @apply rounded-2xl border border-line-warm bg-white;
   }
 
+  .field-label {
+    @apply mb-1.5 block text-[14px] font-medium leading-[1.4] text-charcoal;
+  }
+
+  .field-input {
+    @apply block min-h-[46px] w-full rounded-lg border border-line-warm bg-white px-3.5 py-2.5 text-[16px] text-charcoal placeholder:text-[16px] placeholder:text-slate-400 transition hover:border-slate-300 focus:border-unu-green focus:ring-2 focus:ring-unu-green/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400;
+  }
+
+  .field-help {
+    @apply mt-1.5 text-[13px] leading-[1.5] text-slate-500;
+  }
+
+  .field-error {
+    @apply mt-1.5 flex items-start gap-1.5 text-[13px] font-medium leading-[1.5] text-red-700;
+  }
+
+  .admin-card {
+    @apply rounded-xl border border-admin-border bg-white;
+  }
+
   .admin-label {
-    @apply mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink-muted;
+    @apply mb-1.5 block text-[14px] font-medium leading-[1.4] text-admin-text;
   }
 
   .skeleton {
-    @apply relative overflow-hidden rounded-lg bg-charcoal/10;
+    @apply relative overflow-hidden rounded-lg bg-slate-200/70;
   }
 
   .skeleton::after {
@@ -146,11 +177,11 @@
   }
 
   .link-arrow {
-    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-charcoal underline-offset-4 transition hover:text-gold-dark hover:underline;
+    @apply inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-charcoal underline-offset-4 transition hover:text-unu-green hover:underline;
   }
 
   .prose-unu {
-    @apply prose prose-neutral max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-charcoal prose-p:leading-8 prose-p:text-ink-muted prose-a:font-semibold prose-a:text-gold-dark prose-a:underline-offset-4 prose-strong:text-charcoal prose-li:text-ink-muted prose-img:rounded-2xl;
+    @apply prose prose-neutral max-w-none prose-headings:font-semibold prose-headings:tracking-[-0.025em] prose-headings:text-charcoal prose-p:leading-8 prose-p:text-slate-600 prose-a:font-semibold prose-a:text-unu-green prose-a:underline-offset-4 prose-strong:text-charcoal prose-li:text-slate-600 prose-img:rounded-2xl;
   }
 
   .public-grid-pattern {
@@ -160,8 +191,15 @@
     background-size: 32px 32px;
   }
 
+  .paper-grid {
+    background-image:
+      linear-gradient(to right, rgba(28, 26, 26, 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(28, 26, 26, 0.055) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
   .dot-pattern {
-    background-image: radial-gradient(rgba(28, 26, 26, 0.16) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(28, 26, 26, 0.14) 1px, transparent 1px);
     background-size: 15px 15px;
   }
 
@@ -178,7 +216,50 @@
   }
 
   .rich-content blockquote {
-    @apply border-l-2 border-gold pl-4 italic text-ink-muted;
+    @apply border-l-2 border-gold pl-4 italic text-slate-600;
+  }
+
+  .section-rule {
+    @apply h-px w-full bg-line-warm;
+  }
+
+  .admin-shell h2 {
+    @apply text-[26px] font-bold leading-[1.25] tracking-[-0.025em] text-admin-text;
+  }
+
+  .admin-shell h3 {
+    @apply text-[16px] font-semibold leading-[1.4] text-admin-text;
+  }
+
+  .admin-shell table thead {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .admin-shell table tbody {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .admin-shell table tbody td {
+    color: #475569;
+  }
+
+  /* Header-only typography. Isolated from content and heading scales. */
+  .site-brand-title {
+    @apply whitespace-nowrap text-[13px] font-bold leading-[1.15] tracking-[-0.01em] sm:text-[15px] xl:text-[16px];
+  }
+
+  .site-brand-subtitle {
+    @apply whitespace-nowrap text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.12em];
+  }
+
+  .site-nav-link {
+    @apply whitespace-nowrap text-[14px] font-semibold leading-[1.4];
+  }
+
+  .site-nav-cta {
+    @apply whitespace-nowrap text-[14px] font-semibold leading-[1.4];
   }
 }
 
@@ -198,6 +279,10 @@
 
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .text-editorial {
+    letter-spacing: -0.035em;
   }
 }
 

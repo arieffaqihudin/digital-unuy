@@ -35,7 +35,7 @@ useSeoMeta({
         <Breadcrumbs :items="[{ label: 'Beranda', to: '/' }, { label: page.title }]" />
         <h1 class="display-1 mt-8 max-w-4xl">{{ page.title }}</h1>
         <p v-if="page.excerpt" class="body-lg mt-5 max-w-2xl">{{ page.excerpt }}</p>
-        <p class="mt-5 text-[11px] text-ink-muted">Diperbarui {{ formatDate(page.updatedAt) }}</p>
+        <p class="mt-5 text-[14px] text-ink-muted">Diperbarui {{ formatDate(page.updatedAt) }}</p>
       </div>
     </section>
     <section class="section-space bg-white">

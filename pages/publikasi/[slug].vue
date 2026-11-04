@@ -54,7 +54,7 @@ useHead(() => ({
       <div class="page-shell py-8 sm:py-10">
         <Breadcrumbs :items="[{ label: 'Beranda', to: '/' }, { label: 'Publikasi', to: '/publikasi' }, { label: article.title }]" />
         <div class="mx-auto mt-8 max-w-4xl">
-          <span class="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ article.category }}</span>
+          <span class="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[12px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ article.category }}</span>
           <h1 class="display-2 mt-5">{{ article.title }}</h1>
           <p class="body-lg mt-5">{{ article.excerpt }}</p>
           <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line-warm pt-5 text-xs text-ink-muted">
@@ -74,10 +74,10 @@ useHead(() => ({
           <div class="prose-unu" v-html="article.content" />
 
           <div class="mt-10 flex flex-col gap-3 border-t border-line-warm pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <NuxtLink to="/publikasi" class="inline-flex items-center gap-1.5 text-sm font-semibold underline-offset-4 hover:text-gold-dark hover:underline">
+            <NuxtLink to="/publikasi" class="inline-flex items-center gap-1.5 text-sm font-semibold underline-offset-4 hover:text-unu-green hover:underline">
               <ArrowLeft :size="15" aria-hidden="true" /> Semua publikasi
             </NuxtLink>
-            <NuxtLink to="/layanan" class="inline-flex items-center gap-1.5 text-sm font-semibold text-gold-dark underline-offset-4 hover:underline">
+            <NuxtLink to="/layanan" class="inline-flex items-center gap-1.5 text-sm font-semibold text-unu-green underline-offset-4 hover:underline">
               Jelajahi layanan <ArrowRight :size="15" aria-hidden="true" />
             </NuxtLink>
           </div>

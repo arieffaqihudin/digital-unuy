@@ -188,9 +188,9 @@ export function serializeSettings(settings: any): SiteSettingsDTO {
       eyebrow: settings?.hero?.eyebrow || 'Transformasi Digital',
       title: settings?.hero?.title || 'Mendorong Transformasi Digital UNU Yogyakarta',
       description: settings?.hero?.description || '',
-      primaryLabel: settings?.hero?.primaryLabel || 'Jelajahi Layanan Digital',
+      primaryLabel: settings?.hero?.primaryLabel || 'Jelajahi Layanan',
       primaryUrl: settings?.hero?.primaryUrl || '/layanan',
-      secondaryLabel: settings?.hero?.secondaryLabel || 'Mengenal Direktorat',
+      secondaryLabel: settings?.hero?.secondaryLabel || 'Tentang Direktorat',
       secondaryUrl: settings?.hero?.secondaryUrl || '/tentang'
     },
     metrics: (settings?.metrics || []).filter((metric: any) => metric.verified === true),

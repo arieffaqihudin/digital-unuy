@@ -77,7 +77,9 @@ function visible(field: FormField) {
 }
 
 const visibleFields = computed(() => fields.value.filter(visible))
-const hasFileFields = computed(() => visibleFields.value.some((field) => field.type === 'file'))
+const regularFields = computed(() => visibleFields.value.filter((field) => field.type !== 'file'))
+const fileFields = computed(() => visibleFields.value.filter((field) => field.type === 'file'))
+const hasFileFields = computed(() => fileFields.value.length > 0)
 
 onMounted(async () => {
   try {
@@ -260,7 +262,7 @@ useSeoMeta({
             <h1 class="display-2 mt-3">{{ service.name }}</h1>
             <p class="mt-3 max-w-2xl text-sm leading-7 text-ink-muted">Lengkapi formulir berikut. Seluruh isian divalidasi di server sebelum permohonan dibuat.</p>
           </div>
-          <NuxtLink :to="`/layanan/${service.slug}`" class="inline-flex items-center gap-1.5 text-xs font-semibold underline-offset-4 hover:text-gold-dark hover:underline">
+          <NuxtLink :to="`/layanan/${service.slug}`" class="inline-flex items-center gap-1.5 text-xs font-semibold underline-offset-4 hover:text-unu-green hover:underline">
             <ArrowLeft :size="14" aria-hidden="true" /> Kembali ke detail layanan
           </NuxtLink>
         </div>
@@ -271,8 +273,8 @@ useSeoMeta({
       <div class="page-shell">
         <div v-if="submitted" class="mx-auto max-w-3xl">
           <div class="overflow-hidden rounded-3xl border border-line-warm bg-white shadow-soft">
-            <div class="bg-charcoal px-6 py-8 text-white sm:px-8">
-              <span class="grid h-12 w-12 place-items-center rounded-2xl bg-sage text-charcoal">
+            <div class="bg-unu-green-dark px-6 py-8 text-white sm:px-8">
+              <span class="grid h-12 w-12 place-items-center rounded-2xl bg-unu-green-soft text-unu-green">
                 <CheckCircle2 :size="25" aria-hidden="true" />
               </span>
               <h2 class="mt-5 text-2xl font-semibold text-white sm:text-3xl">Permohonan berhasil diajukan</h2>
@@ -281,11 +283,11 @@ useSeoMeta({
             <div class="p-6 sm:p-8">
               <div class="grid gap-4 sm:grid-cols-2">
                 <div class="rounded-xl border border-line-warm bg-ivory p-4">
-                  <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Nomor tiket</p>
+                  <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-ink-muted">Nomor tiket</p>
                   <p class="mt-2 break-all text-lg font-bold tracking-wide">{{ submitted.ticketNumber }}</p>
                 </div>
                 <div class="rounded-xl border border-line-warm bg-ivory p-4">
-                  <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Status awal</p>
+                  <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-ink-muted">Status awal</p>
                   <p class="mt-2 text-lg font-bold">Diajukan</p>
                 </div>
               </div>
@@ -322,28 +324,46 @@ useSeoMeta({
           </div>
         </div>
 
-        <div v-else class="grid gap-8 lg:grid-cols-[1fr_330px] lg:items-start">
-          <form novalidate class="rounded-2xl border border-line-warm bg-white p-5 shadow-card sm:p-7" @submit.prevent="submit">
+        <div v-else class="grid gap-8 lg:grid-cols-[minmax(0,820px)_300px] lg:justify-center lg:items-start">
+          <form novalidate class="rounded-xl border border-line-warm bg-white p-5 sm:p-7" @submit.prevent="submit">
             <div class="flex items-start justify-between gap-4 border-b border-line-warm pb-5">
               <div>
-                <h2 class="text-lg font-semibold">Formulir permohonan</h2>
-                <p class="mt-1 text-xs leading-5 text-ink-muted">Field bertanda <span class="font-bold text-red-700">*</span> wajib diisi.</p>
+                <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-gold-dark">Formulir</p>
+                <h2 class="mt-1 text-lg font-semibold">{{ service.name }}</h2>
+                <p class="mt-1 text-[14px] leading-5 text-slate-500">Field bertanda <span class="font-bold text-red-700">*</span> wajib diisi.</p>
               </div>
-              <span class="rounded-full bg-sage-soft px-3 py-1 text-[10px] font-bold uppercase tracking-wide">{{ visibleFields.length }} field</span>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-[12px] font-bold uppercase tracking-wide text-slate-500">{{ visibleFields.length }} field</span>
             </div>
 
-            <div v-if="submitError" class="mt-5 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs leading-5 text-red-900" role="alert">
+            <div v-if="submitError" class="mt-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-4 text-xs leading-5 text-red-900" role="alert">
               <AlertCircle :size="16" class="mt-0.5 shrink-0" aria-hidden="true" />
               <p>{{ submitError }}</p>
             </div>
 
-            <div class="mt-6 grid gap-5 sm:grid-cols-2">
-              <div
-                v-for="field in visibleFields"
-                :key="field.key"
-                :class="field.type === 'textarea' || field.type === 'file' || field.type === 'checkbox' || field.type === 'radio' ? 'sm:col-span-2' : ''"
-              >
+            <fieldset class="mt-7">
+              <legend class="mb-4 text-[14px] font-bold uppercase tracking-[0.14em] text-slate-500">Data permohonan</legend>
+              <div class="grid gap-5 sm:grid-cols-2">
+                <div
+                  v-for="field in regularFields"
+                  :key="field.key"
+                  :class="field.type === 'textarea' || field.type === 'checkbox' || field.type === 'radio' ? 'sm:col-span-2' : ''"
+                >
+                  <FormField
+                    :field="field"
+                    v-model="form[field.key]"
+                    :error="errors[field.key]"
+                    :disabled="submitting"
+                  />
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset v-if="fileFields.length" class="mt-8 border-t border-line-warm pt-6">
+              <legend class="mb-4 text-[14px] font-bold uppercase tracking-[0.14em] text-slate-500">Lampiran</legend>
+              <div class="space-y-5">
                 <FormField
+                  v-for="field in fileFields"
+                  :key="field.key"
                   :field="field"
                   v-model="form[field.key]"
                   :error="errors[field.key]"
@@ -351,10 +371,10 @@ useSeoMeta({
                   @update:file="onFile(field, $event)"
                 />
               </div>
-            </div>
+            </fieldset>
 
-            <div class="mt-7 flex flex-col gap-3 border-t border-line-warm pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <div class="flex items-center gap-2 text-[11px] text-ink-muted">
+            <div class="mt-8 flex flex-col gap-3 border-t border-line-warm pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center gap-2 text-[12px] text-slate-500">
                 <Loader2 v-if="draftSaving" :size="13" class="animate-spin" aria-hidden="true" />
                 <Save v-else :size="13" aria-hidden="true" />
                 <span>{{ draftMessage || 'Draft isian disimpan otomatis.' }}</span>
@@ -369,47 +389,42 @@ useSeoMeta({
             </div>
           </form>
 
-          <aside class="space-y-4 lg:sticky lg:top-36">
-            <div class="rounded-2xl border border-line-warm bg-ivory p-5">
-              <div class="flex items-center gap-2">
-                <ClipboardCheck :size="17" class="text-gold-dark" aria-hidden="true" />
-                <h2 class="text-sm font-semibold">Sebelum mengirim</h2>
+          <aside class="lg:sticky lg:top-28">
+            <div class="overflow-hidden rounded-xl border border-line-warm bg-white">
+              <div class="border-b border-line-warm bg-soft-white px-5 py-4">
+                <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-slate-400">Ringkasan pengajuan</p>
+                <p class="mt-1 text-sm font-semibold">{{ service.category }}</p>
               </div>
-              <ul class="mt-4 space-y-3 text-xs leading-5 text-ink-muted">
-                <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />Pastikan data identitas dan unit kerja benar.</li>
-                <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />Lampiran yang didukung: PDF, PNG, JPG, WEBP, DOCX, XLSX, ZIP.</li>
-                <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />File lampiran tidak disimpan dalam draft, unggah ulang saat mengirim.</li>
-                <li v-if="hasFileFields" class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />Total lampiran maksimal 12 MB.</li>
-              </ul>
-            </div>
+              <div class="p-5">
+                <div class="flex items-start gap-3">
+                  <Clock3 :size="15" class="mt-0.5 shrink-0 text-unu-green" aria-hidden="true" />
+                  <div>
+                    <p class="text-[12px] font-semibold uppercase tracking-wide text-slate-400">Estimasi waktu</p>
+                    <p class="mt-0.5 text-sm font-semibold">{{ service.estimatedDuration || 'Sesuai hasil kajian' }}</p>
+                  </div>
+                </div>
 
-            <div class="rounded-2xl border border-line-warm bg-white p-5">
-              <div class="flex items-center gap-2">
-                <Clock3 :size="16" class="text-gold-dark" aria-hidden="true" />
-                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Estimasi waktu</p>
-              </div>
-              <p class="mt-2 text-sm font-semibold">{{ service.estimatedDuration || 'Sesuai hasil kajian' }}</p>
-              <p class="mt-2 text-xs leading-5 text-ink-muted">Estimasi dapat berubah sesuai kelengkapan dokumen dan tingkat urgensi.</p>
-            </div>
+                <ul class="mt-5 space-y-3 border-t border-line-warm pt-5 text-[14px] leading-5 text-slate-600">
+                  <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Pastikan data identitas dan unit kerja benar.</li>
+                  <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Lampiran: PDF, PNG, JPG, WEBP, DOCX, XLSX, ZIP.</li>
+                  <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Lampiran tidak disimpan dalam draft.</li>
+                  <li v-if="hasFileFields" class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Total lampiran maksimal 12 MB.</li>
+                </ul>
 
-            <div class="rounded-2xl border border-line-warm bg-white p-5">
-              <div class="flex items-center gap-2">
-                <ShieldCheck :size="16" class="text-gold-dark" aria-hidden="true" />
-                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Keamanan data</p>
-              </div>
-              <p class="mt-2 text-xs leading-5 text-ink-muted">Jangan pernah mengirim kata sandi melalui formulir. Lampiran hanya dapat diakses oleh Anda dan petugas yang berwenang.</p>
-            </div>
+                <div class="mt-5 flex gap-3 border-t border-line-warm pt-5">
+                  <ShieldCheck :size="15" class="mt-0.5 shrink-0 text-unu-green" aria-hidden="true" />
+                  <p class="text-[12px] leading-5 text-slate-500">Jangan mengirim kata sandi. Lampiran hanya dapat diakses oleh Anda dan petugas berwenang.</p>
+                </div>
 
-            <div v-if="service.requirements?.length" class="rounded-2xl border border-line-warm bg-white p-5">
-              <div class="flex items-center gap-2">
-                <FileText :size="16" class="text-gold-dark" aria-hidden="true" />
-                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Persyaratan</p>
+                <div v-if="service.requirements?.length" class="mt-5 border-t border-line-warm pt-5">
+                  <p class="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.14em] text-slate-400"><FileText :size="13" /> Persyaratan</p>
+                  <ul class="mt-2.5 space-y-2">
+                    <li v-for="item in service.requirements" :key="item" class="flex gap-2 text-[12px] leading-5 text-slate-500">
+                      <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-300" aria-hidden="true" />{{ item }}
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <ul class="mt-3 space-y-2">
-                <li v-for="item in service.requirements" :key="item" class="flex gap-2 text-xs leading-5 text-ink-muted">
-                  <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-current" aria-hidden="true" />{{ item }}
-                </li>
-              </ul>
             </div>
           </aside>
         </div>

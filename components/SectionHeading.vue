@@ -16,13 +16,13 @@ withDefaults(
     class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"
     :class="align === 'center' ? 'text-center md:flex-col md:items-center' : ''"
   >
-    <div :class="align === 'center' ? 'mx-auto max-w-2xl' : 'max-w-2xl'">
+    <div :class="align === 'center' ? 'mx-auto max-w-2xl' : 'max-w-[650px]'">
       <p v-if="eyebrow" :class="inverse ? 'eyebrow-light' : 'eyebrow'">
         <span class="h-px w-5 bg-current" aria-hidden="true" />
         {{ eyebrow }}
       </p>
       <h2 class="display-2 mt-3" :class="inverse ? 'text-white' : ''">{{ title }}</h2>
-      <p v-if="description" class="body-lg mt-4" :class="inverse ? 'text-white/65' : ''">{{ description }}</p>
+      <p v-if="description" class="body-copy mt-3 max-w-[620px]" :class="inverse ? 'text-white/60' : ''">{{ description }}</p>
     </div>
     <div v-if="$slots.action" class="shrink-0">
       <slot name="action" />

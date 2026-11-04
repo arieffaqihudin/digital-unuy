@@ -10,7 +10,7 @@ defineProps<{
   <nav aria-label="Breadcrumb">
     <ol class="flex flex-wrap items-center gap-1.5 text-xs text-ink-muted">
       <li v-for="(item, index) in items" :key="`${item.label}-${index}`" class="flex items-center gap-1.5">
-        <NuxtLink v-if="item.to && index < items.length - 1" :to="item.to" class="transition hover:text-charcoal">
+        <NuxtLink v-if="item.to && index < items.length - 1" :to="item.to" class="transition hover:text-unu-green">
           {{ item.label }}
         </NuxtLink>
         <span v-else :class="index === items.length - 1 ? 'font-semibold text-charcoal' : ''" aria-current="page">

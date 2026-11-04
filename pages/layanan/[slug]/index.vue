@@ -58,9 +58,9 @@ useHead(() => ({
         <div class="mt-8 grid gap-10 lg:grid-cols-[1fr_340px] lg:items-start">
           <div>
             <div class="flex flex-wrap items-center gap-2">
-              <span class="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-gold-dark">{{ service.category }}</span>
+              <span class="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em] text-gold-dark">{{ service.category }}</span>
               <span
-                class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wide"
+                class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-bold uppercase tracking-wide"
                 :class="service.active && service.acceptsRequests ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-line-warm bg-white text-ink-muted'"
               >
                 <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
@@ -82,7 +82,7 @@ useHead(() => ({
 
           <aside class="lg:sticky lg:top-36">
             <div class="rounded-2xl border border-line-warm bg-white p-5 shadow-card sm:p-6">
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Ringkasan layanan</p>
+              <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Ringkasan layanan</p>
               <dl class="mt-4 space-y-3 text-sm">
                 <div class="flex items-start justify-between gap-4 border-b border-line-warm pb-3">
                   <dt class="text-ink-muted">Estimasi waktu</dt>
@@ -109,7 +109,7 @@ useHead(() => ({
               <button v-else disabled class="mt-6 inline-flex min-h-[50px] w-full cursor-not-allowed items-center justify-center rounded-xl border border-line-warm bg-ivory px-5 text-sm font-semibold text-ink-muted">
                 Pengajuan tidak tersedia
               </button>
-              <p class="mt-3 text-center text-[11px] leading-5 text-ink-muted">Anda perlu masuk untuk mengirim permohonan.</p>
+              <p class="mt-3 text-center text-[14px] leading-5 text-ink-muted">Anda perlu masuk untuk mengirim permohonan.</p>
             </div>
           </aside>
         </div>
@@ -139,7 +139,7 @@ useHead(() => ({
             <ul class="mt-4 space-y-2.5">
               <li v-for="(item, index) in service.requirements" :key="item" class="flex gap-3 text-sm leading-7 text-ink-muted">
                 <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />
-                <span><span class="mr-2 text-[10px] font-bold text-ink-muted/60">{{ String(index + 1).padStart(2, '0') }}</span>{{ item }}</span>
+                <span><span class="mr-2 text-[12px] font-bold text-ink-muted/60">{{ String(index + 1).padStart(2, '0') }}</span>{{ item }}</span>
               </li>
             </ul>
           </section>
@@ -164,7 +164,7 @@ useHead(() => ({
             <ol class="mt-5 space-y-0">
               <li v-for="(item, index) in service.procedure" :key="item" class="relative flex gap-4 pb-6 last:pb-0">
                 <span v-if="index < service.procedure.length - 1" class="absolute left-[15px] top-8 h-[calc(100%-2rem)] w-px bg-line-warm" aria-hidden="true" />
-                <span class="relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line-warm bg-white text-[10px] font-bold text-gold-dark">{{ index + 1 }}</span>
+                <span class="relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line-warm bg-white text-[12px] font-bold text-gold-dark">{{ index + 1 }}</span>
                 <p class="pt-1 text-sm leading-7 text-ink-muted">{{ item }}</p>
               </li>
             </ol>
@@ -173,7 +173,7 @@ useHead(() => ({
           <section v-if="service.relatedDocuments?.length">
             <div class="flex items-center justify-between gap-4">
               <h2 class="text-xl font-semibold">SOP dan panduan terkait</h2>
-              <NuxtLink to="/dokumen" class="inline-flex min-h-[44px] items-center text-xs font-semibold underline-offset-4 hover:text-gold-dark hover:underline">Semua dokumen</NuxtLink>
+              <NuxtLink to="/dokumen" class="inline-flex min-h-[44px] items-center text-xs font-semibold underline-offset-4 hover:text-unu-green hover:underline">Semua dokumen</NuxtLink>
             </div>
             <div class="mt-4 grid gap-3 sm:grid-cols-2">
               <NuxtLink
@@ -182,9 +182,9 @@ useHead(() => ({
                 :to="`/dokumen/${doc.slug}`"
                 class="group rounded-xl border border-line-warm bg-white p-4 transition hover:border-charcoal/30"
               >
-                <p class="text-[10px] font-bold uppercase tracking-wide text-gold-dark">{{ doc.category }}</p>
-                <p class="mt-1.5 text-sm font-semibold leading-6 group-hover:text-gold-dark">{{ doc.title }}</p>
-                <p class="mt-2 text-[11px] text-ink-muted">Versi {{ doc.version }} · {{ formatDate(doc.updatedAt) }}</p>
+                <p class="text-[12px] font-bold uppercase tracking-wide text-gold-dark">{{ doc.category }}</p>
+                <p class="mt-1.5 text-sm font-semibold leading-6 group-hover:text-unu-green">{{ doc.title }}</p>
+                <p class="mt-2 text-[14px] text-ink-muted">Versi {{ doc.version }} · {{ formatDate(doc.updatedAt) }}</p>
               </NuxtLink>
             </div>
           </section>
@@ -198,7 +198,7 @@ useHead(() => ({
             <AppButton to="/dokumen" variant="light" size="sm" class="mt-5">Baca panduan</AppButton>
           </div>
           <div class="rounded-2xl border border-line-warm bg-white p-5">
-            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Status pengajuan</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Status pengajuan</p>
             <p class="mt-3 text-sm leading-7 text-ink-muted">Status pengajuan tidak otomatis berarti usulan disetujui. Administrator akan melakukan kajian dan menyampaikan tindak lanjut melalui portal.</p>
           </div>
         </aside>

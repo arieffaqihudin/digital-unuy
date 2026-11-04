@@ -13,18 +13,28 @@ export default <Partial<Config>>{
     extend: {
       colors: {
         ivory: '#FAF8ED',
+        'soft-white': '#FAFAF9',
         charcoal: '#1C1A1A',
-        gold: '#C99517',
-        sage: '#D7D49A',
-        'gold-dark': '#8C6406',
-        'gold-soft': '#E8C766',
         'charcoal-soft': '#2B2828',
-        'ink-muted': '#68625C',
-        'line-warm': '#E6E1D3',
-        'sage-soft': '#F0EFD9'
+        gold: '#BF8B15',
+        'gold-dark': '#7D5800',
+        'gold-soft': '#E8C766',
+        sage: '#D7D49A',
+        'sage-soft': '#F0EFD9',
+        'unu-green': '#337449',
+        'unu-green-dark': '#245B37',
+        'unu-green-soft': '#EAF3ED',
+        'slate-ink': '#334155',
+        'ink-muted': '#5B6572',
+        'line-warm': '#E4E0D3',
+        'admin-bg': '#F6F8FA',
+        'admin-sidebar': '#F4F7FA',
+        'admin-border': '#E5E7EB',
+        'admin-text': '#1E293B',
+        'admin-muted': '#64748B'
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif']
+        sans: ['"Inter Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif']
       },
       borderRadius: {
         '4xl': '2rem'
@@ -32,13 +42,16 @@ export default <Partial<Config>>{
       maxWidth: {
         '8xl': '90rem'
       },
+      letterSpacing: {
+        editorial: '0.18em'
+      },
       boxShadow: {
-        soft: '0 18px 60px -32px rgba(28, 26, 26, 0.28)',
-        card: '0 1px 0 rgba(28,26,26,0.04), 0 16px 40px -30px rgba(28,26,26,0.32)'
+        soft: '0 24px 70px -40px rgba(28, 26, 26, 0.35)',
+        card: '0 1px 2px rgba(28,26,26,0.03), 0 18px 45px -38px rgba(28,26,26,0.28)'
       },
       keyframes: {
         'fade-up': {
-          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' }
         },
         shimmer: {
@@ -46,7 +59,7 @@ export default <Partial<Config>>{
         }
       },
       animation: {
-        'fade-up': 'fade-up .5s ease-out both',
+        'fade-up': 'fade-up .55s ease-out both',
         shimmer: 'shimmer 1.8s infinite'
       }
     }

@@ -16,7 +16,7 @@ withDefaults(
     class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line-warm bg-white/60 text-center"
     :class="compact ? 'px-5 py-10' : 'px-6 py-16'"
   >
-    <span class="grid h-12 w-12 place-items-center rounded-2xl bg-sage-soft text-charcoal">
+    <span class="grid h-12 w-12 place-items-center rounded-xl bg-unu-green-soft text-unu-green">
       <Inbox :size="22" :stroke-width="1.7" aria-hidden="true" />
     </span>
     <h3 class="mt-4 text-base font-semibold">{{ title }}</h3>

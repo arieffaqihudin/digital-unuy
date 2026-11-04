@@ -205,105 +205,105 @@ useSeoMeta({ title: 'Detail Permohonan', robots: 'noindex, nofollow' })
 <template>
   <div class="space-y-5">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <NuxtLink to="/admin/permohonan" class="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-charcoal"><ArrowLeft :size="14" /> Semua permohonan</NuxtLink>
+      <NuxtLink to="/admin/permohonan" class="inline-flex items-center gap-1.5 text-xs font-semibold text-admin-muted hover:text-admin-text"><ArrowLeft :size="14" /> Semua permohonan</NuxtLink>
       <StatusBadge v-if="request" :status="request.status" :substatus="request.substatus" size="md" />
     </div>
 
     <div v-if="loading" class="space-y-4">
-      <div class="skeleton h-32 rounded-2xl" />
-      <div class="skeleton h-72 rounded-2xl" />
+      <div class="skeleton h-32 rounded-xl" />
+      <div class="skeleton h-72 rounded-xl" />
     </div>
-    <div v-else-if="failure" class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-900">{{ failure }}</div>
+    <div v-else-if="failure" class="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-900">{{ failure }}</div>
 
     <template v-else-if="request">
-      <div class="rounded-2xl border border-line-warm bg-white p-5 sm:p-6">
+      <div class="rounded-xl border border-admin-border bg-white p-5 sm:p-6">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ request.serviceName }}</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-unu-green">{{ request.serviceName }}</p>
             <h2 class="mt-2 text-2xl font-semibold tracking-wide">{{ request.ticketNumber }}</h2>
-            <div class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-muted">
+            <div class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-admin-muted">
               <span>Diajukan {{ formatDateTime(request.createdAt) }}</span>
               <span>Diperbarui {{ formatDateTime(request.updatedAt) }}</span>
               <span>Form v{{ request.formSnapshot.version }}</span>
             </div>
-            <div v-if="requester" class="mt-3 inline-flex items-center gap-2 rounded-lg border border-line-warm bg-ivory px-3 py-2 text-xs">
-              <UserRoundCheck :size="14" class="text-gold-dark" aria-hidden="true" />
+            <div v-if="requester" class="mt-3 inline-flex items-center gap-2 rounded-lg border border-admin-border bg-slate-50 px-3 py-2 text-xs">
+              <UserRoundCheck :size="14" class="text-unu-green" aria-hidden="true" />
               <span class="font-semibold">{{ requester.name }}</span>
-              <span class="text-ink-muted">{{ requester.email }}</span>
+              <span class="text-admin-muted">{{ requester.email }}</span>
             </div>
           </div>
           <div class="flex flex-wrap gap-2">
             <AppButton v-if="canVerify" size="sm" @click="openAction('verify')"><template #left><CheckCircle2 :size="14" /></template>Verifikasi</AppButton>
             <AppButton v-if="canStart" size="sm" @click="openAction('start')"><template #left><PlayCircle :size="14" /></template>Mulai Proses</AppButton>
             <AppButton v-if="canRequestInfo" size="sm" variant="secondary" @click="openAction('request_info')">Minta Kelengkapan</AppButton>
-            <AppButton v-if="canComplete" size="sm" variant="accent" @click="openAction('complete')">Selesaikan</AppButton>
+            <AppButton v-if="canComplete" size="sm" @click="openAction('complete')">Selesaikan</AppButton>
             <AppButton v-if="canReject" size="sm" variant="danger" @click="openAction('reject')">Tolak</AppButton>
           </div>
         </div>
 
-        <div v-if="request.substatus" class="mt-5 rounded-xl border border-gold/30 bg-gold/10 p-4 text-xs leading-5 text-ink-muted">
-          <strong class="text-charcoal">Menunggu kelengkapan pemohon.</strong> {{ request.requestedCompletionNote }}
+        <div v-if="request.substatus" class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-admin-muted">
+          <strong class="text-admin-text">Menunggu kelengkapan pemohon.</strong> {{ request.requestedCompletionNote }}
         </div>
       </div>
 
       <div class="grid gap-5 xl:grid-cols-[1fr_350px] xl:items-start">
         <div class="space-y-5">
-          <div class="rounded-2xl border border-line-warm bg-white p-5">
+          <div class="rounded-xl border border-admin-border bg-white p-5">
             <h3 class="text-sm font-semibold">Data permohonan</h3>
             <dl class="mt-4 grid gap-2 sm:grid-cols-2">
-              <div v-for="entry in entries" :key="entry.key" class="rounded-xl border border-line-warm bg-ivory px-3.5 py-3">
-                <dt class="text-[10px] font-bold uppercase tracking-wide text-ink-muted">{{ entry.label }}</dt>
+              <div v-for="entry in entries" :key="entry.key" class="rounded-xl border border-admin-border bg-slate-50 px-3.5 py-3">
+                <dt class="text-[12px] font-bold uppercase tracking-wide text-admin-muted">{{ entry.label }}</dt>
                 <dd class="mt-1 whitespace-pre-line break-words text-sm">{{ entry.value || '—' }}</dd>
               </div>
             </dl>
           </div>
 
-          <div class="rounded-2xl border border-line-warm bg-white p-5">
+          <div class="rounded-xl border border-admin-border bg-white p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <h3 class="text-sm font-semibold">Lampiran</h3>
               <div v-if="!isTerminal" class="flex flex-wrap items-center gap-2">
-                <label class="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-lg border border-line-warm bg-white px-3 text-xs font-semibold transition hover:border-charcoal/30">
+                <label class="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-lg border border-admin-border bg-white px-3 text-xs font-semibold transition hover:border-slate-300">
                   <Paperclip :size="13" aria-hidden="true" /> Pilih hasil
                   <input type="file" class="sr-only" @change="resultFile = ($event.target as HTMLInputElement).files?.[0] || null" />
                 </label>
                 <AppButton v-if="resultFile" size="sm" :loading="busy" @click="uploadResult"><template #left><UploadCloud :size="13" /></template>Unggah</AppButton>
-                <span v-if="resultFile" class="max-w-[160px] truncate text-[10px] text-ink-muted">{{ resultFile.name }}</span>
+                <span v-if="resultFile" class="max-w-[160px] truncate text-[12px] text-admin-muted">{{ resultFile.name }}</span>
               </div>
             </div>
             <div v-if="request.attachments.length" class="mt-4 space-y-2">
-              <a v-for="attachment in request.attachments" :key="attachment.id" :href="`/api/requests/attachments/${attachment.id}`" class="flex items-center gap-3 rounded-xl border border-line-warm bg-ivory px-3.5 py-3 transition hover:border-charcoal/25">
-                <FileText :size="16" class="shrink-0 text-gold-dark" aria-hidden="true" />
-                <span class="min-w-0 flex-1"><span class="block truncate text-xs font-semibold">{{ attachment.originalName }}</span><span class="mt-0.5 block text-[10px] text-ink-muted">{{ attachment.fieldKey === 'hasil_penyelesaian' ? 'Hasil petugas' : 'Lampiran pemohon' }} · {{ formatFileSize(attachment.size) }}</span></span>
-                <Download :size="14" class="text-ink-muted" aria-hidden="true" />
+              <a v-for="attachment in request.attachments" :key="attachment.id" :href="`/api/requests/attachments/${attachment.id}`" class="flex items-center gap-3 rounded-xl border border-admin-border bg-slate-50 px-3.5 py-3 transition hover:border-slate-300">
+                <FileText :size="16" class="shrink-0 text-unu-green" aria-hidden="true" />
+                <span class="min-w-0 flex-1"><span class="block truncate text-xs font-semibold">{{ attachment.originalName }}</span><span class="mt-0.5 block text-[12px] text-admin-muted">{{ attachment.fieldKey === 'hasil_penyelesaian' ? 'Hasil petugas' : 'Lampiran pemohon' }} · {{ formatFileSize(attachment.size) }}</span></span>
+                <Download :size="14" class="text-admin-muted" aria-hidden="true" />
               </a>
             </div>
-            <p v-else class="mt-3 text-sm text-ink-muted">Tidak ada lampiran.</p>
+            <p v-else class="mt-3 text-sm text-admin-muted">Tidak ada lampiran.</p>
           </div>
 
-          <div class="rounded-2xl border border-line-warm bg-white p-5">
+          <div class="rounded-xl border border-admin-border bg-white p-5">
             <h3 class="text-sm font-semibold">Timeline</h3>
             <ol class="mt-4 space-y-4">
               <li v-for="(entry, index) in request.timeline" :key="entry.id" class="flex gap-3">
-                <span class="mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-line-warm text-[9px] font-bold text-gold-dark">{{ index + 1 }}</span>
-                <div><p class="text-xs font-semibold">{{ entry.status }}<span v-if="entry.substatus" class="font-normal text-ink-muted"> · {{ entry.substatus }}</span></p><p v-if="entry.note" class="mt-1 text-[11px] leading-5 text-ink-muted">{{ entry.note }}</p><p class="mt-1 text-[10px] text-ink-muted/70">{{ formatDateTime(entry.createdAt) }} · {{ entry.actorName }}</p></div>
+                <span class="mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-admin-border text-[12px] font-bold text-unu-green">{{ index + 1 }}</span>
+                <div><p class="text-xs font-semibold">{{ entry.status }}<span v-if="entry.substatus" class="font-normal text-admin-muted"> · {{ entry.substatus }}</span></p><p v-if="entry.note" class="mt-1 text-[14px] leading-5 text-admin-muted">{{ entry.note }}</p><p class="mt-1 text-[12px] text-admin-muted/70">{{ formatDateTime(entry.createdAt) }} · {{ entry.actorName }}</p></div>
               </li>
             </ol>
           </div>
 
-          <div class="rounded-2xl border border-line-warm bg-white p-5">
-            <h3 class="flex items-center gap-2 text-sm font-semibold"><MessageSquare :size="15" class="text-gold-dark" /> Catatan & komunikasi</h3>
+          <div class="rounded-xl border border-admin-border bg-white p-5">
+            <h3 class="flex items-center gap-2 text-sm font-semibold"><MessageSquare :size="15" class="text-unu-green" /> Catatan & komunikasi</h3>
             <div v-if="request.comments.length" class="mt-4 space-y-2.5">
-              <div v-for="comment in request.comments" :key="comment.id" class="rounded-xl border p-3.5" :class="comment.visibility === 'internal' ? 'border-amber-200 bg-amber-50' : 'border-line-warm bg-ivory'">
+              <div v-for="comment in request.comments" :key="comment.id" class="rounded-xl border p-3.5" :class="comment.visibility === 'internal' ? 'border-amber-200 bg-amber-50' : 'border-admin-border bg-slate-50'">
                 <div class="flex items-center justify-between gap-2">
-                  <span class="text-[10px] font-bold uppercase tracking-wide" :class="comment.visibility === 'internal' ? 'text-amber-800' : 'text-ink-muted'">{{ comment.visibility === 'internal' ? 'Internal' : 'Untuk pemohon' }}</span>
-                  <span class="text-[10px] text-ink-muted">{{ formatDateTime(comment.createdAt) }}</span>
+                  <span class="text-[12px] font-bold uppercase tracking-wide" :class="comment.visibility === 'internal' ? 'text-amber-800' : 'text-admin-muted'">{{ comment.visibility === 'internal' ? 'Internal' : 'Untuk pemohon' }}</span>
+                  <span class="text-[12px] text-admin-muted">{{ formatDateTime(comment.createdAt) }}</span>
                 </div>
                 <p class="mt-2 whitespace-pre-line text-xs leading-6">{{ comment.message }}</p>
-                <p class="mt-1 text-[10px] text-ink-muted">{{ comment.authorName }}</p>
+                <p class="mt-1 text-[12px] text-admin-muted">{{ comment.authorName }}</p>
               </div>
             </div>
-            <p v-else class="mt-3 text-sm text-ink-muted">Belum ada catatan.</p>
-            <form class="mt-4 space-y-2.5 border-t border-line-warm pt-4" @submit.prevent="addComment">
+            <p v-else class="mt-3 text-sm text-admin-muted">Belum ada catatan.</p>
+            <form class="mt-4 space-y-2.5 border-t border-admin-border pt-4" @submit.prevent="addComment">
               <textarea v-model="commentText" rows="3" class="field-input" placeholder="Tulis catatan…" required :disabled="busy" />
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <select v-model="commentVisibility" class="field-input w-auto min-h-[44px] text-xs">
@@ -317,7 +317,7 @@ useSeoMeta({ title: 'Detail Permohonan', robots: 'noindex, nofollow' })
         </div>
 
         <aside class="space-y-4 xl:sticky xl:top-24">
-          <div class="rounded-2xl border border-line-warm bg-white p-5">
+          <div class="rounded-xl border border-admin-border bg-white p-5">
             <h3 class="text-sm font-semibold">Penugasan</h3>
             <select v-model="assignedTo" class="field-input mt-3">
               <option value="">Belum ditugaskan</option>
@@ -326,21 +326,21 @@ useSeoMeta({ title: 'Detail Permohonan', robots: 'noindex, nofollow' })
             <AppButton size="sm" class="mt-2" :loading="busy" @click="assign">Simpan Penugasan</AppButton>
           </div>
 
-          <div class="rounded-2xl border border-line-warm bg-ivory p-5">
-            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-gold-dark">Keputusan</p>
+          <div class="rounded-xl border border-admin-border bg-slate-50 p-5">
+            <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-unu-green">Keputusan</p>
             <div v-if="isTerminal" class="mt-3">
               <p class="text-sm font-semibold">Permohonan telah ditutup</p>
-              <p class="mt-1 text-xs leading-5 text-ink-muted">{{ request.status === 'Selesai' ? request.resolutionSummary : request.rejectionReason }}</p>
+              <p class="mt-1 text-xs leading-5 text-admin-muted">{{ request.status === 'Selesai' ? request.resolutionSummary : request.rejectionReason }}</p>
             </div>
-            <p v-else class="mt-2 text-xs leading-5 text-ink-muted">Status hanya dapat diubah mengikuti alur yang valid. Setiap perubahan dicatat di timeline dan audit log.</p>
+            <p v-else class="mt-2 text-xs leading-5 text-admin-muted">Status hanya dapat diubah mengikuti alur yang valid. Setiap perubahan dicatat di timeline dan audit log.</p>
           </div>
 
-          <div class="rounded-2xl border border-line-warm bg-white p-5">
-            <div class="flex items-center gap-2"><ShieldAlert :size="15" class="text-gold-dark" /><p class="text-xs font-semibold">Alur status</p></div>
-            <ol class="mt-3 space-y-2 text-[11px] leading-5 text-ink-muted">
-              <li><strong class="text-charcoal">Diajukan</strong> → verifikasi atau tolak</li>
-              <li><strong class="text-charcoal">Diverifikasi</strong> → mulai proses</li>
-              <li><strong class="text-charcoal">Diproses</strong> → minta kelengkapan, selesaikan, atau tolak</li>
+          <div class="rounded-xl border border-admin-border bg-white p-5">
+            <div class="flex items-center gap-2"><ShieldAlert :size="15" class="text-unu-green" /><p class="text-xs font-semibold">Alur status</p></div>
+            <ol class="mt-3 space-y-2 text-[14px] leading-5 text-admin-muted">
+              <li><strong class="text-admin-text">Diajukan</strong> → verifikasi atau tolak</li>
+              <li><strong class="text-admin-text">Diverifikasi</strong> → mulai proses</li>
+              <li><strong class="text-admin-text">Diproses</strong> → minta kelengkapan, selesaikan, atau tolak</li>
             </ol>
           </div>
         </aside>
@@ -372,7 +372,7 @@ useSeoMeta({ title: 'Detail Permohonan', robots: 'noindex, nofollow' })
           <label for="public-note" class="field-label">Catatan tambahan untuk pemohon (opsional)</label>
           <textarea id="public-note" v-model="publicNote" rows="2" class="field-input" placeholder="Pesan singkat yang ditampilkan di detail permohonan…" />
         </div>
-        <div class="flex justify-end gap-2 border-t border-line-warm pt-4">
+        <div class="flex justify-end gap-2 border-t border-admin-border pt-4">
           <AppButton variant="secondary" @click="activeAction = null">Batal</AppButton>
           <AppButton :variant="activeAction === 'reject' ? 'danger' : 'primary'" :loading="busy" @click="runAction">
             <template #left><CheckCircle2 v-if="activeAction !== 'reject'" :size="14" /><XCircle v-else :size="14" /></template>

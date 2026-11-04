@@ -72,61 +72,59 @@ useSeoMeta({
 
 <template>
   <div>
-    <section class="border-b border-line-warm bg-ivory">
-      <div class="page-shell py-8 sm:py-10 lg:py-14">
-        <Breadcrumbs :items="[{ label: 'Beranda', to: '/' }, { label: 'Ekosistem Digital' }]" />
-        <div class="mt-8 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p class="eyebrow"><span class="h-px w-6 bg-current" aria-hidden="true" />Ekosistem Digital</p>
-            <h1 class="display-1 mt-5 max-w-3xl">Direktori platform digital</h1>
-            <p class="body-lg mt-5 max-w-2xl">Platform yang tercatat resmi, lengkap dengan unit pengelola, pengguna sasaran, dan status implementasinya.</p>
-          </div>
-          <div class="rounded-xl border border-line-warm bg-white px-4 py-3 text-xs text-ink-muted">
-            <span class="font-semibold text-charcoal">{{ result?.total ?? 0 }}</span> platform tercatat
-          </div>
+    <PublicPageHeader
+      eyebrow="Platform & Sistem"
+      title="Ekosistem Digital"
+      description="Direktori platform yang menyusun layanan digital universitas, lengkap dengan unit pengelola dan status implementasinya."
+      :breadcrumbs="[{ label: 'Beranda', to: '/' }, { label: 'Ekosistem Digital' }]"
+    >
+      <template #aside>
+        <div class="flex items-center gap-3 text-[14px] text-slate-500">
+          <span class="font-semibold tabular-nums text-charcoal">{{ result?.total ?? '—' }}</span>
+          <span>platform tercatat</span>
         </div>
-      </div>
-    </section>
+      </template>
+    </PublicPageHeader>
 
-    <section class="section-space bg-white">
+    <section class="py-10 lg:py-12 bg-soft-white">
       <div class="page-shell">
-        <div class="rounded-2xl border border-line-warm bg-ivory p-4 sm:p-5">
+        <div class="border-y border-line-warm bg-white px-4 py-3 sm:px-5">
           <div class="grid gap-3 lg:grid-cols-[1fr_210px_210px_auto]">
             <div class="relative">
               <label for="platform-search" class="sr-only">Cari platform</label>
-              <Search :size="17" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
-              <input id="platform-search" v-model="search" type="search" class="field-input pl-10" placeholder="Cari platform, unit, atau sasaran…" />
+              <Search :size="16" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+              <input id="platform-search" v-model="search" type="search" class="field-input border-0 bg-transparent pl-10" placeholder="Cari platform, unit, atau sasaran…" />
             </div>
-            <select v-model="category" class="field-input" aria-label="Filter kategori">
+            <select v-model="category" class="field-input border-0 bg-transparent" aria-label="Filter kategori">
               <option value="">Semua kategori</option>
               <option v-for="item in result?.categories || []" :key="item" :value="item">{{ item }}</option>
             </select>
-            <select v-model="status" class="field-input" aria-label="Filter status">
+            <select v-model="status" class="field-input border-0 bg-transparent" aria-label="Filter status">
               <option value="">Semua status</option>
               <option v-for="item in PLATFORM_STATUSES" :key="item" :value="item">{{ item }}</option>
             </select>
-            <button v-if="hasFilters" type="button" class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-semibold text-ink-muted hover:bg-white hover:text-charcoal" @click="reset">
+            <button v-if="hasFilters" type="button" class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg px-3 text-[14px] font-semibold text-slate-500 hover:bg-soft-white hover:text-charcoal" @click="reset">
               <FilterX :size="14" aria-hidden="true" /> Reset
             </button>
           </div>
         </div>
 
-        <div v-if="pending" class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <CardSkeleton v-for="index in 6" :key="index" />
+        <div v-if="pending" class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div v-for="index in 6" :key="index" class="skeleton h-60 rounded-xl" />
         </div>
-        <EmptyState v-else-if="failure" class="mt-8" title="Data belum dapat dimuat" description="Silakan coba lagi.">
+        <EmptyState v-else-if="failure" class="mt-7" title="Data belum dapat dimuat" description="Silakan coba lagi.">
           <AppButton variant="secondary" @click="load">Muat ulang</AppButton>
         </EmptyState>
         <EmptyState
           v-else-if="!result?.items.length"
-          class="mt-8"
+          class="mt-7"
           title="Platform tidak ditemukan"
           :description="hasFilters ? 'Coba ubah kata kunci atau filter.' : 'Belum ada platform digital yang dicatat.'"
         >
           <AppButton v-if="hasFilters" variant="secondary" @click="reset">Hapus filter</AppButton>
         </EmptyState>
-        <div v-else class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <PlatformCard v-for="platform in result.items" :key="platform.id" :platform="platform" />
+        <div v-else class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <PlatformCard v-for="(platform, index) in result.items" :key="platform.id" :platform="platform" :index="index + 1" />
         </div>
 
         <Pagination v-if="totalPages > 1" :page="page" :total-pages="totalPages" class="mt-10" @update:page="page = $event" />

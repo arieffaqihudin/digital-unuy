@@ -91,17 +91,17 @@ const widths = { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl' }
           role="dialog"
           aria-modal="true"
           :aria-labelledby="titleId"
-          class="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-line-warm bg-ivory shadow-soft sm:rounded-3xl"
+          class="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-admin-border bg-white shadow-soft sm:rounded-3xl"
           :class="widths[size]"
         >
-          <div class="flex items-start justify-between gap-4 border-b border-line-warm px-5 py-4 sm:px-6">
+          <div class="flex items-start justify-between gap-4 border-b border-admin-border px-5 py-4 sm:px-6">
             <div>
               <h2 :id="titleId" class="text-lg font-semibold">{{ title }}</h2>
-              <p v-if="description" class="mt-1 text-xs leading-5 text-ink-muted">{{ description }}</p>
+              <p v-if="description" class="mt-1 text-xs leading-5 text-admin-muted">{{ description }}</p>
             </div>
             <button
               type="button"
-              class="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-ink-muted transition hover:bg-charcoal/5 hover:text-charcoal"
+              class="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-admin-muted transition hover:bg-slate-100 hover:text-admin-text"
               aria-label="Tutup dialog"
               @click="close"
             >
@@ -111,7 +111,7 @@ const widths = { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl' }
           <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
             <slot />
           </div>
-          <div v-if="$slots.footer" class="border-t border-line-warm bg-white/60 px-5 py-4 sm:px-6">
+          <div v-if="$slots.footer" class="border-t border-admin-border bg-admin-sidebar px-5 py-4 sm:px-6">
             <slot name="footer" />
           </div>
         </div>

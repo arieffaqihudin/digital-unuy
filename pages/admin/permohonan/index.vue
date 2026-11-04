@@ -86,20 +86,20 @@ useSeoMeta({ title: 'Manajemen Permohonan', robots: 'noindex, nofollow' })
   <div class="space-y-5">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Operasional</p>
+        <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Operasional</p>
         <h2 class="mt-2 text-2xl font-semibold tracking-tight">Permohonan</h2>
-        <p class="mt-1 text-sm text-ink-muted">Verifikasi, proses, dan selesaikan permohonan layanan.</p>
+        <p class="mt-1 text-sm text-admin-muted">Verifikasi, proses, dan selesaikan permohonan layanan.</p>
       </div>
-      <div class="rounded-xl border border-line-warm bg-white px-4 py-2.5 text-xs text-ink-muted">
-        <span class="font-semibold text-charcoal">{{ result?.total ?? 0 }}</span> hasil
+      <div class="rounded-xl border border-admin-border bg-white px-4 py-2.5 text-xs text-admin-muted">
+        <span class="font-semibold text-admin-text">{{ result?.total ?? 0 }}</span> hasil
       </div>
     </div>
 
-    <div class="rounded-2xl border border-line-warm bg-white p-4">
+    <div class="rounded-xl border border-admin-border bg-white p-4">
       <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_1fr_auto]">
         <div class="relative">
           <label for="admin-request-search" class="sr-only">Cari nomor tiket</label>
-          <Search :size="16" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
+          <Search :size="16" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-admin-muted" aria-hidden="true" />
           <input id="admin-request-search" v-model="search" type="search" class="field-input pl-10" placeholder="Cari nomor tiket atau layanan…" />
         </div>
         <select v-model="status" class="field-input" aria-label="Filter status">
@@ -116,17 +116,17 @@ useSeoMeta({ title: 'Manajemen Permohonan', robots: 'noindex, nofollow' })
           <option v-for="item in options.assignees" :key="item.id" :value="item.id">{{ item.name }}</option>
         </select>
         <div class="flex items-center gap-2">
-          <label class="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-xl border border-line-warm px-3 text-xs font-semibold">
-            <input v-model="waiting" type="checkbox" class="h-4 w-4 accent-charcoal" /> Menunggu pemohon
+          <label class="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-xl border border-admin-border px-3 text-xs font-semibold">
+            <input v-model="waiting" type="checkbox" class="h-4 w-4 accent-unu-green" /> Menunggu pemohon
           </label>
-          <button v-if="hasFilters" type="button" class="grid h-10 w-10 place-items-center rounded-lg text-ink-muted hover:bg-ivory hover:text-charcoal" aria-label="Reset filter" @click="reset">
+          <button v-if="hasFilters" type="button" class="grid h-10 w-10 place-items-center rounded-lg text-admin-muted hover:bg-slate-50 hover:text-admin-text" aria-label="Reset filter" @click="reset">
             <FilterX :size="15" aria-hidden="true" />
           </button>
         </div>
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-line-warm bg-white">
+    <div class="overflow-hidden rounded-xl border border-admin-border bg-white">
       <div v-if="loading" class="space-y-2 p-4">
         <div v-for="i in 6" :key="i" class="skeleton h-14 rounded-lg" />
       </div>
@@ -142,7 +142,7 @@ useSeoMeta({ title: 'Manajemen Permohonan', robots: 'noindex, nofollow' })
         <div class="hidden overflow-x-auto md:block">
           <table class="w-full min-w-[800px] text-left">
             <thead>
-              <tr class="border-b border-line-warm bg-ivory text-[10px] uppercase tracking-wide text-ink-muted">
+              <tr class="border-b border-admin-border bg-slate-50 text-[12px] uppercase tracking-wide text-admin-muted">
                 <th class="px-5 py-3 font-bold">Tiket</th>
                 <th class="px-5 py-3 font-bold">Layanan</th>
                 <th class="px-5 py-3 font-bold">Status</th>
@@ -152,32 +152,32 @@ useSeoMeta({ title: 'Manajemen Permohonan', robots: 'noindex, nofollow' })
                 <th class="px-5 py-3 text-right font-bold">Aksi</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-line-warm">
-              <tr v-for="item in result.items" :key="item.id" class="transition hover:bg-ivory/60">
+            <tbody class="divide-y divide-admin-border">
+              <tr v-for="item in result.items" :key="item.id" class="transition hover:bg-slate-50/60">
                 <td class="px-5 py-3.5 text-xs font-semibold tracking-wide">{{ item.ticketNumber }}</td>
                 <td class="max-w-[220px] px-5 py-3.5 text-xs">{{ item.serviceName }}</td>
                 <td class="px-5 py-3.5"><StatusBadge :status="item.status" :substatus="item.substatus" /></td>
-                <td class="px-5 py-3.5 text-xs text-ink-muted">{{ item.assignedToName || '—' }}</td>
-                <td class="px-5 py-3.5 text-[11px] text-ink-muted">{{ formatDateTime(item.createdAt) }}</td>
-                <td class="px-5 py-3.5 text-[11px] text-ink-muted">{{ formatDateTime(item.updatedAt) }}</td>
+                <td class="px-5 py-3.5 text-xs text-admin-muted">{{ item.assignedToName || '—' }}</td>
+                <td class="px-5 py-3.5 text-[14px] text-admin-muted">{{ formatDateTime(item.createdAt) }}</td>
+                <td class="px-5 py-3.5 text-[14px] text-admin-muted">{{ formatDateTime(item.updatedAt) }}</td>
                 <td class="px-5 py-3.5 text-right">
-                  <NuxtLink :to="`/admin/permohonan/${item.id}`" class="inline-flex items-center gap-1 text-xs font-semibold text-gold-dark hover:underline">Kelola <ArrowRight :size="12" /></NuxtLink>
+                  <NuxtLink :to="`/admin/permohonan/${item.id}`" class="inline-flex items-center gap-1 text-xs font-semibold text-unu-green hover:underline">Kelola <ArrowRight :size="12" /></NuxtLink>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="divide-y divide-line-warm md:hidden">
-          <NuxtLink v-for="item in result.items" :key="item.id" :to="`/admin/permohonan/${item.id}`" class="block p-4 transition hover:bg-ivory">
+        <div class="divide-y divide-admin-border md:hidden">
+          <NuxtLink v-for="item in result.items" :key="item.id" :to="`/admin/permohonan/${item.id}`" class="block p-4 transition hover:bg-slate-50">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <p class="text-xs font-semibold tracking-wide">{{ item.ticketNumber }}</p>
-                <p class="mt-1 truncate text-xs text-ink-muted">{{ item.serviceName }}</p>
+                <p class="mt-1 truncate text-xs text-admin-muted">{{ item.serviceName }}</p>
               </div>
               <StatusBadge :status="item.status" :substatus="item.substatus" />
             </div>
-            <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-ink-muted">
+            <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-admin-muted">
               <span>Diajukan {{ formatDateTime(item.createdAt) }}</span>
               <span>Petugas: {{ item.assignedToName || '—' }}</span>
             </div>

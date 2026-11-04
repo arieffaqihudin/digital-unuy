@@ -31,7 +31,7 @@ useSeoMeta({
         <Breadcrumbs :items="[{ label: 'Beranda', to: '/' }, { label: 'Panduan & Dokumen', to: '/dokumen' }, { label: doc.title }]" />
         <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_330px] lg:items-start">
           <div>
-            <span class="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ doc.category }}</span>
+            <span class="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[12px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ doc.category }}</span>
             <h1 class="display-2 mt-5 max-w-3xl">{{ doc.title }}</h1>
             <p v-if="doc.description" class="body-lg mt-4 max-w-2xl">{{ doc.description }}</p>
             <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-muted">
@@ -42,11 +42,11 @@ useSeoMeta({
             </div>
           </div>
           <aside class="rounded-2xl border border-line-warm bg-white p-5">
-            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Unduhan resmi</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Unduhan resmi</p>
             <p class="mt-2 text-xs leading-5 text-ink-muted">Pastikan Anda menggunakan versi terbaru yang diterbitkan melalui portal ini.</p>
             <a
               :href="`/api/documents/${doc.slug}/download`"
-              class="mt-4 inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-charcoal px-4 text-sm font-semibold text-white transition hover:bg-gold hover:text-charcoal"
+              class="mt-4 inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-unu-green px-4 text-sm font-semibold text-white transition hover:bg-unu-green-dark"
             >
               <Download :size="16" aria-hidden="true" /> Unduh dokumen
             </a>
@@ -69,7 +69,7 @@ useSeoMeta({
           <div v-if="canPreview" class="overflow-hidden rounded-2xl border border-line-warm bg-ivory">
             <div class="flex items-center justify-between border-b border-line-warm bg-white px-4 py-3">
               <div class="flex items-center gap-2 text-xs font-semibold"><FileText :size="15" class="text-gold-dark" aria-hidden="true" /> Pratinjau PDF</div>
-              <span class="text-[10px] text-ink-muted">{{ doc.fileName }}</span>
+              <span class="text-[12px] text-ink-muted">{{ doc.fileName }}</span>
             </div>
             <iframe
               :src="`/api/documents/${doc.slug}/download?preview=1#view=FitH`"
@@ -81,7 +81,7 @@ useSeoMeta({
             <span class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white"><FileText :size="22" class="text-gold-dark" aria-hidden="true" /></span>
             <p class="mt-4 text-sm font-semibold">Pratinjau langsung tidak tersedia untuk format ini.</p>
             <p class="mt-1 text-xs text-ink-muted">Unduh dokumen untuk membukanya dengan aplikasi yang sesuai.</p>
-            <a :href="`/api/documents/${doc.slug}/download`" class="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-charcoal px-4 text-sm font-semibold text-white">
+            <a :href="`/api/documents/${doc.slug}/download`" class="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-unu-green px-4 text-sm font-semibold text-white">
               <Download :size="15" aria-hidden="true" /> Unduh dokumen
             </a>
           </div>
@@ -89,7 +89,7 @@ useSeoMeta({
 
         <aside class="space-y-4">
           <div v-if="doc.services?.length" class="rounded-2xl border border-line-warm bg-white p-5">
-            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Layanan terkait</p>
+            <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-dark">Layanan terkait</p>
             <ul class="mt-3 space-y-2">
               <li v-for="service in doc.services" :key="service.id">
                 <NuxtLink :to="`/layanan/${service.slug}`" class="flex items-center justify-between gap-3 rounded-lg border border-line-warm px-3 py-2.5 text-xs font-semibold transition hover:border-charcoal/30">

@@ -29,9 +29,9 @@ export default defineEventHandler(async (event) => {
     eyebrow: text(body?.hero?.eyebrow, 80) || 'Transformasi Digital',
     title: text(body?.hero?.title, 180) || 'Mendorong Transformasi Digital UNU Yogyakarta',
     description: text(body?.hero?.description, 900),
-    primaryLabel: text(body?.hero?.primaryLabel, 60) || 'Jelajahi Layanan Digital',
+    primaryLabel: text(body?.hero?.primaryLabel, 60) || 'Jelajahi Layanan',
     primaryUrl: validateInternalUrl(body?.hero?.primaryUrl) || '/layanan',
-    secondaryLabel: text(body?.hero?.secondaryLabel, 60) || 'Mengenal Direktorat',
+    secondaryLabel: text(body?.hero?.secondaryLabel, 60) || 'Tentang Direktorat',
     secondaryUrl: validateInternalUrl(body?.hero?.secondaryUrl) || '/tentang'
   }
 

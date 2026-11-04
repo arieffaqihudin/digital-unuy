@@ -86,23 +86,23 @@ useSeoMeta({ title: 'Halaman & Profil', robots: 'noindex, nofollow' })
 <template>
   <div class="space-y-5">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-dark">Konten</p><h2 class="mt-2 text-2xl font-semibold tracking-tight">Halaman & Profil</h2><p class="mt-1 text-sm text-ink-muted">Kelola halaman profil direktorat dan halaman kustom.</p></div>
+      <div><p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Konten</p><h2 class="mt-2 text-2xl font-semibold tracking-tight">Halaman & Profil</h2><p class="mt-1 text-sm text-admin-muted">Kelola halaman profil direktorat dan halaman kustom.</p></div>
       <AppButton size="sm" @click="openCreate"><template #left><Plus :size="14" /></template>Tambah Halaman</AppButton>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-line-warm bg-white">
+    <div class="overflow-hidden rounded-xl border border-admin-border bg-white">
       <div v-if="loading" class="space-y-2 p-4"><div v-for="i in 3" :key="i" class="skeleton h-14 rounded-lg" /></div>
       <EmptyState v-else-if="!pages.length" class="m-4" title="Belum ada halaman" description="Buat halaman profil atau halaman informasi." compact><AppButton size="sm" @click="openCreate">Tambah Halaman</AppButton></EmptyState>
-      <div v-else class="divide-y divide-line-warm">
+      <div v-else class="divide-y divide-admin-border">
         <div v-for="page in pages" :key="page.id" class="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-2"><p class="text-sm font-semibold">{{ page.title }}</p><span class="rounded-full border px-2 py-0.5 text-[9px] font-bold" :class="page.published ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-line-warm bg-ivory text-ink-muted'">{{ page.published ? 'Publik' : 'Draft' }}</span></div>
-            <p class="mt-1 text-[10px] text-ink-muted">/{{ page.slug }} · diperbarui {{ formatDate(page.updatedAt) }}</p>
-            <p v-if="page.excerpt" class="mt-1 line-clamp-1 text-xs text-ink-muted">{{ page.excerpt }}</p>
+            <div class="flex flex-wrap items-center gap-2"><p class="text-sm font-semibold">{{ page.title }}</p><span class="rounded-full border px-2 py-0.5 text-[12px] font-bold" :class="page.published ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-admin-border bg-slate-50 text-admin-muted'">{{ page.published ? 'Publik' : 'Draft' }}</span></div>
+            <p class="mt-1 text-[12px] text-admin-muted">/{{ page.slug }} · diperbarui {{ formatDate(page.updatedAt) }}</p>
+            <p v-if="page.excerpt" class="mt-1 line-clamp-1 text-xs text-admin-muted">{{ page.excerpt }}</p>
           </div>
           <div class="flex items-center gap-3">
-            <NuxtLink :to="page.slug === 'tentang-kami' ? '/tentang' : `/halaman/${page.slug}`" target="_blank" class="text-xs font-semibold text-ink-muted hover:text-charcoal"><ExternalLink :size="12" class="inline" /></NuxtLink>
-            <button type="button" class="text-xs font-semibold text-gold-dark hover:underline" @click="openEdit(page)"><Pencil :size="12" class="inline" /> Edit</button>
+            <NuxtLink :to="page.slug === 'tentang-kami' ? '/tentang' : `/halaman/${page.slug}`" target="_blank" class="text-xs font-semibold text-admin-muted hover:text-admin-text"><ExternalLink :size="12" class="inline" /></NuxtLink>
+            <button type="button" class="text-xs font-semibold text-unu-green hover:underline" @click="openEdit(page)"><Pencil :size="12" class="inline" /> Edit</button>
           </div>
         </div>
       </div>
