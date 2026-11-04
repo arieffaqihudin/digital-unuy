@@ -1,5 +1,5 @@
 import mongoose, { Schema, type Model, type Types } from 'mongoose'
-import { DOCUMENT_CATEGORIES, PLATFORM_STATUSES, PROGRAM_CATEGORIES, REQUEST_STATUSES, SERVICE_CATEGORIES } from '../../shared/types'
+import { DOCUMENT_CATEGORIES, PLATFORM_STATUSES, REQUEST_STATUSES, SERVICE_CATEGORIES } from '../../shared/types'
 
 const models = mongoose.models as Record<string, Model<any>>
 
@@ -97,6 +97,17 @@ const fieldSchema = new Schema(
   { _id: false }
 )
 
+const seoSchema = new Schema(
+  {
+    title: { type: String, default: '', maxlength: 160 },
+    description: { type: String, default: '', maxlength: 320 },
+    image: { type: String, default: '', maxlength: 500 },
+    canonical: { type: String, default: '', maxlength: 500 },
+    noindex: { type: Boolean, default: false }
+  },
+  { _id: false }
+)
+
 const serviceSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 160 },
@@ -117,6 +128,7 @@ const serviceSchema = new Schema(
     currentFormVersionId: { type: Schema.Types.ObjectId, ref: 'ServiceFormVersion', default: null },
     formVersionNumber: { type: Number, default: 1 },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    seo: { type: seoSchema, default: () => ({}) },
     isSeedData: { type: Boolean, default: false }
   },
   { timestamps: true }
@@ -314,7 +326,7 @@ const digitalPlatformSchema = new Schema(
     category: { type: String, required: true },
     categoryId: { type: Schema.Types.ObjectId, ref: 'PlatformCategory', default: null, index: true },
     unit: { type: String, default: '' },
-    status: { type: String, enum: PLATFORM_STATUSES, default: 'Belum Dikonfirmasi', index: true },
+    status: { type: String, enum: PLATFORM_STATUSES, default: 'Dalam Pengembangan', index: true },
     url: { type: String, default: '' },
     audience: { type: String, default: '' },
     audiences: { type: [String], default: [] },
@@ -331,21 +343,7 @@ const digitalPlatformSchema = new Schema(
     modules: { type: [platformModuleSchema], default: [] },
     metrics: { type: [platformMetricSchema], default: [] },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    isSeedData: { type: Boolean, default: false }
-  },
-  { timestamps: true }
-)
-
-const programSchema = new Schema(
-  {
-    title: { type: String, required: true, trim: true, maxlength: 180 },
-    slug: { type: String, required: true, unique: true },
-    category: { type: String, enum: PROGRAM_CATEGORIES, required: true },
-    summary: { type: String, required: true, maxlength: 400 },
-    content: { type: String, default: '' },
-    status: { type: String, enum: ['Direncanakan', 'Berjalan', 'Selesai'], default: 'Direncanakan' },
-    order: { type: Number, default: 0 },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    seo: { type: seoSchema, default: () => ({}) },
     isSeedData: { type: Boolean, default: false }
   },
   { timestamps: true }
@@ -363,6 +361,7 @@ const articleSchema = new Schema(
     publishedAt: { type: Date, default: Date.now },
     status: { type: String, enum: ['draft', 'published'], default: 'draft', index: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    seo: { type: seoSchema, default: () => ({}) },
     isSeedData: { type: Boolean, default: false }
   },
   { timestamps: true }
@@ -376,6 +375,7 @@ const pageSchema = new Schema(
     content: { type: String, default: '' },
     seoTitle: { type: String, default: '' },
     seoDescription: { type: String, default: '' },
+    seo: { type: seoSchema, default: () => ({}) },
     published: { type: Boolean, default: true },
     isSeedData: { type: Boolean, default: false }
   },
@@ -417,6 +417,12 @@ const siteSettingSchema = new Schema(
       primaryUrl: { type: String, default: '/layanan' },
       secondaryLabel: { type: String, default: 'Tentang Direktorat' },
       secondaryUrl: { type: String, default: '/tentang' }
+    },
+    seo: {
+      titleSuffix: { type: String, default: '' },
+      defaultDescription: { type: String, default: '' },
+      defaultOgImage: { type: String, default: '' },
+      googleVerification: { type: String, default: '' }
     },
     metrics: { type: [metricSchema], default: [] },
     devSeedMode: { type: Boolean, default: false }
@@ -468,7 +474,6 @@ export const TeamGroup = defineModel('TeamGroup', teamGroupSchema)
 export const TeamMember = defineModel('TeamMember', teamMemberSchema)
 export const PlatformCategory = defineModel('PlatformCategory', platformCategorySchema)
 export const DigitalPlatform = defineModel('DigitalPlatform', digitalPlatformSchema)
-export const Program = defineModel('Program', programSchema)
 export const Article = defineModel('Article', articleSchema)
 export const Page = defineModel('Page', pageSchema)
 export const SiteSetting = defineModel('SiteSetting', siteSettingSchema)

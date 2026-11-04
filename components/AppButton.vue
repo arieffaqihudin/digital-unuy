@@ -66,7 +66,7 @@ function onClick(event: MouseEvent) {
     :disabled="tag === 'button' ? isDisabled : undefined"
     :aria-disabled="isDisabled || undefined"
     :tabindex="isDisabled && tag !== 'button' ? -1 : undefined"
-    class="inline-flex items-center justify-center border font-semibold transition duration-200 disabled:cursor-not-allowed"
+    class="btn-nudge inline-flex items-center justify-center border font-semibold transition duration-200 disabled:cursor-not-allowed"
     :class="[variants[variant], sizes[size], block ? 'w-full' : '']"
     @click="onClick"
   >

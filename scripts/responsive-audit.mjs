@@ -27,6 +27,7 @@ const corePublicPages = [
   ['/layanan/pembuatan-email-institusi', 'service-detail'],
   ['/ekosistem-digital', 'ecosystem'],
   ['/ekosistem-digital/portal-pegawai-green-team', 'ecosystem-detail'],
+  ['/pencarian?q=layanan', 'search'],
   ['/dokumen', 'documents'],
   ['/publikasi', 'publications']
 ]
@@ -35,7 +36,6 @@ const extraPublicPages = [
   ['/tentang', 'about'],
   ['/dokumen/sop-pengajuan-layanan-digital', 'document-detail'],
   ['/publikasi/menata-layanan-digital-satu-alur-jelas', 'publication-detail'],
-  ['/program/penyederhanaan-alur-pengajuan-layanan', 'program-detail'],
   ['/tentang-kami/tim', 'team'],
   ['/masuk', 'login'],
   ['/lacak', 'tracking']
@@ -82,7 +82,8 @@ async function inspect(page, path, name, viewport) {
         const style = getComputedStyle(element)
         return (
           style.display !== 'none' &&
-          element.getBoundingClientRect().width > 0 &&
+          !element.classList.contains('sr-only') &&
+          element.getBoundingClientRect().width > 2 &&
           element.scrollWidth > element.clientWidth + 1
         )
       })

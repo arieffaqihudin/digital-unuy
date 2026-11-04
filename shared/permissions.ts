@@ -34,7 +34,7 @@ export const PERMISSION_META: {
     key: 'content.manage',
     label: 'Mengelola konten website',
     group: 'Konten & Layanan',
-    description: 'Mengelola halaman, program, ekosistem digital, publikasi, dan capaian.'
+    description: 'Mengelola halaman, ekosistem digital, publikasi, dan capaian.'
   },
   {
     key: 'documents.manage',
@@ -68,8 +68,8 @@ export const PERMISSION_META: {
   },
   {
     key: 'notifications.read',
-    label: 'Melihat log notifikasi',
+    label: 'Melihat notifikasi',
     group: 'Administrasi',
-    description: 'Melihat status pengiriman email dan kegagalannya.'
+    description: 'Melihat pembaruan dan tindakan yang perlu ditindaklanjuti pada permohonan.'
   }
 ]

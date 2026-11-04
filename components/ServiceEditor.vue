@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emptySeo } from '~/shared/seo'
 import {
   ArrowLeft,
   ExternalLink,
@@ -40,7 +41,8 @@ const form = reactive({
   requirements: '',
   requiredDocuments: '',
   procedure: '',
-  documentIds: [] as string[]
+  documentIds: [] as string[],
+  seo: emptySeo()
 })
 
 const iconOptions = [
@@ -95,7 +97,8 @@ async function loadService() {
       requirements: (service.requirements || []).join('\n'),
       requiredDocuments: (service.requiredDocuments || []).join('\n'),
       procedure: (service.procedure || []).join('\n'),
-      documentIds: service.documentIds || []
+      documentIds: service.documentIds || [],
+      seo: { ...emptySeo(), ...(service.seo || {}) }
     })
     fields.value = service.fields || []
     formVersion.value = service.formVersion || 1
@@ -226,6 +229,7 @@ useSeoMeta({ title: props.serviceId ? 'Edit Layanan' : 'Tambah Layanan', robots:
               <label for="service-description" class="admin-label">Deskripsi lengkap <span class="text-red-700">*</span></label>
               <textarea id="service-description" v-model="form.description" rows="5" class="field-input" placeholder="Jelaskan tujuan dan cakupan layanan…" />
             </div>
+            <SeoFields v-model="form.seo" :fallback-title="form.name ? `Layanan ${form.name} | UNU Yogyakarta` : ''" :fallback-description="form.shortDescription" :path="form.slug ? `/layanan/${form.slug}` : '/layanan/…'" />
             <div>
               <label for="service-duration" class="admin-label">Estimasi waktu</label>
               <input id="service-duration" v-model="form.estimatedDuration" class="field-input" placeholder="Contoh: 3–5 hari kerja" maxlength="100" />

@@ -15,13 +15,16 @@ if (!doc.value) throw createError({ statusCode: 404, statusMessage: 'Dokumen tid
 const { formatDate, formatFileSize } = useFormat()
 const canPreview = computed(() => doc.value?.fileName?.toLowerCase().endsWith('.pdf'))
 
-useSeoMeta({
+usePageSeo(() => ({
   title: doc.value?.title || 'Dokumen',
-  description: doc.value?.description || `${doc.value?.category} dari Direktorat Tim Transformasi Digital UNU Yogyakarta.`,
-  ogTitle: `${doc.value?.title} · UNU Yogyakarta`,
-  ogDescription: doc.value?.description,
-  ogType: 'article'
-})
+  suffix: true,
+  description: doc.value?.description || `${doc.value?.category} dari Direktorat Transformasi Digital UNU Yogyakarta.`,
+  breadcrumbs: [
+    { name: 'Beranda', to: '/' },
+    { name: 'Panduan & Dokumen', to: '/dokumen' },
+    { name: doc.value?.title || '', to: `/dokumen/${doc.value?.slug}` }
+  ]
+}))
 </script>
 
 <template>

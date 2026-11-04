@@ -15,7 +15,6 @@ import {
   Page,
   Permission,
   PlatformCategory,
-  Program,
   Role,
   Service,
   ServiceFormVersion,
@@ -625,71 +624,6 @@ for (const definition of PLATFORM_SEED) {
   )
 }
 
-const programDefinitions = [
-  {
-    title: 'Penyederhanaan Alur Pengajuan Layanan',
-    slug: 'penyederhanaan-alur-pengajuan-layanan',
-    category: 'Digitalisasi Layanan',
-    summary:
-      'Menyatukan formulir, status, dan komunikasi layanan TI dalam satu portal agar pengguna tidak berpindah kanal.',
-    content:
-      '## Arah kerja\n\nProgram ini memetakan alur layanan yang ada, menyederhanakan formulir, dan menyiapkan pelacakan status yang konsisten. Fokus awal adalah layanan yang paling sering digunakan oleh sivitas akademika.',
-    status: 'Berjalan',
-    order: 1
-  },
-  {
-    title: 'Pemetaan Data dan Integrasi Antarunit',
-    slug: 'pemetaan-data-dan-integrasi-antarunit',
-    category: 'Integrasi Data',
-    summary:
-      'Mengidentifikasi sumber data, pemilik data, dan kebutuhan pertukaran informasi antarunit secara terkendali.',
-    content:
-      '## Pendekatan\n\nSetiap integrasi dimulai dari tujuan penggunaan, dasar kewenangan, dan persetujuan pemilik data. Data sensitif tidak dibuka otomatis melalui permohonan.',
-    status: 'Direncanakan',
-    order: 2
-  },
-  {
-    title: 'Penguatan Portal Layanan Terpadu',
-    slug: 'penguatan-portal-layanan-terpadu',
-    category: 'Pengembangan Sistem',
-    summary:
-      'Membangun portal layanan yang dapat dikonfigurasi melalui CMS, termasuk formulir dinamis dan pelacakan permohonan.',
-    content:
-      '## Ruang lingkup\n\nPortal menyediakan katalog layanan, formulir yang dikelola admin, nomor tiket, timeline status, serta kanal komunikasi yang tercatat.',
-    status: 'Berjalan',
-    order: 3
-  },
-  {
-    title: 'Tata Kelola Perubahan dan Hak Akses',
-    slug: 'tata-kelola-perubahan-dan-hak-akses',
-    category: 'Tata Kelola Digital',
-    summary:
-      'Menetapkan praktik perubahan yang tercatat dan pembatasan akses berdasarkan peran pada sistem digital.',
-    content:
-      '## Prinsip\n\nAkses diberikan seminimal mungkin, perubahan sensitif dicatat, dan pemisahan kewenangan diterapkan pada proses administrasi.',
-    status: 'Direncanakan',
-    order: 4
-  },
-  {
-    title: 'Pendampingan Kapasitas Digital Unit Kerja',
-    slug: 'pendampingan-kapasitas-digital-unit-kerja',
-    category: 'Penguatan Kapasitas Digital',
-    summary:
-      'Menyiapkan panduan dan pendampingan agar unit kerja dapat mengelola layanan digital secara mandiri dan tertib.',
-    content:
-      '## Bentuk kegiatan\n\nPanduan tertulis, sesi pendampingan, dan materi pembelajaran singkat yang disesuaikan dengan kebutuhan unit kerja.',
-    status: 'Direncanakan',
-    order: 5
-  }
-]
-for (const definition of programDefinitions) {
-  await Program.findOneAndUpdate(
-    { slug: definition.slug },
-    { $set: { ...definition, content: markdownToSafeHtml(definition.content), isSeedData: true } },
-    { upsert: true }
-  )
-}
-
 const articleDefinitions = [
   {
     title: 'Menata Layanan Digital dengan Satu Alur yang Jelas',
@@ -961,7 +895,6 @@ await Promise.all([
   TeamMember.init(),
   PlatformCategory.init(),
   DigitalPlatform.init(),
-  Program.init(),
   Article.init(),
   Document.init(),
   DocumentVersion.init()

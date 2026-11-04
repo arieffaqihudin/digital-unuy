@@ -10,8 +10,7 @@ import {
   Newspaper,
   Plus,
   Timer,
-  TrendingUp,
-  Workflow
+  TrendingUp
 } from 'lucide-vue-next'
 import type { RequestListItem } from '~/shared/types'
 
@@ -32,7 +31,7 @@ const data = ref<{
 } | null>(null)
 
 const contentLoading = ref(true)
-const contentCounts = ref({ platforms: 0, programs: 0, articles: 0, pages: 0 })
+const contentCounts = ref({ platforms: 0, articles: 0, pages: 0 })
 
 async function load() {
   loading.value = true
@@ -53,15 +52,13 @@ async function loadContentCounts() {
   }
   contentLoading.value = true
   try {
-    const [platforms, programs, articles, pages] = await Promise.all([
+    const [platforms, articles, pages] = await Promise.all([
       requestFetch<{ total: number }>('/api/admin/platforms', { query: { pageSize: 1 } }).catch(() => ({ total: 0 })),
-      requestFetch<{ total: number }>('/api/admin/programs', { query: { pageSize: 1 } }).catch(() => ({ total: 0 })),
       requestFetch<{ total: number }>('/api/admin/articles', { query: { pageSize: 1 } }).catch(() => ({ total: 0 })),
       requestFetch<{ items: unknown[] }>('/api/admin/pages').catch(() => ({ items: [] }))
     ])
     contentCounts.value = {
       platforms: platforms.total,
-      programs: programs.total,
       articles: articles.total,
       pages: pages.items.length
     }
@@ -75,7 +72,6 @@ watch(period, load)
 
 const contentCards = computed(() => [
   { title: 'Ekosistem Digital', to: '/admin/ekosistem', icon: Globe2, count: contentCounts.value.platforms, description: 'Platform, kategori, unit, dan status implementasi.' },
-  { title: 'Program & Inisiatif', to: '/admin/program', icon: Workflow, count: contentCounts.value.programs, description: 'Program transformasi dan status pelaksanaannya.' },
   { title: 'Publikasi', to: '/admin/publikasi', icon: Newspaper, count: contentCounts.value.articles, description: 'Artikel, draft, thumbnail, dan status terbit.' },
   { title: 'Halaman & Profil', to: '/admin/halaman', icon: FileText, count: contentCounts.value.pages, description: 'Profil direktorat dan halaman informasi.' }
 ])

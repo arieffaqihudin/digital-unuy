@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
       content: page.content,
       seoTitle: page.seoTitle,
       seoDescription: page.seoDescription,
+      seo: serializeSeo((page as any).seo, { title: page.seoTitle, description: page.seoDescription }),
       published: page.published,
       updatedAt: page.updatedAt
     }))

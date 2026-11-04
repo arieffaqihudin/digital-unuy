@@ -1,4 +1,5 @@
 import { SiteSetting } from '../../models'
+import { cleanSeoText } from '../../../shared/seo'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'settings.manage')
@@ -48,6 +49,15 @@ export default defineEventHandler(async (event) => {
       }))
       .filter((metric: any) => metric.label && Number.isFinite(metric.value) && metric.value >= 0)
       .slice(0, 8)
+  }
+
+  if (body?.seo && typeof body.seo === 'object') {
+    doc.seo = {
+      titleSuffix: cleanSeoText(body.seo.titleSuffix, 80),
+      defaultDescription: cleanSeoText(body.seo.defaultDescription, 320),
+      defaultOgImage: parseSeoInput({ image: body.seo.defaultOgImage })?.image || '',
+      googleVerification: String(body.seo.googleVerification || '').replace(/[^A-Za-z0-9_\-]/g, '').slice(0, 120)
+    } as any
   }
 
   doc.devSeedMode = Boolean(body?.devSeedMode)

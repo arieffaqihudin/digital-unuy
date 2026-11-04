@@ -1,3 +1,5 @@
+import type { SeoDTO, SeoSettingsDTO } from './seo'
+
 export type RoleSlug = 'superadmin' | 'admin'
 
 export type Permission =
@@ -94,6 +96,7 @@ export interface ServiceFormVersionDTO {
 }
 
 export interface ServiceDTO {
+  seo?: SeoDTO
   id: string
   name: string
   slug: string
@@ -185,6 +188,28 @@ export interface TeamGroupDTO {
   order: number
 }
 
+
+export type SearchContentType = 'service' | 'platform' | 'document' | 'article' | 'page'
+
+export const SEARCH_CONTENT_TYPES = [
+  { value: 'service', label: 'Layanan Digital' },
+  { value: 'platform', label: 'Ekosistem Digital' },
+  { value: 'document', label: 'Panduan & Dokumen' },
+  { value: 'article', label: 'Publikasi' },
+  { value: 'page', label: 'Halaman Informasi' }
+] as const
+
+export interface SearchResultDTO {
+  id: string
+  type: SearchContentType
+  typeLabel: string
+  title: string
+  category: string
+  excerpt: string
+  href: string
+  updatedAt: string
+}
+
 export interface PlatformModuleDTO {
   id?: string
   name: string
@@ -212,6 +237,7 @@ export interface PlatformCategoryDTO {
 }
 
 export interface DigitalPlatformDTO {
+  seo?: SeoDTO
   id: string
   name: string
   slug: string
@@ -240,19 +266,8 @@ export interface DigitalPlatformDTO {
   updatedAt: string
 }
 
-export interface ProgramDTO {
-  id: string
-  title: string
-  slug: string
-  category: string
-  summary: string
-  content: string
-  status: 'Direncanakan' | 'Berjalan' | 'Selesai'
-  order: number
-  updatedAt: string
-}
-
 export interface ArticleDTO {
+  seo?: SeoDTO
   id: string
   title: string
   slug: string
@@ -275,6 +290,7 @@ export interface MetricDTO {
 }
 
 export interface SiteSettingsDTO {
+  seo: SeoSettingsDTO
   directorateName: string
   universityName: string
   tagline: string
@@ -351,7 +367,7 @@ export interface Paginated<T> {
   pageSize: number
 }
 
-export const PLATFORM_STATUSES = ['Aktif', 'Pilot', 'Dalam Pengembangan', 'Tidak Aktif', 'Belum Dikonfirmasi'] as const
+export const PLATFORM_STATUSES = ['Sudah Rilis', 'Dalam Pengembangan', 'Pilot / Beta'] as const
 
 export const PLATFORM_AUDIENCES = ['Mahasiswa', 'Dosen', 'Tenaga Kependidikan', 'Pengelola Unit'] as const
 
@@ -360,14 +376,6 @@ export const PLATFORM_CATEGORIES = [
   'Operasional & Tata Kelola',
   'Pengabdian & Pengembangan Masyarakat',
   'Platform & Infrastruktur Digital'
-]
-
-export const PROGRAM_CATEGORIES = [
-  'Digitalisasi Layanan',
-  'Integrasi Data',
-  'Pengembangan Sistem',
-  'Tata Kelola Digital',
-  'Penguatan Kapasitas Digital'
 ]
 
 export const SERVICE_CATEGORIES = [

@@ -57,12 +57,11 @@ function reset() {
 const hasFilters = computed(() => Boolean(search.value || category.value))
 const totalPages = computed(() => Math.max(1, Math.ceil((result.value?.total || 0) / (result.value?.pageSize || 12))))
 
-useSeoMeta({
-  title: 'Panduan & Dokumen',
+usePageSeo({
+  title: 'Panduan & SOP Layanan Digital | UNU Yogyakarta',
   description:
-    'SOP, panduan, kebijakan, dan formulir Direktorat Tim Transformasi Digital UNU Yogyakarta. Cari dokumen publik dan unduh versi terbaru.',
-  ogTitle: 'Panduan & Dokumen · UNU Yogyakarta',
-  ogDescription: 'Dokumentasi layanan digital yang dapat diakses publik.'
+    'Temukan panduan, prosedur, kebijakan, dan dokumentasi resmi terkait layanan teknologi informasi UNU Yogyakarta.',
+  breadcrumbs: [{ name: 'Beranda', to: '/' }, { name: 'Panduan & Dokumen', to: '/dokumen' }]
 })
 </script>
 
@@ -80,6 +79,7 @@ useSeoMeta({
     </PublicPageHeader>
 
     <section class="py-10 lg:py-12 bg-soft-white">
+      <h2 class="sr-only">Daftar panduan dan dokumen</h2>
       <div class="page-shell">
         <div class="relative mb-8">
           <label for="doc-search" class="sr-only">Cari dokumen</label>

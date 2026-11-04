@@ -235,6 +235,21 @@ for (const definition of PLATFORM_SEED) {
   metricSeedCount.created += definition.metrics?.length || 0
 }
 
+const statusMigration: Record<string, string> = {
+  Aktif: 'Sudah Rilis',
+  Pilot: 'Pilot / Beta',
+  'Belum Dikonfirmasi': 'Dalam Pengembangan',
+  'Tidak Aktif': 'Dalam Pengembangan'
+}
+const statusCounts: Record<string, number> = {}
+for (const [from, to] of Object.entries(statusMigration)) {
+  const count = await DigitalPlatform.countDocuments({ status: from })
+  if (count) {
+    statusCounts[`${from} -> ${to}`] = count
+    if (!DRY_RUN) await DigitalPlatform.updateMany({ status: from }, { $set: { status: to } })
+  }
+}
+
 const legacyProducts: string[] = []
 for (const platform of beforePlatforms) {
   if (officialSlugs.has(platform.slug)) continue
@@ -290,7 +305,8 @@ console.log(
         legacyRetainedAndUnpublished: legacyProducts
       },
       modules: moduleSeedCount,
-      metrics: metricSeedCount
+      metrics: metricSeedCount,
+      statusesNormalized: statusCounts
     },
     null,
     2

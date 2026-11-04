@@ -50,11 +50,6 @@ const deleteTarget = ref<TeamMemberDTO | null>(null)
 const deletingMember = ref(false)
 
 const groupModalOpen = ref(false)
-const groupForm = reactive({ id: '', name: '', order: 0 })
-const groupSaving = ref(false)
-const groupError = ref('')
-const groupDeleteTarget = ref<GroupWithCount | null>(null)
-const deletingGroup = ref(false)
 
 const toggleBusy = ref('')
 const orderBusy = ref('')
@@ -105,7 +100,7 @@ function openCreateMember() {
   Object.assign(memberForm, {
     name: '',
     position: '',
-    groupId: '',
+    groupId: groups.value[0]?.id || '',
     bio: '',
     order: members.value.length,
     removePhoto: false
@@ -123,7 +118,7 @@ function openEditMember(member: TeamMemberDTO) {
   Object.assign(memberForm, {
     name: member.name,
     position: member.position,
-    groupId: member.groupId,
+    groupId: member.groupId || groups.value[0]?.id || '',
     bio: member.bio,
     order: member.order,
     removePhoto: false
@@ -179,6 +174,10 @@ async function saveMember() {
   }
   if (memberForm.position.trim().length < 2) {
     memberError.value = 'Jabatan anggota minimal 2 karakter.'
+    return
+  }
+  if (!memberForm.groupId) {
+    memberError.value = 'Pilih kelompok tim.'
     return
   }
   savingMember.value = true
@@ -270,72 +269,7 @@ async function confirmDeleteMember() {
 }
 
 function openGroupManager() {
-  groupError.value = ''
-  groupForm.id = ''
-  groupForm.name = ''
-  groupForm.order = groups.value.length
-  groupDeleteTarget.value = null
   groupModalOpen.value = true
-}
-
-function editGroup(group: GroupWithCount) {
-  groupError.value = ''
-  groupForm.id = group.id
-  groupForm.name = group.name
-  groupForm.order = group.order
-}
-
-function resetGroupForm() {
-  groupForm.id = ''
-  groupForm.name = ''
-  groupForm.order = groups.value.length
-  groupError.value = ''
-}
-
-async function saveGroup() {
-  groupError.value = ''
-  if (groupForm.name.trim().length < 2) {
-    groupError.value = 'Nama kelompok minimal 2 karakter.'
-    return
-  }
-  groupSaving.value = true
-  try {
-    if (groupForm.id) {
-      await api(`/api/admin/team/groups/${groupForm.id}`, {
-        method: 'PATCH',
-        body: { name: groupForm.name, order: groupForm.order }
-      })
-      toast.success('Nama kelompok diperbarui')
-    } else {
-      await api('/api/admin/team/groups', {
-        method: 'POST',
-        body: { name: groupForm.name, order: groupForm.order }
-      })
-      toast.success('Kelompok ditambahkan')
-    }
-    resetGroupForm()
-    await load()
-  } catch (e: any) {
-    groupError.value = e?.data?.statusMessage || 'Gagal menyimpan kelompok.'
-  } finally {
-    groupSaving.value = false
-  }
-}
-
-async function deleteGroup() {
-  if (!groupDeleteTarget.value) return
-  deletingGroup.value = true
-  try {
-    await api(`/api/admin/team/groups/${groupDeleteTarget.value.id}`, { method: 'DELETE' })
-    toast.success('Kelompok dihapus')
-    if (groupForm.id === groupDeleteTarget.value.id) resetGroupForm()
-    groupDeleteTarget.value = null
-    await load()
-  } catch (e: any) {
-    toast.error('Gagal menghapus kelompok', e?.data?.statusMessage || 'Coba lagi.')
-  } finally {
-    deletingGroup.value = false
-  }
 }
 
 watch(memberModalOpen, (open) => {
@@ -355,7 +289,7 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
       <div>
         <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Konten Website</p>
         <h2 class="mt-2">Tim Kami</h2>
-        <p class="mt-1 text-[14px] text-admin-muted">Kelola anggota, kelompok, urutan, foto, dan publikasi.</p>
+        <p class="mt-1 text-[14px] text-admin-muted">Kelola anggota, urutan, foto, dan publikasi.</p>
       </div>
       <div class="flex flex-wrap gap-2">
         <AppButton variant="secondary" size="sm" @click="openGroupManager"><template #left><UsersRound :size="14" /></template>Kelompok Tim</AppButton>
@@ -496,7 +430,6 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
           <div>
             <label for="team-group" class="admin-label">Kelompok tim</label>
             <select id="team-group" v-model="memberForm.groupId" class="field-input">
-              <option value="">Tanpa kelompok</option>
               <option v-for="group in groups" :key="group.id" :value="group.id">{{ group.name }}</option>
             </select>
           </div>
@@ -526,45 +459,19 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
       </template>
     </ModalDialog>
 
-    <ModalDialog v-model="groupModalOpen" title="Kelompok Tim" description="Kelompok digunakan untuk mengelompokkan anggota pada halaman publik." size="lg">
-      <div class="grid gap-5 sm:grid-cols-[1fr_1fr]">
-        <div>
-          <p class="text-[14px] font-semibold">Kelompok tersedia</p>
-          <div v-if="groupDeleteTarget" class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
-            <p class="text-[13px] leading-5 text-red-900">Hapus kelompok <strong>{{ groupDeleteTarget.name }}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
-            <div class="mt-3 flex gap-2">
-              <AppButton size="sm" variant="secondary" @click="groupDeleteTarget = null">Batal</AppButton>
-              <AppButton size="sm" variant="danger" :loading="deletingGroup" @click="deleteGroup">Hapus</AppButton>
-            </div>
+    <ModalDialog v-model="groupModalOpen" title="Kelompok Tim" description="Empat kelompok final yang digunakan pada halaman publik." size="md">
+      <div v-if="groups.length" class="divide-y divide-admin-border rounded-lg border border-admin-border">
+        <div v-for="group in groups" :key="group.id" class="flex items-center justify-between gap-4 px-4 py-3">
+          <div>
+            <p class="text-[14px] font-semibold">{{ group.name }}</p>
+            <p class="mt-0.5 text-[12px] text-admin-muted">{{ group.memberCount }} anggota</p>
           </div>
-          <div v-if="groups.length" class="mt-3 divide-y divide-admin-border rounded-lg border border-admin-border">
-            <div v-for="group in groups" :key="group.id" class="flex items-center justify-between gap-3 px-3 py-2.5">
-              <div><p class="text-[14px] font-medium">{{ group.name }}</p><p class="text-[12px] text-admin-muted">{{ group.memberCount }} anggota · urutan {{ group.order }}</p></div>
-              <div class="flex gap-2">
-                <button type="button" class="text-[12px] font-semibold text-unu-green" @click="editGroup(group)">Edit</button>
-                <button
-                  type="button"
-                  class="text-[12px] font-semibold text-red-700 disabled:cursor-not-allowed disabled:text-slate-300"
-                  :disabled="group.memberCount > 0"
-                  :title="group.memberCount > 0 ? 'Pindahkan anggota ke kelompok lain sebelum menghapus.' : 'Hapus kelompok'"
-                  @click="groupDeleteTarget = group"
-                >Hapus</button>
-              </div>
-            </div>
-          </div>
-          <p v-else class="mt-3 rounded-lg border border-dashed border-admin-border p-4 text-[13px] text-admin-muted">Belum ada kelompok.</p>
-          <p class="mt-3 text-[12px] leading-5 text-admin-muted">Kelompok yang masih memiliki anggota tidak dapat dihapus.</p>
+          <span class="rounded-full border border-admin-border bg-slate-50 px-2.5 py-1 text-[11px] font-bold tabular-nums text-admin-muted">{{ String(group.order).padStart(2, '0') }}</span>
         </div>
-        <div class="rounded-lg border border-admin-border bg-slate-50 p-4">
-          <p class="text-[14px] font-semibold">{{ groupForm.id ? 'Edit Kelompok' : 'Tambah Kelompok' }}</p>
-          <div v-if="groupError" class="mt-3 rounded-md border border-red-200 bg-red-50 p-2 text-[12px] text-red-900">{{ groupError }}</div>
-          <div class="mt-3"><label for="group-name" class="admin-label">Nama kelompok</label><input id="group-name" v-model="groupForm.name" class="field-input" maxlength="100" /></div>
-          <div class="mt-3"><label for="group-order" class="admin-label">Urutan</label><input id="group-order" v-model.number="groupForm.order" type="number" class="field-input" /></div>
-          <div class="mt-4 flex gap-2">
-            <AppButton size="sm" :loading="groupSaving" @click="saveGroup">{{ groupForm.id ? 'Simpan Perubahan' : 'Tambah' }}</AppButton>
-            <AppButton v-if="groupForm.id" size="sm" variant="secondary" @click="resetGroupForm">Batal</AppButton>
-          </div>
-        </div>
+      </div>
+      <p v-else class="rounded-lg border border-dashed border-admin-border p-4 text-[13px] text-admin-muted">Kelompok belum tersedia.</p>
+      <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] leading-5 text-amber-900">
+        Struktur kelompok bersifat final. Penambahan, penggantian nama, atau penghapusan kelompok memerlukan perubahan kebijakan.
       </div>
       <template #footer><div class="flex justify-end"><AppButton variant="secondary" @click="groupModalOpen = false">Tutup</AppButton></div></template>
     </ModalDialog>

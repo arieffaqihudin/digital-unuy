@@ -106,6 +106,12 @@ export default defineEventHandler(async (event) => {
     changed.push('order')
   }
 
+  const seoInput = parseSeoInput(body?.seo)
+  if (seoInput) {
+    platform.seo = seoInput as any
+    changed.push('seo')
+  }
+
   await platform.save()
   await recordAudit(event, user, 'platform.updated', 'DigitalPlatform', String(platform._id), {
     name: platform.name,

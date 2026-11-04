@@ -3,13 +3,12 @@ import {
   DigitalPlatform,
   Document,
   PlatformCategory,
-  Program,
   Service,
   SiteSetting
 } from '../models'
 
 export default defineEventHandler(async () => {
-  const [featuredServices, allServices, platforms, platformCategories, programs, documents, articles, settings] =
+  const [featuredServices, allServices, platforms, platformCategories, documents, articles, settings] =
     await Promise.all([
       Service.find({ active: true, featured: true }).sort({ order: 1 }).limit(6).lean(),
       Service.find({ active: true }).sort({ order: 1 }).limit(6).lean(),
@@ -19,7 +18,6 @@ export default defineEventHandler(async () => {
         .limit(6)
         .lean(),
       PlatformCategory.find({ active: true }).sort({ order: 1, name: 1 }).lean(),
-      Program.find({}).sort({ order: 1, updatedAt: -1 }).limit(4).lean(),
       Document.find({ published: true, archived: false })
         .sort({ updatedAt: -1 })
         .populate('currentVersion')
@@ -37,7 +35,6 @@ export default defineEventHandler(async () => {
     services: serviceItems.map((service) => serializeService(service)),
     platforms: platforms.map((platform) => serializePlatform(platform)),
     platformCategories: platformCategories.map((category) => serializePlatformCategory(category)),
-    programs: programs.map((program) => serializeProgram(program)),
     documents: documents.map((doc) => serializeDocument(doc)),
     articles: articles.map((article) => serializeArticle(article)),
     metrics: verifiedMetrics,

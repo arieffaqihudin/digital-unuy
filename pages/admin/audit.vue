@@ -66,6 +66,7 @@ const ACTION_LABELS: Record<string, string> = {
   'document.downloaded_admin': 'Mengunduh dokumen',
   'platform.created': 'Menambahkan produk ekosistem',
   'platform.updated': 'Memperbarui produk ekosistem',
+  'platform.deleted': 'Menghapus produk ekosistem',
   'platform_category.created': 'Menambahkan kategori ekosistem',
   'platform_category.updated': 'Memperbarui kategori ekosistem',
   'platform_category.deleted': 'Menghapus kategori ekosistem',

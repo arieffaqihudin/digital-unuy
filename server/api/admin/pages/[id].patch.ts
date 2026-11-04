@@ -45,6 +45,14 @@ export default defineEventHandler(async (event) => {
     changed.push('published')
   }
 
+  const seoInput = parseSeoInput(body?.seo)
+  if (seoInput) {
+    page.seo = seoInput as any
+    page.seoTitle = seoInput.title
+    page.seoDescription = seoInput.description
+    changed.push('seo')
+  }
+
   await page.save()
   await recordAudit(event, user, 'page.updated', 'Page', String(page._id), {
     title: page.title,
@@ -59,6 +67,7 @@ export default defineEventHandler(async (event) => {
       content: page.content,
       seoTitle: page.seoTitle,
       seoDescription: page.seoDescription,
+      seo: serializeSeo((page as any).seo, { title: page.seoTitle, description: page.seoDescription }),
       published: page.published,
       updatedAt: page.updatedAt
     }

@@ -43,6 +43,9 @@ export default defineNuxtConfig({
     '/admin/**': { ssr: true },
     '/masuk': { ssr: true },
     '/aktivasi': { ssr: true },
+    // Program & Inisiatif module was retired; old URLs go to the homepage.
+    '/halaman/tentang-kami': { redirect: { to: '/tentang', statusCode: 301 } },
+    '/program/**': { redirect: { to: '/', statusCode: 301 } },
     '/api/**': { cors: false }
   },
   typescript: {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowRight, CheckCircle2, Clock3, FileText, Info, ListChecks, Users } from 'lucide-vue-next'
 import type { DocumentDTO, FormField, ServiceDTO } from '~/shared/types'
+import { serviceLd } from '~/shared/seo-schema'
 
 interface ServiceResponse {
   service: ServiceDTO & { fields?: FormField[]; relatedDocuments?: DocumentDTO[] }
@@ -22,32 +23,30 @@ if (!service.value) {
 
 const canRequest = computed(() => Boolean(service.value?.active && service.value?.acceptsRequests))
 
-useSeoMeta({
-  title: service.value?.name || 'Detail Layanan',
-  description: service.value?.shortDescription || 'Detail layanan digital UNU Yogyakarta.',
-  ogTitle: `${service.value?.name} · UNU Yogyakarta`,
-  ogDescription: service.value?.shortDescription,
-  ogType: 'article'
-})
-
-useHead(() => ({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Service',
-        name: service.value?.name,
-        description: service.value?.shortDescription,
-        provider: {
-          '@type': 'Organization',
-          name: 'Universitas Nahdlatul Ulama Yogyakarta'
-        },
-        url: `${runtimeConfig.public.siteUrl}/layanan/${service.value?.slug}`
+const siteBase = String(runtimeConfig.public.siteUrl || '').replace(/\/+$/, '')
+usePageSeo(() => {
+  const name = service.value?.name || 'Detail Layanan'
+  return {
+    title: `${/^layanan\b/i.test(name) ? name : `Layanan ${name}`} | UNU Yogyakarta`,
+    description: service.value?.shortDescription,
+    seo: service.value?.seo,
+    breadcrumbs: [
+      { name: 'Beranda', to: '/' },
+      { name: 'Layanan Digital', to: '/layanan' },
+      { name, to: `/layanan/${service.value?.slug}` }
+    ],
+    jsonLd: [
+      serviceLd(siteBase, {
+        url: `${siteBase}/layanan/${service.value?.slug}`,
+        name,
+        description: service.value?.shortDescription || '',
+        audience: service.value?.targetUsers,
+        category: service.value?.category
       })
-    }
-  ]
-}))
+    ],
+    modifiedTime: service.value?.updatedAt
+  }
+})
 </script>
 
 <template>

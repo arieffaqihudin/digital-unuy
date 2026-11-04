@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ArrowUpRight, ChevronDown, CircleUserRound, LogOut, Menu, Search, ShieldCheck, X } from 'lucide-vue-next'
+import { ArrowUpRight, ChevronDown, Menu, Search, X } from 'lucide-vue-next'
 
 const route = useRoute()
 const { settings, ensureSite } = useSite()
-const { user, fetchSession, logout, isStaff } = useAuth()
+const { fetchSession } = useAuth()
 const mobileOpen = ref(false)
-const userMenuOpen = ref(false)
-const userMenu = ref<HTMLElement | null>(null)
 const infoMenuOpen = ref(false)
 const mobileInfoOpen = ref(false)
+const searchOpen = ref(false)
 
 const navigation = [
   { label: 'Beranda', to: '/' },
@@ -37,7 +36,6 @@ const isActive = (item: { to: string; activeWhen?: string[] }) => {
   if (item.activeWhen?.length) return item.activeWhen.some((path) => route.path === path || route.path.startsWith(`${path}/`))
   return item.to === '/' ? route.path === '/' : route.path.startsWith(item.to)
 }
-const hasAdminAccess = computed(() => isStaff.value && Boolean(user.value?.permissions?.length))
 
 function closeMobile() {
   mobileOpen.value = false
@@ -45,9 +43,6 @@ function closeMobile() {
 }
 
 function handleDocumentClick(event: MouseEvent) {
-  if (userMenuOpen.value && userMenu.value && !userMenu.value.contains(event.target as Node)) {
-    userMenuOpen.value = false
-  }
   if (infoMenuOpen.value) {
     const menu = document.querySelector('[data-info-menu]')
     if (menu && !menu.contains(event.target as Node)) infoMenuOpen.value = false
@@ -59,12 +54,13 @@ function closeInfoMenu() {
 }
 
 function handleDocumentKeydown(event: KeyboardEvent) {
-  if (event.key !== 'Escape') return
-  if (infoMenuOpen.value) {
-    infoMenuOpen.value = false
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault()
+    searchOpen.value = true
     return
   }
-  if (userMenuOpen.value) userMenuOpen.value = false
+  if (event.key !== 'Escape') return
+  if (infoMenuOpen.value) infoMenuOpen.value = false
 }
 
 async function focusFirstInfoLink() {
@@ -86,8 +82,8 @@ watch(
   () => {
     mobileOpen.value = false
     mobileInfoOpen.value = false
-    userMenuOpen.value = false
     infoMenuOpen.value = false
+    searchOpen.value = false
   }
 )
 
@@ -120,7 +116,7 @@ useHead(() => ({
       <div class="page-shell flex h-16 items-center gap-4 md:h-[72px]">
         <AppLogo />
 
-        <div class="hidden min-w-0 flex-1 justify-center lg:flex">
+        <div class="hidden min-w-0 flex-1 justify-center xl:flex">
           <nav class="flex items-center gap-0.5" aria-label="Navigasi utama">
             <template v-for="item in navigation" :key="item.to">
               <div v-if="item.children?.length" data-info-menu class="relative">
@@ -186,71 +182,30 @@ useHead(() => ({
           </nav>
         </div>
 
-        <div class="ml-2 hidden shrink-0 items-center gap-2 lg:flex">
-          <NuxtLink
-            to="/lacak"
+        <div class="ml-2 hidden shrink-0 items-center gap-2 xl:flex">
+          <button
+            type="button"
             class="grid h-11 w-11 place-items-center rounded-lg text-slate-500 transition hover:bg-white hover:text-charcoal"
-            aria-label="Lacak permohonan"
-            title="Lacak permohonan"
+            aria-label="Buka pencarian"
+            title="Cari (Ctrl+K)"
+            @click="searchOpen = true"
           >
             <Search :size="17" aria-hidden="true" />
-          </NuxtLink>
-
-          <div v-if="user" ref="userMenu" class="relative">
-            <button
-              type="button"
-              class="grid h-11 w-11 place-items-center rounded-lg border border-line-warm bg-white text-slate-500 transition hover:border-slate-300 hover:text-charcoal"
-              :aria-expanded="userMenuOpen"
-              aria-haspopup="menu"
-              aria-label="Menu akun"
-              title="Menu akun"
-              @click.stop="userMenuOpen = !userMenuOpen"
-            >
-              <CircleUserRound :size="19" aria-hidden="true" />
-            </button>
-            <Transition
-              enter-active-class="transition duration-150 ease-out"
-              enter-from-class="translate-y-1 opacity-0"
-              enter-to-class="translate-y-0 opacity-100"
-              leave-active-class="transition duration-100 ease-in"
-              leave-to-class="translate-y-1 opacity-0"
-            >
-              <div
-                v-if="userMenuOpen"
-                class="absolute right-0 top-[calc(100%+8px)] w-56 overflow-hidden rounded-xl border border-line-warm bg-white p-2 shadow-soft"
-                role="menu"
-              >
-                <NuxtLink to="/lacak" class="flex min-h-[44px] items-center rounded-lg px-3 text-[14px] font-medium transition hover:bg-soft-white" role="menuitem">
-                  Permohonan Saya
-                </NuxtLink>
-                <NuxtLink v-if="hasAdminAccess" to="/admin" class="flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-[14px] font-medium transition hover:bg-soft-white" role="menuitem">
-                  <ShieldCheck :size="15" aria-hidden="true" /> Dashboard Admin
-                </NuxtLink>
-                <button
-                  type="button"
-                  class="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 text-[14px] font-medium text-red-700 transition hover:bg-red-50"
-                  role="menuitem"
-                  @click="logout"
-                >
-                  <LogOut :size="15" aria-hidden="true" /> Keluar
-                </button>
-              </div>
-            </Transition>
-          </div>
-          <NuxtLink
-            v-else
-            to="/masuk"
-            class="grid h-11 w-11 place-items-center rounded-lg border border-line-warm bg-white text-slate-500 transition hover:border-slate-300 hover:text-charcoal"
-            aria-label="Masuk ke akun"
-            title="Masuk ke akun"
-          >
-            <CircleUserRound :size="19" aria-hidden="true" />
-          </NuxtLink>
-
-          <AppButton to="/layanan" size="sm" class="site-nav-cta ml-1 whitespace-nowrap">Ajukan Layanan</AppButton>
+          </button>
+          <AppButton to="/lacak" variant="secondary" size="sm" class="site-nav-cta whitespace-nowrap">Lacak Permohonan</AppButton>
+          <AppButton to="/layanan" size="sm" class="site-nav-cta whitespace-nowrap">Ajukan Layanan</AppButton>
         </div>
 
-        <div class="ml-auto flex items-center gap-2 lg:hidden">
+        <div class="ml-auto flex items-center gap-2 xl:hidden">
+          <button
+            type="button"
+            class="grid h-11 w-11 place-items-center rounded-lg border border-line-warm bg-white text-charcoal transition hover:border-slate-300"
+            aria-label="Buka pencarian"
+            title="Cari"
+            @click="searchOpen = true"
+          >
+            <Search :size="19" aria-hidden="true" />
+          </button>
           <AppButton to="/layanan" size="sm" class="site-nav-cta hidden whitespace-nowrap sm:inline-flex">Ajukan Layanan</AppButton>
           <button
             type="button"
@@ -275,7 +230,7 @@ useHead(() => ({
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="mobileOpen" id="mobile-navigation" class="fixed inset-0 z-[90] bg-soft-white lg:hidden">
+        <div v-if="mobileOpen" id="mobile-navigation" class="fixed inset-0 z-[90] bg-soft-white xl:hidden">
           <div class="flex h-full flex-col">
             <div class="flex h-[64px] items-center justify-between border-b border-line-warm px-5">
               <AppLogo />
@@ -329,12 +284,7 @@ useHead(() => ({
               </ul>
               <div class="my-5 h-px bg-line-warm" />
               <div class="grid gap-2">
-                <AppButton to="/lacak" variant="secondary" block @click="closeMobile">{{ user ? 'Permohonan Saya' : 'Lacak Permohonan' }}</AppButton>
-                <template v-if="user">
-                  <AppButton v-if="hasAdminAccess" to="/admin" variant="secondary" block @click="closeMobile">Dashboard Admin</AppButton>
-                  <button type="button" class="min-h-[44px] text-sm font-semibold text-red-700" @click="logout">Keluar</button>
-                </template>
-                <AppButton v-else to="/masuk" variant="secondary" block @click="closeMobile">Masuk</AppButton>
+                <AppButton to="/lacak" variant="secondary" block @click="closeMobile">Lacak Permohonan</AppButton>
                 <AppButton to="/layanan" block @click="closeMobile">Ajukan Layanan</AppButton>
               </div>
               <div class="mt-5 border-t border-line-warm pt-4">
@@ -353,8 +303,8 @@ useHead(() => ({
     </main>
 
     <footer class="mt-auto border-t-4 border-unu-green bg-charcoal text-white">
-      <div class="page-shell pb-7 pt-12 lg:pt-14">
-        <div class="grid gap-10 lg:grid-cols-[1.5fr_0.7fr_0.8fr]">
+      <div class="page-shell pb-6 pt-10 lg:pt-12">
+        <div class="grid gap-8 lg:grid-cols-[1.5fr_0.7fr_0.8fr]">
           <div>
             <div class="flex flex-wrap items-center gap-4" aria-label="Universitas Nahdlatul Ulama Yogyakarta">
               <img src="/unu-logo.png" alt="Logo Universitas Nahdlatul Ulama Yogyakarta" class="h-11 w-11 object-contain brightness-0 invert" />
@@ -365,7 +315,7 @@ useHead(() => ({
             <p class="mt-3 max-w-md text-[14px] leading-6 text-white/55">
               {{ settings.description || 'Direktorat yang mengembangkan ekosistem digital terintegrasi dan layanan teknologi informasi Universitas Nahdlatul Ulama Yogyakarta.' }}
             </p>
-            <div v-if="settings.socials.length" class="mt-5 flex flex-wrap gap-2">
+            <div v-if="settings.socials.length" class="mt-4 flex flex-wrap gap-2">
               <a
                 v-for="social in settings.socials"
                 :key="social.url"
@@ -377,7 +327,7 @@ useHead(() => ({
                 {{ social.label }}
               </a>
             </div>
-            <address class="mt-7 space-y-1.5 text-[13px] not-italic leading-6 text-white/50">
+            <address class="mt-6 space-y-1.5 text-[13px] not-italic leading-6 text-white/50">
               <p v-if="settings.address">{{ settings.address }}</p>
               <p v-if="settings.contactPhone">{{ settings.contactPhone }}</p>
               <p v-if="settings.contactEmail"><a :href="`mailto:${settings.contactEmail}`" class="break-all transition hover:text-white">{{ settings.contactEmail }}</a></p>
@@ -408,7 +358,7 @@ useHead(() => ({
           </div>
         </div>
 
-        <div class="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-[12px] text-white/35 sm:flex-row sm:items-center sm:justify-between">
+        <div class="mt-8 flex flex-col gap-3 border-t border-white/10 pt-5 text-[12px] text-white/35 sm:flex-row sm:items-center sm:justify-between">
           <p>© {{ new Date().getFullYear() }} {{ settings.universityName }}. Hak cipta dilindungi.</p>
           <div class="flex flex-wrap gap-4">
             <NuxtLink to="/dokumen" class="inline-flex min-h-[44px] items-center transition hover:text-white">Kebijakan & Panduan</NuxtLink>
@@ -417,6 +367,7 @@ useHead(() => ({
       </div>
     </footer>
 
+    <GlobalSearchDialog v-model="searchOpen" />
     <ToastHost />
   </div>
 </template>

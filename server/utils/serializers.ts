@@ -4,7 +4,6 @@ import type {
   DocumentDTO,
   FormField,
   PlatformCategoryDTO,
-  ProgramDTO,
   RequestDetailDTO,
   RequestListItem,
   ServiceDTO,
@@ -40,6 +39,7 @@ export function serializeService(service: any, fields?: FormField[], relatedDocu
     formVersion: service.formVersionNumber || 1,
     fields,
     relatedDocuments,
+    seo: serializeSeo(service.seo),
     updatedAt: toIso(service.updatedAt)
   }
 }
@@ -142,6 +142,7 @@ export function serializePlatform(platform: any): DigitalPlatformDTO {
           source: metric.source || ''
         }))
       : [],
+    seo: serializeSeo(platform.seo),
     updatedAt: toIso(platform.updatedAt)
   }
 }
@@ -158,20 +159,6 @@ export function serializePlatformCategory(category: any): PlatformCategoryDTO {
 }
 
 
-export function serializeProgram(program: any): ProgramDTO {
-  return {
-    id: String(program._id),
-    title: program.title,
-    slug: program.slug,
-    category: program.category,
-    summary: program.summary,
-    content: program.content || '',
-    status: program.status,
-    order: Number(program.order || 0),
-    updatedAt: toIso(program.updatedAt)
-  }
-}
-
 export function serializeArticle(article: any): ArticleDTO {
   return {
     id: String(article._id),
@@ -184,6 +171,7 @@ export function serializeArticle(article: any): ArticleDTO {
     author: article.author,
     publishedAt: toIso(article.publishedAt),
     status: article.status,
+    seo: serializeSeo(article.seo),
     updatedAt: toIso(article.updatedAt)
   }
 }
@@ -269,6 +257,12 @@ export function serializeSettings(settings: any): SiteSettingsDTO {
       secondaryUrl: settings?.hero?.secondaryUrl || '/tentang'
     },
     metrics: (settings?.metrics || []).filter((metric: any) => metric.verified === true),
+    seo: {
+      titleSuffix: settings?.seo?.titleSuffix || '',
+      defaultDescription: settings?.seo?.defaultDescription || '',
+      defaultOgImage: settings?.seo?.defaultOgImage || '',
+      googleVerification: settings?.seo?.googleVerification || ''
+    },
     devSeedMode: Boolean(settings?.devSeedMode)
   }
 }

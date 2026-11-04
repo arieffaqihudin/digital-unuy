@@ -8,6 +8,7 @@ interface PageResponse {
     content: string
     seoTitle: string
     seoDescription: string
+    seo?: import('~/shared/seo').SeoDTO
     updatedAt: string
   }
 }
@@ -20,12 +21,13 @@ const page = computed(() => data.value?.page)
 if (!page.value) throw createError({ statusCode: 404, statusMessage: 'Halaman tidak ditemukan.', fatal: true })
 const { formatDate } = useFormat()
 
-useSeoMeta({
-  title: page.value?.seoTitle || page.value?.title || 'Halaman',
-  description: page.value?.seoDescription || page.value?.excerpt || '',
-  ogTitle: page.value?.seoTitle || page.value?.title,
-  ogDescription: page.value?.seoDescription || page.value?.excerpt
-})
+usePageSeo(() => ({
+  title: page.value?.title || 'Halaman',
+  suffix: true,
+  description: page.value?.excerpt,
+  seo: page.value?.seo,
+  breadcrumbs: [{ name: 'Beranda', to: '/' }, { name: page.value?.title || '', to: `/halaman/${page.value?.slug}` }]
+}))
 </script>
 
 <template>
