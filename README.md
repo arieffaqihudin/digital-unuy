@@ -29,7 +29,7 @@ Buka `http://localhost:3000`.
 
 ### Akun seed development
 
-Data seed diberi penanda `isSeedData` dan banner **Lingkungan pengembangan** otomatis tampil karena `devSeedMode=true`.
+Data seed diberi penanda `isSeedData`. Pengajuan layanan dapat dilakukan tanpa membuat akun; pemohon menyimpan ID permohonan dan tautan pelacakan setelah submit.
 
 | Peran | Email | Kata sandi |
 |---|---|---|
@@ -38,7 +38,7 @@ Data seed diberi penanda `isSeedData` dan banner **Lingkungan pengembangan** oto
 | Pemohon | `pemohon@digital.unu.local` | `Pemohon#2026` |
 | Nonaktif | `nonaktif@digital.unu.local` | — (tanpa kata sandi) |
 
-Jangan gunakan kredensial ini di produksi. Nonaktifkan `devSeedMode` dan ganti kata sandi sebelum go-live.
+Jangan gunakan kredensial ini di produksi. Ganti kata sandi dan bersihkan data seed sebelum go-live.
 
 ## Konfigurasi lingkungan
 
@@ -68,6 +68,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Dokumentasi publik dengan pencarian, kategori, detail, preview PDF, unduh, versi, dan layanan terkait.
 - Publikasi dengan kategori, pencarian, detail, dan render konten tersanitasi.
 - Halaman profil/kustom dari CMS.
+- Halaman **Tim Kami** (`/tentang-kami/tim`) dengan grid anggota, kelompok opsional, foto 3:4, focal point, dan empty state.
 - SEO: title, description, Open Graph, canonical, JSON-LD, sitemap, robots, dan noindex pada area privat.
 - Desain responsif mobile-first, token warna ivory/charcoal/gold/sage, navigasi mobile, skeleton, error, dan empty state.
 
@@ -86,6 +87,9 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Semua perubahan sensitif masuk audit log.
 
 ### Pengajuan & pelacakan
+
+- Pengajuan layanan dapat dilakukan **tanpa login/akun**. Setelah submit, sistem menampilkan ID permohonan dan tautan pelacakan untuk disimpan pemohon.
+- Pelacakan publik menggunakan ID permohonan + token akses; pemohon juga dapat mengirim komunikasi dan kelengkapan melalui halaman lacak.
 
 - Formulir dibuat dari konfigurasi layanan di database (text, textarea, number, email, select, radio, checkbox, date, file).
 - Conditional field sederhana (`showIf`) didukung.
@@ -109,7 +113,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Antrean tindakan dan permohonan terbaru.
 - Manajemen permohonan: filter, pencarian, detail, penugasan, perubahan status tervalidasi, catatan internal/publik, lampiran, timeline.
 - Manajemen layanan: CRUD metadata, aktif/nonaktif, unggulan, urutan, form builder berversi, penghubung dokumen.
-- CMS: platform ekosistem, program, publikasi, halaman/profil.
+- CMS: platform ekosistem, program, publikasi, halaman/profil, dan Tim Kami (anggota, kelompok, foto, urutan, publikasi).
 - Dokumentasi: unggah, metadata, publish/unpublish, arsip, versi baru, hubungkan ke layanan.
 - Pengguna: buat, edit, aktif/nonaktif, kirim ulang aktivasi.
 - Role & permission.
@@ -166,7 +170,9 @@ shared/
 - `GET /api/documents/:slug/download`
 - `GET /api/articles` / `GET /api/articles/:slug`
 - `GET /api/pages/:slug`
+- `GET /api/team`, `GET /api/team/members/:id/photo`
 - `POST /api/track`
+- `POST /api/track/respond`, `POST /api/track/comments`, `POST /api/track/attachments`
 - `GET /sitemap.xml`, `GET /robots.txt`
 
 ### Autentikasi
@@ -205,6 +211,8 @@ shared/
 - `GET /api/admin/roles`, `PATCH /api/admin/roles/:slug`
 - `GET|PUT /api/admin/settings`
 - `GET /api/admin/notifications`
+- `GET /api/admin/team/members`, `GET|POST /api/admin/team/members/:id`, `DELETE /api/admin/team/members/:id`
+- `GET|POST /api/admin/team/groups`, `PATCH|DELETE /api/admin/team/groups/:id`
 - `GET /api/admin/audit`
 
 ## Pengujian
@@ -212,16 +220,16 @@ shared/
 Dengan server development berjalan:
 
 ```bash
-npm run test:e2e         # 81 pemeriksaan API & alur end-to-end
+npm run test:e2e         # 89 pemeriksaan API & alur end-to-end
 npm run test:visual      # 44 pemeriksaan render & error console
-npm run test:responsive  # 112 kombinasi halaman × 10 viewport (320–1920px)
+npm run test:responsive  # 132 kombinasi halaman × 10 viewport (320–1920px)
 ```
 
 Hasil yang sudah dijalankan pada lingkungan ini:
 
-- **E2E:** 81/81 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
+- **E2E:** 89/89 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
 - **Visual:** 44/44 lulus — halaman publik, admin desktop/mobile, form pengajuan, permohonan saya. Tidak ada page error atau console error.
-- **Responsive:** 112/112 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
+- **Responsive:** 132/132 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
 - **Login standalone:** layout autentikasi tanpa public header/footer/sidebar, split-screen 50:50, light mode permanen, diuji pada 320–1440px.
 
 Screenshot pengujian disimpan di `.data/screenshots/`.
@@ -246,6 +254,6 @@ Hal-hal berikut **belum** diklaim selesai:
 ## Catatan operasional
 
 - `npm run seed` bersifat idempotent untuk entitas utama; `npm run seed:reset` menghapus database aplikasi lalu mengisi ulang. Jangan jalankan `seed:reset` di produksi.
-- File upload berada di `.data/uploads` (gitignored) dan diakses melalui endpoint ber-otorisasi.
-- `devSeedMode` mengaktifkan banner data contoh. Matikan setelah data produksi siap.
+- File upload berada di `.data/uploads` (gitignored) dan diakses melalui endpoint ber-otorisasi. Foto Tim Kami dioptimalkan dengan Sharp dan hanya dapat diakses publik setelah anggota dipublikasikan.
+- `devSeedMode` tetap disimpan sebagai penanda seed internal, tetapi banner data contoh tidak lagi ditampilkan di website publik.
 - Format tanggal/tabel mengikuti locale `id-ID`.

@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     RequestStatusHistory.find({ request: request._id }).sort({ createdAt: 1 }).lean(),
     RequestComment.find({ request: request._id }).sort({ createdAt: 1 }).lean(),
     RequestAttachment.find({ request: request._id }).sort({ createdAt: 1 }).lean(),
-    User.findById(request.user).select('name email active role').lean(),
+    request.user ? User.findById(request.user).select('name email active role').lean() : null,
     User.find({ role: { $in: ['admin', 'superadmin'] }, active: true })
       .select('name email role')
       .sort({ name: 1 })
@@ -38,7 +38,15 @@ export default defineEventHandler(async (event) => {
           active: requester.active,
           role: requester.role
         }
-      : null,
+      : request.requesterEmail
+        ? {
+            id: '',
+            name: request.requesterName || 'Pemohon',
+            email: request.requesterEmail,
+            active: true,
+            role: 'guest'
+          }
+        : null,
     assignees: assignees.map((user) => ({
       id: String(user._id),
       name: user.name,

@@ -19,8 +19,15 @@ export default defineEventHandler(async (event) => {
   const request = await ServiceRequest.findById(id).lean()
   if (!request) throw createError({ statusCode: 404, statusMessage: 'Permohonan tidak ditemukan.' })
 
-  const requester = await User.findById(request.user).select('name email active').lean()
-  if (!requester) throw createError({ statusCode: 409, statusMessage: 'Pemohon tidak ditemukan.' })
+  const account = request.user
+    ? await User.findById(request.user).select('name email active').lean()
+    : null
+  const requester = account
+    ? { name: account.name, email: account.email }
+    : { name: request.requesterName || 'Pemohon', email: request.requesterEmail || '' }
+  if (!requester.email) {
+    throw createError({ statusCode: 409, statusMessage: 'Email pemohon tidak tersedia untuk notifikasi.' })
+  }
 
   const note = String(body?.note || '').trim().slice(0, 5000)
   let emailStatus = 'not-sent'
@@ -98,7 +105,7 @@ export default defineEventHandler(async (event) => {
       template: 'request-processing',
       subject: `Permohonan ${request.ticketNumber} mulai diproses`,
       heading: 'Permohonan Anda mulai diproses',
-      body: `<p>Halo ${escapeHtml(requester.name)},</p><p>Permohonan <strong>${escapeHtml(request.ticketNumber)}</strong> untuk layanan <strong>${escapeHtml(request.serviceName)}</strong> telah mulai diproses oleh petugas.</p>${note ? `<p>Catatan petugas:</p><blockquote style="border-left:3px solid #C99517;padding-left:12px;color:#68625C;">${escapeHtml(note)}</blockquote>` : ''}<p>Anda dapat memantau perkembangan melalui halaman Permohonan Saya.</p>`
+      body: `<p>Halo ${escapeHtml(requester.name)},</p><p>Permohonan <strong>${escapeHtml(request.ticketNumber)}</strong> untuk layanan <strong>${escapeHtml(request.serviceName)}</strong> telah mulai diproses oleh petugas.</p>${note ? `<p>Catatan petugas:</p><blockquote style="border-left:3px solid #C99517;padding-left:12px;color:#68625C;">${escapeHtml(note)}</blockquote>` : ''}<p>Anda dapat memantau perkembangan melalui halaman pelacakan permohonan.</p>`
     }
   } else if (action === 'request_info') {
     if (!note) {
@@ -121,7 +128,7 @@ export default defineEventHandler(async (event) => {
       template: 'request-needs-info',
       subject: `Kelengkapan diperlukan untuk ${request.ticketNumber}`,
       heading: 'Permohonan membutuhkan kelengkapan',
-      body: `<p>Halo ${escapeHtml(requester.name)},</p><p>Permohonan <strong>${escapeHtml(request.ticketNumber)}</strong> memerlukan kelengkapan dari Anda sebelum dapat dilanjutkan.</p><div style="background:#FAF8ED;border:1px solid #E6E1D3;border-radius:10px;padding:16px;margin:16px 0;">${escapeHtml(note)}</div><p>Silakan buka halaman Permohonan Saya, lengkapi data, lalu kirimkan keterangan Anda.</p>`
+      body: `<p>Halo ${escapeHtml(requester.name)},</p><p>Permohonan <strong>${escapeHtml(request.ticketNumber)}</strong> memerlukan kelengkapan dari Anda sebelum dapat dilanjutkan.</p><div style="background:#FAF8ED;border:1px solid #E6E1D3;border-radius:10px;padding:16px;margin:16px 0;">${escapeHtml(note)}</div><p>Silakan buka halaman pelacakan permohonan, lengkapi data, lalu kirimkan keterangan Anda.</p>`
     }
   } else if (action === 'complete') {
     const summary = String(body?.resolutionSummary || '').trim()
@@ -214,6 +221,9 @@ export default defineEventHandler(async (event) => {
 
   if (email) {
     const siteUrl = useRuntimeConfig().siteUrl
+    const destination = account
+      ? `${siteUrl}/permohonan-saya/${String(request._id)}`
+      : `${siteUrl}/lacak?ticket=${encodeURIComponent(request.ticketNumber)}`
     const result = await sendEmail({
       template: email.template,
       to: requester.email,
@@ -221,7 +231,7 @@ export default defineEventHandler(async (event) => {
       heading: email.heading,
       reference: request.ticketNumber,
       preheader: `Pembaruan permohonan ${request.ticketNumber}.`,
-      bodyHtml: `${email.body}<p style="margin:24px 0;"><a href="${escapeHtml(siteUrl)}/permohonan-saya/${String(request._id)}" style="display:inline-block;background:#1C1A1A;color:#fff;text-decoration:none;padding:13px 20px;border-radius:10px;font-weight:700;">Buka Permohonan Saya</a></p>`
+      bodyHtml: `${email.body}<p style="margin:24px 0;"><a href="${escapeHtml(destination)}" style="display:inline-block;background:#337449;color:#fff;text-decoration:none;padding:13px 20px;border-radius:10px;font-weight:700;">Buka Pelacakan Permohonan</a></p>${account ? '' : '<p style="font-size:12px;color:#68625C;">Masukkan ID permohonan dan token akses yang Anda simpan saat pengajuan.</p>'}`
     })
     emailStatus = result.ok ? (result.simulated ? 'simulated' : 'sent') : 'failed'
   }

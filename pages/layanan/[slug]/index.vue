@@ -109,7 +109,7 @@ useHead(() => ({
               <button v-else disabled class="mt-6 inline-flex min-h-[50px] w-full cursor-not-allowed items-center justify-center rounded-xl border border-line-warm bg-ivory px-5 text-sm font-semibold text-ink-muted">
                 Pengajuan tidak tersedia
               </button>
-              <p class="mt-3 text-center text-[14px] leading-5 text-ink-muted">Anda perlu masuk untuk mengirim permohonan.</p>
+              <p class="mt-3 text-center text-[14px] leading-5 text-ink-muted">Tidak perlu membuat akun. Simpan ID permohonan setelah mengirim.</p>
             </div>
           </aside>
         </div>

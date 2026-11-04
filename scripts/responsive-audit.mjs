@@ -35,6 +35,7 @@ const extraPublicPages = [
   ['/dokumen/sop-pengajuan-layanan-digital', 'document-detail'],
   ['/publikasi/menata-layanan-digital-satu-alur-jelas', 'publication-detail'],
   ['/program/penyederhanaan-alur-pengajuan-layanan', 'program-detail'],
+  ['/tentang-kami/tim', 'team'],
   ['/masuk', 'login'],
   ['/lacak', 'tracking']
 ]
@@ -44,7 +45,11 @@ const adminPages = [
   ['/admin/layanan', 'admin-services'],
   ['/admin/permohonan', 'admin-requests'],
   ['/admin/pengguna', 'admin-users'],
-  ['/admin/pengaturan', 'admin-settings']
+  ['/admin/pengaturan', 'admin-settings'],
+  ['/admin/audit', 'admin-audit'],
+  ['/admin/notifikasi', 'admin-notifications'],
+  ['/admin/layanan/baru', 'admin-service-new'],
+  ['/admin/tim', 'admin-team']
 ]
 
 const browser = await chromium.launch({ executablePath: chromePath, headless: true })

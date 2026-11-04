@@ -411,6 +411,46 @@ const notifications = await admin.get('/api/admin/notifications')
 check('Log notifikasi mencatat pengiriman', notifications.status === 200 && notifications.data?.total > 3)
 check('Log notifikasi bukan penyimpanan token', !JSON.stringify(notifications.data).includes('aktivasi?token='))
 
+console.log('\n=== Guest submission & tracking without account ===')
+const guestEmail = `guest-${stamp}@example.com`
+const guestIdem = `guest-${stamp}-abcdef`
+const guestCreate = await publicClient.post('/api/services/bantuan-teknis-ti/requests', {
+  json: {
+    requester: { name: 'Pemohon Tanpa Akun', email: guestEmail, phone: '081200000000' },
+    data: {
+      jenis_kendala: 'tidak_dapat_akses',
+      sistem_terdampak: 'Portal Akademik',
+      deskripsi_masalah: 'Pengujian pengajuan tanpa akun melalui API.',
+      waktu_kejadian: new Date().toISOString().slice(0, 10),
+      tingkat_dampak: 'individu'
+    }
+  },
+  headers: { 'x-idempotency-key': guestIdem }
+})
+check('Pengajuan tanpa login berhasil', guestCreate.status === 200 && Boolean(guestCreate.data?.ticketNumber))
+const guestTicket = guestCreate.data?.ticketNumber
+const guestRequestId = guestCreate.data?.requestId
+const guestTrackingUrl = new URL(guestCreate.data?.trackingUrl)
+const guestToken = guestTrackingUrl.searchParams.get('token')
+check('Hasil pengajuan guest menyertakan ID dan tautan lacak', Boolean(guestTicket) && Boolean(guestToken))
+const guestTrack = await publicClient.post('/api/track', { json: { ticket: guestTicket, token: guestToken } })
+check('Guest dapat melacak tanpa login', guestTrack.status === 200 && guestTrack.data?.request?.ticketNumber === guestTicket)
+const guestAdminDetail = await admin.get(`/api/admin/requests/${guestRequestId}`)
+check('Admin melihat kontak pemohon guest', guestAdminDetail.data?.requester?.email === guestEmail)
+await admin.patch(`/api/admin/requests/${guestRequestId}`, { json: { action: 'verify', note: 'Diverifikasi.' } })
+const guestInfo = await admin.patch(`/api/admin/requests/${guestRequestId}`, { json: { action: 'request_info', note: 'Mohon lengkapi dokumen pendukung.' } })
+check('Admin dapat meminta kelengkapan guest', guestInfo.status === 200 && guestInfo.data?.substatus === 'Menunggu Kelengkapan Pemohon')
+const guestRespond = await publicClient.post('/api/track/respond', {
+  json: { ticket: guestTicket, token: guestToken, message: 'Kelengkapan telah dikirim oleh pemohon tanpa akun.' }
+})
+check('Guest dapat mengirim kelengkapan lewat tracking', guestRespond.status === 200 && guestRespond.data?.status === 'Diverifikasi')
+const guestComment = await publicClient.post('/api/track/comments', {
+  json: { ticket: guestTicket, token: guestToken, message: 'Terima kasih, saya menunggu proses berikutnya.' }
+})
+check('Guest dapat berkomunikasi lewat tracking', guestComment.status === 200)
+const guestTrackAfter = await publicClient.post('/api/track', { json: { ticket: guestTicket, token: guestToken } })
+check('Komunikasi guest terlihat pada tracking', guestTrackAfter.data?.request?.comments?.some((comment) => comment.message.includes('menunggu proses')))
+
 console.log(`\n${failures.length ? 'FAILED' : 'PASSED'}: ${passed} checks passed, ${failures.length} failed`)
 if (failures.length) {
   console.error(JSON.stringify(failures, null, 2))

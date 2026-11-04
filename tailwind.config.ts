@@ -18,6 +18,7 @@ export default <Partial<Config>>{
         'charcoal-soft': '#2B2828',
         gold: '#BF8B15',
         'gold-dark': '#7D5800',
+        'gold-text': '#9A6D08',
         'gold-soft': '#E8C766',
         sage: '#D7D49A',
         'sage-soft': '#F0EFD9',

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, ArrowRight, Clock3, FileText, LockKeyhole, Search, ShieldCheck } from 'lucide-vue-next'
+import { AlertCircle, ArrowRight, Clock3, FileText, LockKeyhole, Search, Send, ShieldCheck } from 'lucide-vue-next'
 import type { RequestDetailDTO } from '~/shared/types'
 
 const route = useRoute()
@@ -10,7 +10,12 @@ const loading = ref(false)
 const errorMessage = ref('')
 const request = ref<RequestDetailDTO | null>(null)
 const api = useApi()
-const { formatDateTime, formatDate, formatFileSize } = useFormat()
+const { formatDateTime, formatFileSize } = useFormat()
+const completionMessage = ref('')
+const completionFile = ref<File | null>(null)
+const commentMessage = ref('')
+const actionLoading = ref(false)
+const actionError = ref('')
 
 async function track() {
   errorMessage.value = ''
@@ -59,6 +64,58 @@ const entries = computed(() => {
 
 function attachmentsFor(key: string) {
   return request.value?.attachments.filter((attachment) => attachment.fieldKey === key) || []
+}
+
+async function submitCompletion() {
+  if (!request.value) return
+  if (completionMessage.value.trim().length < 5) {
+    actionError.value = 'Keterangan kelengkapan minimal 5 karakter.'
+    return
+  }
+  actionLoading.value = true
+  actionError.value = ''
+  try {
+    if (completionFile.value) {
+      const formData = new FormData()
+      formData.append('ticket', ticket.value)
+      formData.append('token', token.value)
+      formData.append('file', completionFile.value)
+      await api('/api/track/attachments', { method: 'POST', body: formData })
+    }
+    await api('/api/track/respond', {
+      method: 'POST',
+      body: { ticket: ticket.value, token: token.value, message: completionMessage.value }
+    })
+    completionMessage.value = ''
+    completionFile.value = null
+    await track()
+  } catch (error: any) {
+    actionError.value = error?.data?.statusMessage || 'Gagal mengirim kelengkapan.'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function submitComment() {
+  if (!request.value) return
+  if (commentMessage.value.trim().length < 3) {
+    actionError.value = 'Pesan minimal 3 karakter.'
+    return
+  }
+  actionLoading.value = true
+  actionError.value = ''
+  try {
+    await api('/api/track/comments', {
+      method: 'POST',
+      body: { ticket: ticket.value, token: token.value, message: commentMessage.value }
+    })
+    commentMessage.value = ''
+    await track()
+  } catch (error: any) {
+    actionError.value = error?.data?.statusMessage || 'Gagal mengirim pesan.'
+  } finally {
+    actionLoading.value = false
+  }
 }
 
 useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
@@ -116,13 +173,25 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
               <StatusBadge :status="request.status" :substatus="request.substatus" size="md" />
             </div>
 
-            <div v-if="request.substatus" class="mt-5 flex items-start gap-3 rounded-xl border border-gold/30 bg-gold/10 p-4 text-sm leading-6">
-              <Clock3 :size="18" class="mt-0.5 shrink-0 text-gold-dark" aria-hidden="true" />
-              <div>
-                <p class="font-semibold">Tindakan diperlukan dari Anda</p>
-                <p class="mt-1 text-xs leading-5 text-ink-muted">{{ request.requestedCompletionNote || 'Permohonan menunggu kelengkapan dari pemohon.' }}</p>
-                <NuxtLink :to="`/masuk?redirect=${encodeURIComponent(`/permohonan-saya/${request.id}`)}`" class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-gold-dark underline underline-offset-4">Masuk untuk melengkapi <ArrowRight :size="12" /></NuxtLink>
+            <div v-if="request.substatus" class="mt-5 rounded-xl border border-gold/30 bg-gold/10 p-4 text-sm leading-6">
+              <div class="flex items-start gap-3">
+                <Clock3 :size="18" class="mt-0.5 shrink-0 text-gold-dark" aria-hidden="true" />
+                <div>
+                  <p class="font-semibold">Tindakan diperlukan dari Anda</p>
+                  <p class="mt-1 text-xs leading-5 text-ink-muted">{{ request.requestedCompletionNote || 'Permohonan menunggu kelengkapan dari pemohon.' }}</p>
+                </div>
               </div>
+              <form class="mt-4 border-t border-gold/20 pt-4" @submit.prevent="submitCompletion">
+                <label for="track-completion" class="field-label">Keterangan kelengkapan</label>
+                <textarea id="track-completion" v-model="completionMessage" rows="3" class="field-input" placeholder="Tuliskan keterangan atau data tambahan…" required :disabled="actionLoading" />
+                <div class="mt-3">
+                  <label for="track-completion-file" class="field-label">Lampiran kelengkapan <span class="text-slate-400">(opsional)</span></label>
+                  <input id="track-completion-file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.docx,.xlsx,.zip" class="block w-full rounded-lg border border-line-warm bg-white p-2.5 text-[14px]" :disabled="actionLoading" @change="completionFile = ($event.target as HTMLInputElement).files?.[0] || null" />
+                  <p class="field-help">Maksimal 10 MB.</p>
+                </div>
+                <p v-if="actionError" class="field-error" role="alert">{{ actionError }}</p>
+                <AppButton type="submit" class="mt-3" :loading="actionLoading">Kirim Kelengkapan</AppButton>
+              </form>
             </div>
 
             <div v-if="request.status === 'Ditolak'" class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-950">
@@ -158,7 +227,7 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
                   <p v-else class="text-xs text-ink-muted">{{ field.label }}: tidak ada lampiran.</p>
                 </div>
               </div>
-              <p class="mt-2 text-[14px] leading-5 text-ink-muted">Unduhan lampiran memerlukan masuk ke akun pemohon.</p>
+              <p class="mt-2 text-[14px] leading-5 text-ink-muted">Untuk mengunduh lampiran, hubungi petugas melalui komunikasi pada halaman ini.</p>
             </div>
           </div>
 
@@ -176,19 +245,23 @@ useSeoMeta({ title: 'Lacak Permohonan', robots: 'noindex, nofollow' })
             </ol>
           </div>
 
-          <div v-if="request.comments.length" class="rounded-2xl border border-line-warm bg-white p-5 sm:p-7">
+          <div class="rounded-2xl border border-line-warm bg-white p-5 sm:p-7">
             <h3 class="text-base font-semibold">Komunikasi</h3>
-            <div class="mt-4 space-y-3">
+            <div v-if="request.comments.length" class="mt-4 space-y-3">
               <div v-for="comment in request.comments" :key="comment.id" class="rounded-xl border border-line-warm bg-ivory p-3.5">
                 <p class="text-xs leading-6">{{ comment.message }}</p>
                 <p class="mt-2 text-[12px] text-ink-muted">{{ comment.authorName }} · {{ formatDateTime(comment.createdAt) }}</p>
               </div>
             </div>
-          </div>
-
-          <div class="flex flex-col gap-2 rounded-2xl border border-line-warm bg-ivory p-5 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-xs text-ink-muted">Ingin menambahkan keterangan atau mengunggah ulang lampiran?</p>
-            <AppButton :to="`/masuk?redirect=${encodeURIComponent(`/permohonan-saya/${request.id}`)}`" size="sm">Masuk ke Permohonan Saya</AppButton>
+            <p v-else class="mt-3 text-sm text-ink-muted">Belum ada komunikasi publik.</p>
+            <form class="mt-5 border-t border-line-warm pt-5" @submit.prevent="submitComment">
+              <label for="track-comment" class="field-label">Tambahkan pesan</label>
+              <textarea id="track-comment" v-model="commentMessage" rows="3" class="field-input" placeholder="Tuliskan pertanyaan atau informasi tambahan…" required :disabled="actionLoading" />
+              <p v-if="actionError" class="field-error" role="alert">{{ actionError }}</p>
+              <div class="mt-3 flex justify-end">
+                <AppButton type="submit" :loading="actionLoading"><template #left><Send :size="14" /></template>Kirim Pesan</AppButton>
+              </div>
+            </form>
           </div>
         </div>
 

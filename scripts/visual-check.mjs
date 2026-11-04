@@ -87,7 +87,6 @@ const adminPages = [
   ['/admin/permohonan', 'admin-requests'],
   ['/admin/layanan', 'admin-services'],
   ['/admin/layanan/baru', 'admin-service-new'],
-  ['/admin/konten', 'admin-content'],
   ['/admin/ekosistem', 'admin-ecosystem'],
   ['/admin/program', 'admin-programs'],
   ['/admin/publikasi', 'admin-publications'],

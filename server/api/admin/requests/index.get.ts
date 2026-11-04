@@ -23,7 +23,13 @@ export default defineEventHandler(async (event) => {
   if (waiting) filter.substatus = WAITING_SUBSTATUS
   if (search) {
     const regex = new RegExp(escapeRegex(search), 'i')
-    filter.$or = [{ ticketNumber: regex }, { serviceName: regex }, { 'data.nama_lengkap': regex }]
+    filter.$or = [
+      { ticketNumber: regex },
+      { serviceName: regex },
+      { requesterName: regex },
+      { requesterEmail: regex },
+      { 'data.nama_lengkap': regex }
+    ]
   }
 
   const [items, total] = await Promise.all([

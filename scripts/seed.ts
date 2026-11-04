@@ -18,6 +18,8 @@ import {
   Service,
   ServiceFormVersion,
   SiteSetting,
+  TeamGroup,
+  TeamMember,
   User
 } from '../server/models'
 
@@ -1036,6 +1038,8 @@ await Promise.all([
   ServiceFormVersion.init(),
   SiteSetting.init(),
   Page.init(),
+  TeamGroup.init(),
+  TeamMember.init(),
   DigitalPlatform.init(),
   Program.init(),
   Article.init(),
@@ -1044,7 +1048,7 @@ await Promise.all([
 ])
 
 console.log('')
-console.log('Seed development selesai. Data contoh ditandai isSeedData dan banner devSeedMode aktif.')
+console.log('Seed development selesai. Data contoh ditandai isSeedData.')
 console.log('Akun pengembangan:')
 console.log(`  superadmin@digital.unu.local / ${SEED_PASSWORD_ADMIN}`)
 console.log(`  petugas@digital.unu.local    / ${SEED_PASSWORD_PETUGAS}`)

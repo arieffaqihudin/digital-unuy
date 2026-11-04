@@ -3,17 +3,22 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
+  FileText,
+  Globe2,
   Inbox,
   Layers,
+  Newspaper,
   Plus,
   Timer,
-  TrendingUp
+  TrendingUp,
+  Workflow
 } from 'lucide-vue-next'
 import type { RequestListItem } from '~/shared/types'
 
 definePageMeta({ layout: 'admin' })
 
 const requestFetch = useRequestFetch()
+const { can } = useAuth()
 const { formatDateTime } = useFormat()
 const period = ref('30d')
 const loading = ref(true)
@@ -25,6 +30,9 @@ const data = ref<{
   recent: RequestListItem[]
   actionQueue: RequestListItem[]
 } | null>(null)
+
+const contentLoading = ref(true)
+const contentCounts = ref({ platforms: 0, programs: 0, articles: 0, pages: 0 })
 
 async function load() {
   loading.value = true
@@ -38,8 +46,39 @@ async function load() {
   }
 }
 
-await load()
+async function loadContentCounts() {
+  if (!can('content.manage')) {
+    contentLoading.value = false
+    return
+  }
+  contentLoading.value = true
+  try {
+    const [platforms, programs, articles, pages] = await Promise.all([
+      requestFetch<{ total: number }>('/api/admin/platforms', { query: { pageSize: 1 } }).catch(() => ({ total: 0 })),
+      requestFetch<{ total: number }>('/api/admin/programs', { query: { pageSize: 1 } }).catch(() => ({ total: 0 })),
+      requestFetch<{ total: number }>('/api/admin/articles', { query: { pageSize: 1 } }).catch(() => ({ total: 0 })),
+      requestFetch<{ items: unknown[] }>('/api/admin/pages').catch(() => ({ items: [] }))
+    ])
+    contentCounts.value = {
+      platforms: platforms.total,
+      programs: programs.total,
+      articles: articles.total,
+      pages: pages.items.length
+    }
+  } finally {
+    contentLoading.value = false
+  }
+}
+
+await Promise.all([load(), loadContentCounts()])
 watch(period, load)
+
+const contentCards = computed(() => [
+  { title: 'Ekosistem Digital', to: '/admin/ekosistem', icon: Globe2, count: contentCounts.value.platforms, description: 'Platform, kategori, unit, dan status implementasi.' },
+  { title: 'Program & Inisiatif', to: '/admin/program', icon: Workflow, count: contentCounts.value.programs, description: 'Program transformasi dan status pelaksanaannya.' },
+  { title: 'Publikasi', to: '/admin/publikasi', icon: Newspaper, count: contentCounts.value.articles, description: 'Artikel, draft, thumbnail, dan status terbit.' },
+  { title: 'Halaman & Profil', to: '/admin/halaman', icon: FileText, count: contentCounts.value.pages, description: 'Profil direktorat dan halaman informasi.' }
+])
 
 const cards = computed(() => [
   { label: 'Total permohonan', value: data.value?.counts.total ?? 0, icon: Inbox, note: 'Dalam periode terpilih' },
@@ -163,13 +202,42 @@ useSeoMeta({ title: 'Dashboard Admin', robots: 'noindex, nofollow' })
       </div>
     </div>
 
+    <div v-if="can('content.manage')" class="rounded-xl border border-admin-border bg-white p-5">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="text-[16px] font-semibold text-admin-text">Konten Website</p>
+          <p class="mt-0.5 text-[14px] text-admin-muted">Kelola konten publik langsung dari dashboard.</p>
+        </div>
+        <span class="text-[12px] text-slate-400">{{ contentLoading ? 'Memuat…' : 'Terhubung ke CMS' }}</span>
+      </div>
+      <div class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <NuxtLink
+          v-for="item in contentCards"
+          :key="item.to"
+          :to="item.to"
+          class="group rounded-lg border border-admin-border p-4 transition hover:border-unu-green/30 hover:bg-unu-green-soft/20"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <span class="grid h-8 w-8 place-items-center rounded-md bg-unu-green-soft text-unu-green">
+              <component :is="item.icon" :size="15" aria-hidden="true" />
+            </span>
+            <span class="text-[20px] font-bold leading-none tracking-tight text-admin-text">{{ contentLoading ? '—' : item.count }}</span>
+          </div>
+          <p class="mt-3 text-[14px] font-semibold text-admin-text">{{ item.title }}</p>
+          <p class="mt-1 text-[12px] leading-5 text-admin-muted">{{ item.description }}</p>
+          <span class="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-unu-green">
+            Kelola <ArrowRight :size="11" aria-hidden="true" />
+          </span>
+        </NuxtLink>
+      </div>
+    </div>
+
     <div class="rounded-xl border border-admin-border bg-slate-50 p-5">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div><p class="text-xs font-semibold">Akses cepat</p><p class="mt-0.5 text-[14px] text-admin-muted">Kelola layanan, dokumentasi, dan konten website dari satu tempat.</p></div>
+        <div><p class="text-xs font-semibold">Akses cepat</p><p class="mt-0.5 text-[14px] text-admin-muted">Kelola layanan dan dokumentasi dari satu tempat.</p></div>
         <div class="flex flex-wrap gap-2">
           <AppButton to="/admin/layanan" variant="secondary" size="sm">Manajemen Layanan</AppButton>
           <AppButton to="/admin/dokumen" variant="secondary" size="sm">Dokumentasi</AppButton>
-          <AppButton to="/admin/konten" variant="secondary" size="sm">Konten Website</AppButton>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   BookOpen,
+  ChevronDown,
   ChevronLeft,
   ExternalLink,
   FileText,
@@ -12,11 +13,11 @@ import {
   Mail,
   Menu,
   Newspaper,
-  PanelTop,
   ScrollText,
   Settings,
   ShieldCheck,
   Users,
+  UsersRound,
   Workflow,
   X
 } from 'lucide-vue-next'
@@ -27,6 +28,15 @@ const { settings, ensureSite } = useSite()
 const route = useRoute()
 const mobileOpen = ref(false)
 const collapsed = ref(false)
+const accountMenuOpen = ref(false)
+const accountMenu = ref<HTMLElement | null>(null)
+
+function handleDocumentClick(event: MouseEvent) {
+  if (!accountMenuOpen.value) return
+  if (accountMenu.value && !accountMenu.value.contains(event.target as Node)) {
+    accountMenuOpen.value = false
+  }
+}
 
 await useAsyncData('admin-bootstrap', async () => {
   await Promise.all([fetchSession(), ensureSite()])
@@ -58,11 +68,11 @@ const menuGroups: {
   {
     label: 'Konten Website',
     items: [
-      { label: 'Ringkasan Konten', to: '/admin/konten', icon: PanelTop, permission: 'content.manage' },
       { label: 'Publikasi', to: '/admin/publikasi', icon: Newspaper, permission: 'content.manage' },
       { label: 'Ekosistem Digital', to: '/admin/ekosistem', icon: Globe2, permission: 'content.manage' },
       { label: 'Program', to: '/admin/program', icon: Workflow, permission: 'content.manage' },
-      { label: 'Halaman & Profil', to: '/admin/halaman', icon: FileText, permission: 'content.manage' }
+      { label: 'Halaman & Profil', to: '/admin/halaman', icon: FileText, permission: 'content.manage' },
+      { label: 'Tim Kami', to: '/admin/tim', icon: UsersRound, permission: 'content.manage' }
     ]
   },
   {
@@ -115,6 +125,7 @@ watch(
   () => route.fullPath,
   () => {
     mobileOpen.value = false
+    accountMenuOpen.value = false
   }
 )
 
@@ -123,7 +134,9 @@ watch(mobileOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
 })
 
+onMounted(() => document.addEventListener('click', handleDocumentClick))
 onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick)
   if (import.meta.client) document.body.style.overflow = ''
 })
 
@@ -133,21 +146,26 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
 <template>
   <div class="admin-shell min-h-screen bg-admin-bg">
     <aside
+      id="admin-sidebar"
       class="fixed inset-y-0 left-0 z-50 hidden border-r border-admin-border bg-admin-sidebar transition-[width] duration-200 lg:flex lg:flex-col"
       :class="collapsed ? 'w-[76px]' : 'w-[252px]'"
     >
-      <div class="flex h-[64px] items-center border-b border-admin-border px-4" :class="collapsed ? 'justify-center' : 'justify-between'">
+      <div class="flex h-[64px] items-center border-b border-admin-border px-4" :class="collapsed ? 'justify-center' : 'justify-start'">
         <AppLogo v-if="!collapsed" />
-        <NuxtLink v-else to="/admin" class="grid h-10 w-10 place-items-center rounded-lg bg-unu-green text-[12px] font-bold text-white" aria-label="Dashboard admin">TD</NuxtLink>
-        <button
-          type="button"
-          class="grid h-8 w-8 place-items-center rounded-md text-admin-muted transition hover:bg-white hover:text-admin-text"
-          :aria-label="collapsed ? 'Perluas sidebar' : 'Ringkas sidebar'"
-          @click="collapsed = !collapsed"
-        >
-          <ChevronLeft :size="15" :class="collapsed ? 'rotate-180' : ''" aria-hidden="true" />
-        </button>
+        <AppLogo v-else compact />
       </div>
+
+      <button
+        type="button"
+        class="absolute -right-3.5 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-admin-border bg-white text-admin-muted shadow-sm transition hover:border-unu-green/40 hover:text-unu-green lg:grid"
+        :aria-label="collapsed ? 'Perluas sidebar' : 'Ringkas sidebar'"
+        :aria-expanded="!collapsed"
+        aria-controls="admin-sidebar"
+        :title="collapsed ? 'Perluas sidebar' : 'Ringkas sidebar'"
+        @click="collapsed = !collapsed"
+      >
+        <ChevronLeft :size="15" :class="collapsed ? 'rotate-180' : ''" aria-hidden="true" />
+      </button>
 
       <nav class="no-scrollbar flex-1 overflow-y-auto px-3 py-3" aria-label="Navigasi admin">
         <div v-for="group in visibleGroups" :key="group.label" class="mb-3">
@@ -157,51 +175,21 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
             <li v-for="item in group.items" :key="item.to">
               <NuxtLink
                 :to="item.to"
-                class="group relative flex min-h-[40px] items-center gap-3 rounded-md border-l-2 px-3 text-[12px] font-medium transition"
+                class="group relative flex min-h-[40px] items-center gap-3 rounded-md px-3 text-[14px] font-medium transition"
                 :class="
                   isActive(item.to)
-                    ? 'border-unu-green bg-white text-unu-green shadow-sm'
-                    : 'border-transparent text-slate-600 hover:bg-white/70 hover:text-admin-text'
+                    ? 'bg-white text-unu-green shadow-sm'
+                    : 'text-slate-600 hover:bg-white/70 hover:text-admin-text'
                 "
                 :title="collapsed ? item.label : undefined"
               >
-                <component :is="item.icon" :size="16" :stroke-width="1.8" class="shrink-0" aria-hidden="true" />
+                <component :is="item.icon" :size="18" :stroke-width="1.8" class="shrink-0" aria-hidden="true" />
                 <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
               </NuxtLink>
             </li>
           </ul>
         </div>
       </nav>
-
-      <div class="border-t border-admin-border p-3">
-        <div v-if="!collapsed" class="mb-2 rounded-lg border border-admin-border bg-white p-3">
-          <p class="truncate text-[14px] font-semibold text-admin-text">{{ user?.name }}</p>
-          <p class="mt-0.5 truncate text-[12px] text-admin-muted">{{ user?.email }}</p>
-          <p class="mt-2 inline-flex rounded-full bg-unu-green-soft px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-unu-green">
-            {{ user?.role }}
-          </p>
-        </div>
-        <div class="flex items-center" :class="collapsed ? 'justify-center' : 'justify-between'">
-          <NuxtLink
-            to="/"
-            target="_blank"
-            class="inline-flex min-h-[36px] items-center gap-2 rounded-md px-2 text-[12px] text-admin-muted transition hover:bg-white hover:text-admin-text"
-            :title="collapsed ? 'Lihat website' : undefined"
-          >
-            <ExternalLink :size="13" aria-hidden="true" />
-            <span v-if="!collapsed">Website publik</span>
-          </NuxtLink>
-          <button
-            type="button"
-            class="inline-flex min-h-[36px] items-center gap-2 rounded-md px-2 text-[12px] text-admin-muted transition hover:bg-red-50 hover:text-red-700"
-            :title="collapsed ? 'Keluar' : undefined"
-            @click="logout"
-          >
-            <LogOut :size="13" aria-hidden="true" />
-            <span v-if="!collapsed">Keluar</span>
-          </button>
-        </div>
-      </div>
     </aside>
 
     <Teleport to="body">
@@ -229,8 +217,8 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
                   <li v-for="item in group.items" :key="item.to">
                     <NuxtLink
                       :to="item.to"
-                      class="flex min-h-[44px] items-center gap-3 rounded-md border-l-2 px-3 text-[14px] font-medium"
-                      :class="isActive(item.to) ? 'border-unu-green bg-unu-green-soft text-unu-green' : 'border-transparent text-slate-600'"
+                      class="flex min-h-[44px] items-center gap-3 rounded-md px-3 text-[14px] font-medium"
+                      :class="isActive(item.to) ? 'bg-unu-green-soft text-unu-green' : 'text-slate-600'"
                     >
                       <component :is="item.icon" :size="16" aria-hidden="true" />
                       {{ item.label }}
@@ -239,14 +227,6 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
                 </ul>
               </div>
             </nav>
-            <div class="border-t border-admin-border p-4">
-              <p class="truncate text-sm font-semibold text-admin-text">{{ user?.name }}</p>
-              <p class="mt-0.5 truncate text-[12px] text-admin-muted">{{ user?.email }}</p>
-              <div class="mt-3 flex gap-2">
-                <NuxtLink to="/" target="_blank" class="flex-1 rounded-lg border border-admin-border px-3 py-2 text-center text-[14px] text-slate-600">Website</NuxtLink>
-                <button type="button" class="flex-1 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[14px] font-semibold text-red-700" @click="logout">Keluar</button>
-              </div>
-            </div>
           </aside>
         </div>
       </Transition>
@@ -266,21 +246,66 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
             </button>
             <div class="min-w-0">
               <p class="text-[12px] font-bold uppercase tracking-[0.14em] text-slate-400">Administrasi</p>
-              <h1 class="truncate text-[15px] font-semibold text-admin-text">{{ currentLabel }}</h1>
+              <h1 class="truncate text-[18px] font-semibold text-admin-text">{{ currentLabel }}</h1>
             </div>
           </div>
           <div class="flex items-center gap-2">
             <span class="hidden text-[12px] font-medium text-admin-muted md:inline">{{ settings.directorateName }}</span>
             <span class="mx-1 hidden h-5 w-px bg-admin-border md:block" aria-hidden="true" />
-            <NuxtLink
-              to="/"
-              target="_blank"
-              class="grid h-9 w-9 place-items-center rounded-lg border border-admin-border bg-white text-admin-muted transition hover:text-unu-green"
-              aria-label="Buka website publik"
-            >
-              <ExternalLink :size="15" aria-hidden="true" />
-            </NuxtLink>
-            <span class="grid h-9 w-9 place-items-center rounded-lg bg-unu-green text-[12px] font-bold text-white">{{ initials }}</span>
+
+            <div v-if="user" ref="accountMenu" class="relative">
+              <button
+                type="button"
+                class="flex min-h-[40px] items-center gap-1.5 rounded-lg px-1 text-left transition hover:bg-admin-sidebar"
+                :aria-expanded="accountMenuOpen"
+                aria-haspopup="menu"
+                aria-label="Menu akun"
+                @click.stop="accountMenuOpen = !accountMenuOpen"
+              >
+                <span class="grid h-9 w-9 place-items-center rounded-lg bg-unu-green text-[12px] font-bold text-white">{{ initials }}</span>
+                <ChevronDown :size="14" class="hidden text-admin-muted sm:block" aria-hidden="true" />
+              </button>
+
+              <Transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="translate-y-1 opacity-0"
+                enter-to-class="translate-y-0 opacity-100"
+                leave-active-class="transition duration-100 ease-in"
+                leave-to-class="translate-y-1 opacity-0"
+              >
+                <div
+                  v-if="accountMenuOpen"
+                  class="absolute right-0 top-[calc(100%+8px)] w-64 overflow-hidden rounded-xl border border-admin-border bg-white p-2 shadow-soft"
+                  role="menu"
+                >
+                  <div class="border-b border-admin-border px-3 pb-3 pt-2">
+                    <p class="truncate text-[14px] font-semibold text-admin-text">{{ user.name }}</p>
+                    <p class="mt-0.5 truncate text-[12px] text-admin-muted">{{ user.email }}</p>
+                    <p class="mt-2 inline-flex rounded-full bg-unu-green-soft px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-unu-green">
+                      {{ user.role }}
+                    </p>
+                  </div>
+                  <NuxtLink
+                    to="/"
+                    target="_blank"
+                    class="mt-1 flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-[14px] font-medium text-slate-600 transition hover:bg-admin-sidebar hover:text-admin-text"
+                    role="menuitem"
+                  >
+                    <ExternalLink :size="14" aria-hidden="true" />
+                    Website publik
+                  </NuxtLink>
+                  <button
+                    type="button"
+                    class="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 text-[14px] font-medium text-red-700 transition hover:bg-red-50"
+                    role="menuitem"
+                    @click="logout"
+                  >
+                    <LogOut :size="14" aria-hidden="true" />
+                    Keluar
+                  </button>
+                </div>
+              </Transition>
+            </div>
           </div>
         </div>
       </header>

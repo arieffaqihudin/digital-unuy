@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, Plus, Save, Send, Trash2 } from 'lucide-vue-next'
+import { Plus, Save, Send, Trash2 } from 'lucide-vue-next'
 import type { SiteSettingsDTO } from '~/shared/types'
 
 definePageMeta({ layout: 'admin' })
@@ -153,15 +153,6 @@ useSeoMeta({ title: 'Pengaturan Sistem', robots: 'noindex, nofollow' })
       </div>
 
       <aside class="space-y-4 xl:sticky xl:top-24">
-        <div class="rounded-xl border border-admin-border bg-white p-5">
-          <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Mode pengembangan</p>
-          <label class="mt-3 flex cursor-pointer items-start gap-3 text-xs">
-            <input v-model="form.devSeedMode" type="checkbox" class="mt-0.5 h-4 w-4 accent-unu-green" />
-            <span><span class="block font-semibold">Tampilkan label data contoh</span><span class="mt-1 block text-[12px] leading-4 text-admin-muted">Aktifkan hanya saat website memakai seed development. Matikan di produksi.</span></span>
-          </label>
-          <div class="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-[12px] leading-4 text-amber-950"><AlertTriangle :size="13" class="mt-0.5 shrink-0" /> Data seed tidak boleh dianggap sebagai data operasional resmi.</div>
-        </div>
-
         <div class="rounded-xl border border-admin-border bg-slate-50 p-5">
           <div class="flex items-center gap-2"><Send :size="15" class="text-unu-green" /><p class="text-xs font-semibold">Email delivery</p></div>
           <p class="mt-2 text-[14px] leading-5 text-admin-muted">Kredensial SMTP dikonfigurasi melalui environment variable dan tidak disimpan di database. Status pengiriman dapat dipantau di menu Notifikasi.</p>

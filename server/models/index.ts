@@ -137,7 +137,11 @@ const serviceRequestSchema = new Schema(
   {
     ticketNumber: { type: String, required: true, unique: true, index: true },
     trackingTokenHash: { type: String, required: true },
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
+    requesterName: { type: String, default: '' },
+    requesterEmail: { type: String, default: '', index: true },
+    requesterPhone: { type: String, default: '' },
+    isGuest: { type: Boolean, default: false, index: true },
     service: { type: Schema.Types.ObjectId, ref: 'Service', required: true, index: true },
     serviceSlug: { type: String, required: true },
     serviceName: { type: String, required: true },
@@ -187,7 +191,7 @@ requestDraftSchema.index({ user: 1, service: 1 }, { unique: true })
 const requestCommentSchema = new Schema(
   {
     request: { type: Schema.Types.ObjectId, ref: 'ServiceRequest', required: true, index: true },
-    author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    author: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     authorName: { type: String, required: true },
     message: { type: String, required: true, maxlength: 5000 },
     visibility: { type: String, enum: ['public', 'internal'], default: 'public' }
@@ -203,7 +207,7 @@ const requestAttachmentSchema = new Schema(
     storageKey: { type: String, required: true, unique: true },
     mimeType: { type: String, required: true },
     size: { type: Number, required: true },
-    uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+    uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null }
   },
   { timestamps: true }
 )
@@ -239,6 +243,35 @@ const documentSchema = new Schema(
     services: { type: [{ type: Schema.Types.ObjectId, ref: 'Service' }], default: [] },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     isSeedData: { type: Boolean, default: false }
+  },
+  { timestamps: true }
+)
+
+const teamGroupSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    slug: { type: String, required: true, unique: true },
+    order: { type: Number, default: 0, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null }
+  },
+  { timestamps: true }
+)
+
+const teamMemberSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 120 },
+    position: { type: String, required: true, trim: true, maxlength: 160 },
+    unit: { type: String, default: '', trim: true, maxlength: 160 },
+    bio: { type: String, default: '', maxlength: 1500 },
+    group: { type: Schema.Types.ObjectId, ref: 'TeamGroup', default: null, index: true },
+    order: { type: Number, default: 0, index: true },
+    published: { type: Boolean, default: false, index: true },
+    photoStorageKey: { type: String, default: '' },
+    photoMimeType: { type: String, default: '' },
+    photoSize: { type: Number, default: 0 },
+    focalX: { type: Number, default: 50, min: 0, max: 100 },
+    focalY: { type: Number, default: 50, min: 0, max: 100 },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null }
   },
   { timestamps: true }
 )
@@ -397,6 +430,8 @@ export const RequestComment = defineModel('RequestComment', requestCommentSchema
 export const RequestAttachment = defineModel('RequestAttachment', requestAttachmentSchema)
 export const Document = defineModel('Document', documentSchema)
 export const DocumentVersion = defineModel('DocumentVersion', documentVersionSchema)
+export const TeamGroup = defineModel('TeamGroup', teamGroupSchema)
+export const TeamMember = defineModel('TeamMember', teamMemberSchema)
 export const DigitalPlatform = defineModel('DigitalPlatform', digitalPlatformSchema)
 export const Program = defineModel('Program', programSchema)
 export const Article = defineModel('Article', articleSchema)

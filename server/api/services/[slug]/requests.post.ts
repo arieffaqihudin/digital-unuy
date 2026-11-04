@@ -6,8 +6,7 @@ import {
   RequestStatusHistory,
   Service,
   ServiceFormVersion,
-  ServiceRequest,
-  User
+  ServiceRequest
 } from '../../../models'
 
 function generateTicketNumber() {
@@ -21,8 +20,8 @@ function generateTicketNumber() {
 }
 
 export default defineEventHandler(async (event) => {
-  const user = await requireUser(event)
-  checkRateLimit(event, 'request-submit', 12, 60 * 60 * 1000, user.id)
+  const user = await getSessionUser(event)
+  checkRateLimit(event, 'request-submit-ip', 40, 60 * 60 * 1000)
 
   const idempotencyKey = String(getHeader(event, 'x-idempotency-key') || '').trim()
   if (idempotencyKey.length < 10 || idempotencyKey.length > 120) {
@@ -30,20 +29,6 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       statusMessage: 'Kunci idempotensi tidak valid. Muat ulang halaman lalu coba lagi.'
     })
-  }
-
-  const existing = await ServiceRequest.findOne({ idempotencyKey }).lean()
-  if (existing) {
-    if (String(existing.user) !== user.id) {
-      throw createError({ statusCode: 409, statusMessage: 'Permintaan duplikat terdeteksi.' })
-    }
-    return {
-      duplicate: true,
-      ticketNumber: existing.ticketNumber,
-      requestId: String(existing._id),
-      status: existing.status,
-      emailStatus: 'not-resent'
-    }
   }
 
   const slug = String(getRouterParam(event, 'slug') || '')
@@ -62,6 +47,7 @@ export default defineEventHandler(async (event) => {
 
   const contentType = String(getHeader(event, 'content-type') || '')
   let payload: Record<string, unknown> = {}
+  let requesterInput: Record<string, unknown> = {}
   const fileEntries = new Map<string, { data: Buffer; filename: string; type: string }>()
 
   if (contentType.includes('multipart/form-data')) {
@@ -75,6 +61,14 @@ export default defineEventHandler(async (event) => {
           payload = JSON.parse(part.data.toString('utf8'))
         } catch {
           throw createError({ statusCode: 400, statusMessage: 'Data formulir tidak dapat dibaca.' })
+        }
+        continue
+      }
+      if (part.name === '__requester') {
+        try {
+          requesterInput = JSON.parse(part.data.toString('utf8'))
+        } catch {
+          throw createError({ statusCode: 400, statusMessage: 'Data pemohon tidak dapat dibaca.' })
         }
         continue
       }
@@ -98,11 +92,41 @@ export default defineEventHandler(async (event) => {
     }
   } else {
     const body = await readBody(event)
+    requesterInput =
+      body?.requester && typeof body.requester === 'object' ? body.requester : {}
     payload = body?.data && typeof body.data === 'object' ? body.data : body || {}
   }
 
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     throw createError({ statusCode: 400, statusMessage: 'Data formulir tidak valid.' })
+  }
+
+  const requesterName = String(requesterInput?.name || user?.name || '').trim()
+  const requesterEmail = String(requesterInput?.email || user?.email || '').trim().toLowerCase()
+  const requesterPhone = String(requesterInput?.phone || '').trim().slice(0, 40)
+  if (requesterName.length < 3) {
+    throw createError({ statusCode: 422, statusMessage: 'Nama pemohon wajib diisi minimal 3 karakter.' })
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(requesterEmail) || requesterEmail.length > 180) {
+    throw createError({ statusCode: 422, statusMessage: 'Email pemohon tidak valid.' })
+  }
+
+  checkRateLimit(event, 'request-submit', 12, 60 * 60 * 1000, requesterEmail)
+
+  const existing = await ServiceRequest.findOne({ idempotencyKey }).lean()
+  if (existing) {
+    const sameUser = user && existing.user && String(existing.user) === user.id
+    const sameGuest = !existing.user && existing.requesterEmail === requesterEmail
+    if (!sameUser && !sameGuest) {
+      throw createError({ statusCode: 409, statusMessage: 'Permintaan duplikat terdeteksi.' })
+    }
+    return {
+      duplicate: true,
+      ticketNumber: existing.ticketNumber,
+      requestId: String(existing._id),
+      status: existing.status,
+      emailStatus: 'not-resent'
+    }
   }
 
   const fileMeta = new Map<string, { originalName: string; mimeType: string; size: number }>()
@@ -158,7 +182,11 @@ export default defineEventHandler(async (event) => {
       _id: requestId,
       ticketNumber,
       trackingTokenHash: hashToken(trackingToken),
-      user: user.id,
+      user: user?.id || null,
+      requesterName,
+      requesterEmail,
+      requesterPhone,
+      isGuest: !user,
       service: service._id,
       serviceSlug: service.slug,
       serviceName: service.name,
@@ -180,7 +208,7 @@ export default defineEventHandler(async (event) => {
           storageKey: file.storageKey,
           mimeType: file.mimeType,
           size: file.size,
-          uploadedBy: user.id
+          uploadedBy: user?.id || null
         }))
       )
     }
@@ -190,33 +218,35 @@ export default defineEventHandler(async (event) => {
       fromStatus: '',
       toStatus: 'Diajukan',
       note: 'Permohonan berhasil diajukan melalui portal.',
-      actor: user.id,
-      actorName: user.name
+      actor: user?.id || null,
+      actorName: requesterName
     })
 
     await recordAudit(event, user, 'request.created', 'ServiceRequest', String(request._id), {
       ticketNumber,
-      service: service.slug
+      service: service.slug,
+      guest: !user,
+      requesterEmail
     })
 
     const siteUrl = useRuntimeConfig().siteUrl
     const trackingUrl = `${siteUrl}/lacak?ticket=${encodeURIComponent(ticketNumber)}&token=${encodeURIComponent(trackingToken)}`
     const emailResult = await sendEmail({
       template: 'request-created',
-      to: user.email,
+      to: requesterEmail,
       subject: `Permohonan ${ticketNumber} telah diterima`,
       heading: 'Permohonan Anda telah diterima',
       reference: ticketNumber,
-      preheader: `Nomor tiket ${ticketNumber} untuk layanan ${service.name}.`,
+      preheader: `ID permohonan ${ticketNumber} untuk layanan ${service.name}.`,
       bodyHtml: `
-        <p>Halo ${escapeHtml(user.name)},</p>
-        <p>Permohonan Anda untuk layanan <strong>${escapeHtml(service.name)}</strong> telah kami terima.</p>
+        <p>Halo ${escapeHtml(requesterName)},</p>
+        <p>Permohonan Anda untuk layanan <strong>${escapeHtml(service.name)}</strong> telah kami terima. Tidak perlu membuat akun untuk melacaknya.</p>
         <table style="width:100%;border-collapse:collapse;margin:20px 0;">
-          <tr><td style="padding:10px 0;border-bottom:1px solid #E6E1D3;color:#68625C;">Nomor tiket</td><td style="padding:10px 0;border-bottom:1px solid #E6E1D3;text-align:right;font-weight:700;">${escapeHtml(ticketNumber)}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #E6E1D3;color:#68625C;">ID permohonan</td><td style="padding:10px 0;border-bottom:1px solid #E6E1D3;text-align:right;font-weight:700;">${escapeHtml(ticketNumber)}</td></tr>
           <tr><td style="padding:10px 0;border-bottom:1px solid #E6E1D3;color:#68625C;">Status awal</td><td style="padding:10px 0;border-bottom:1px solid #E6E1D3;text-align:right;">Diajukan</td></tr>
         </table>
-        <p>Pantau status dan komunikasi permohonan melalui tautan aman berikut. Tautan ini bersifat pribadi, jangan dibagikan.</p>
-        <p style="margin:24px 0;"><a href="${escapeHtml(trackingUrl)}" style="display:inline-block;background:#1C1A1A;color:#fff;text-decoration:none;padding:13px 20px;border-radius:10px;font-weight:700;">Lacak Permohonan</a></p>
+        <p>Simpan tautan aman berikut untuk melihat status, catatan petugas, dan mengirim kelengkapan. Tautan ini bersifat pribadi, jangan dibagikan.</p>
+        <p style="margin:24px 0;"><a href="${escapeHtml(trackingUrl)}" style="display:inline-block;background:#337449;color:#fff;text-decoration:none;padding:13px 20px;border-radius:10px;font-weight:700;">Lacak Permohonan</a></p>
         <p style="font-size:12px;color:#68625C;">Jika tombol tidak berfungsi, salin tautan berikut: ${escapeHtml(trackingUrl)}</p>
       `
     })
@@ -232,7 +262,9 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     if (error?.code === 11000 && error?.keyPattern?.idempotencyKey) {
       const duplicate = await ServiceRequest.findOne({ idempotencyKey }).lean()
-      if (duplicate && String(duplicate.user) === user.id) {
+      const sameUser = duplicate && user && duplicate.user && String(duplicate.user) === user.id
+      const sameGuest = duplicate && !duplicate.user && duplicate.requesterEmail === requesterEmail
+      if (duplicate && (sameUser || sameGuest)) {
         return {
           duplicate: true,
           ticketNumber: duplicate.ticketNumber,

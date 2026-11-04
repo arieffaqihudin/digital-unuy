@@ -162,6 +162,29 @@ export interface DocumentListResponse {
   pageSize: number
 }
 
+export interface TeamMemberDTO {
+  id: string
+  name: string
+  position: string
+  unit: string
+  bio: string
+  groupId: string
+  groupName: string
+  order: number
+  published: boolean
+  photoUrl?: string
+  focalX: number
+  focalY: number
+  updatedAt: string
+}
+
+export interface TeamGroupDTO {
+  id: string
+  name: string
+  slug: string
+  order: number
+}
+
 export interface DigitalPlatformDTO {
   id: string
   name: string

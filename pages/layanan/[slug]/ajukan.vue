@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  ClipboardCheck,
   Clock3,
   FileText,
   Info,
@@ -13,8 +12,6 @@ import {
   ShieldCheck
 } from 'lucide-vue-next'
 import type { DocumentDTO, FormField, ServiceDTO } from '~/shared/types'
-
-definePageMeta({ middleware: 'auth' })
 
 interface ServiceResponse {
   service: ServiceDTO & { fields?: FormField[]; relatedDocuments?: DocumentDTO[] }
@@ -30,11 +27,12 @@ interface SubmitResult {
 }
 
 const route = useRoute()
-const router = useRouter()
 const { data, error } = await useAsyncData<ServiceResponse>(`request-service-${route.params.slug}`, () =>
   $fetch<ServiceResponse>(`/api/services/${route.params.slug}`)
 )
 const service = computed(() => data.value?.service)
+const { user, fetchSession } = useAuth()
+await fetchSession()
 
 if (!service.value) {
   throw createError({ statusCode: 404, statusMessage: 'Layanan tidak ditemukan.', fatal: true })
@@ -50,6 +48,8 @@ const errors = ref<Record<string, string>>({})
 const submitting = ref(false)
 const submitted = ref<SubmitResult | null>(null)
 const submitError = ref('')
+const requester = reactive({ name: user.value?.name || '', email: user.value?.email || '', phone: '' })
+const requesterErrors = ref<Record<string, string>>({})
 const draftMessage = ref('')
 const draftLoaded = ref(false)
 const draftSaving = ref(false)
@@ -66,7 +66,6 @@ for (const field of fields.value) {
 }
 
 const { settings } = useSite()
-const { formatFileSize } = useFormat()
 const api = useApi()
 const toast = useToast()
 
@@ -82,6 +81,11 @@ const fileFields = computed(() => visibleFields.value.filter((field) => field.ty
 const hasFileFields = computed(() => fileFields.value.length > 0)
 
 onMounted(async () => {
+  if (!user.value) {
+    draftLoaded.value = true
+    suppressDraft = false
+    return
+  }
   try {
     const draft = await $fetch<{ data: Record<string, unknown>; updatedAt: string | null }>(
       `/api/requests/drafts/${route.params.slug}`
@@ -106,7 +110,7 @@ onMounted(async () => {
 watch(
   form,
   () => {
-    if (suppressDraft || !draftLoaded.value || submitted.value) return
+    if (!user.value || suppressDraft || !draftLoaded.value || submitted.value) return
     if (draftTimer) clearTimeout(draftTimer)
     draftTimer = setTimeout(saveDraft, 1100)
   },
@@ -114,7 +118,7 @@ watch(
 )
 
 async function saveDraft() {
-  if (submitting.value || submitted.value) return
+  if (!user.value || submitting.value || submitted.value) return
   draftSaving.value = true
   try {
     const payload: Record<string, unknown> = {}
@@ -135,6 +139,11 @@ async function saveDraft() {
 
 function validate() {
   const next: Record<string, string> = {}
+  const contactErrors: Record<string, string> = {}
+  if (requester.name.trim().length < 3) contactErrors.name = 'Nama pemohon minimal 3 karakter.'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(requester.email.trim())) contactErrors.email = 'Email pemohon tidak valid.'
+  if (requester.phone.length > 40) contactErrors.phone = 'Nomor kontak maksimal 40 karakter.'
+  requesterErrors.value = contactErrors
   for (const field of visibleFields.value) {
     if (field.type === 'file') {
       if (field.required && !files[field.key]) next[field.key] = `${field.label} wajib dilampirkan.`
@@ -158,7 +167,7 @@ function validate() {
     }
   }
   errors.value = next
-  return Object.keys(next).length === 0
+  return Object.keys(next).length === 0 && Object.keys(contactErrors).length === 0
 }
 
 function onFile(field: FormField, file: File | null) {
@@ -199,6 +208,7 @@ async function submit() {
       payload[field.key] = field.type === 'checkbox' ? form[field.key] === true : form[field.key] ?? ''
     }
     formData.append('payload', JSON.stringify(payload))
+    formData.append('__requester', JSON.stringify({ name: requester.name, email: requester.email, phone: requester.phone }))
     for (const field of visibleFields.value) {
       if (field.type === 'file' && files[field.key]) {
         formData.append(field.key, files[field.key] as File)
@@ -211,12 +221,14 @@ async function submit() {
       headers: { 'x-idempotency-key': idempotencyKey.value }
     })
     submitted.value = result
-    toast.success('Permohonan terkirim', `Nomor tiket ${result.ticketNumber}.`)
+    toast.success('Permohonan terkirim', `ID permohonan ${result.ticketNumber}.`)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    try {
-      await api(`/api/requests/drafts/${route.params.slug}`, { method: 'DELETE' })
-    } catch {
-      // Draft cleanup failure does not affect the submitted request.
+    if (user.value) {
+      try {
+        await api(`/api/requests/drafts/${route.params.slug}`, { method: 'DELETE' })
+      } catch {
+        // Draft cleanup failure does not affect the submitted request.
+      }
     }
   } catch (error: any) {
     const serverErrors = error?.data?.data?.errors || error?.data?.errors
@@ -242,6 +254,16 @@ async function copyTracking() {
     toast.success('Tautan disalin', 'Simpan tautan ini untuk melacak permohonan tanpa masuk.')
   } catch {
     toast.warning('Tidak dapat menyalin', 'Salin tautan secara manual dari halaman ini.')
+  }
+}
+
+async function copyTicket() {
+  if (!submitted.value?.ticketNumber || !import.meta.client) return
+  try {
+    await navigator.clipboard.writeText(submitted.value.ticketNumber)
+    toast.success('ID disalin', 'Simpan ID permohonan untuk pelacakan.')
+  } catch {
+    toast.warning('Tidak dapat menyalin', 'Salin ID secara manual dari halaman ini.')
   }
 }
 
@@ -278,13 +300,14 @@ useSeoMeta({
                 <CheckCircle2 :size="25" aria-hidden="true" />
               </span>
               <h2 class="mt-5 text-2xl font-semibold text-white sm:text-3xl">Permohonan berhasil diajukan</h2>
-              <p class="mt-2 text-sm leading-6 text-white/60">Simpan nomor tiket dan tautan pelacakan berikut. Jangan bagikan tautan pelacakan kepada pihak lain.</p>
+              <p class="mt-2 text-sm leading-6 text-white/60">Simpan ID permohonan dan tautan pelacakan berikut. Tidak perlu membuat akun untuk memantau permohonan.</p>
             </div>
             <div class="p-6 sm:p-8">
               <div class="grid gap-4 sm:grid-cols-2">
                 <div class="rounded-xl border border-line-warm bg-ivory p-4">
-                  <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-ink-muted">Nomor tiket</p>
+                  <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-ink-muted">ID Permohonan</p>
                   <p class="mt-2 break-all text-lg font-bold tracking-wide">{{ submitted.ticketNumber }}</p>
+                  <button type="button" class="mt-2 text-[12px] font-semibold text-unu-green underline-offset-4 hover:underline" @click="copyTicket">Salin ID</button>
                 </div>
                 <div class="rounded-xl border border-line-warm bg-ivory p-4">
                   <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-ink-muted">Status awal</p>
@@ -313,12 +336,12 @@ useSeoMeta({
                   <input :value="submitted.trackingUrl" readonly class="field-input flex-1 text-xs" aria-label="Tautan pelacakan permohonan" />
                   <AppButton variant="secondary" @click="copyTracking">Salin tautan</AppButton>
                 </div>
-                <p class="field-help">Tautan ini juga dikirim ke email akun Anda jika konfigurasi email aktif.</p>
+                <p class="field-help">Tautan ini juga dikirim ke email pemohon jika konfigurasi email aktif. Jangan membagikannya kepada pihak lain.</p>
               </div>
 
               <div class="mt-7 flex flex-col gap-2.5 sm:flex-row">
-                <AppButton :to="`/permohonan-saya/${submitted.requestId}`" size="lg">Lihat Permohonan <template #right><ArrowRight :size="15" /></template></AppButton>
-                <AppButton to="/permohonan-saya" variant="secondary" size="lg">Semua Permohonan Saya</AppButton>
+                <AppButton :to="submitted.trackingUrl || '/lacak'" size="lg">Lacak Permohonan <template #right><ArrowRight :size="15" /></template></AppButton>
+                <AppButton to="/layanan" variant="secondary" size="lg">Ajukan Layanan Lain</AppButton>
               </div>
             </div>
           </div>
@@ -341,7 +364,29 @@ useSeoMeta({
             </div>
 
             <fieldset class="mt-7">
-              <legend class="mb-4 text-[14px] font-bold uppercase tracking-[0.14em] text-slate-500">Data permohonan</legend>
+              <legend class="mb-1 text-[14px] font-bold uppercase tracking-[0.14em] text-slate-500">Data pemohon</legend>
+              <p class="mb-4 text-[13px] leading-5 text-slate-500">Dipakai untuk notifikasi dan tautan pelacakan. Tidak perlu membuat akun.</p>
+              <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label for="requester-name" class="field-label">Nama pemohon <span class="text-red-700">*</span></label>
+                  <input id="requester-name" v-model="requester.name" class="field-input" maxlength="120" autocomplete="name" placeholder="Nama lengkap" :disabled="submitting" />
+                  <p v-if="requesterErrors.name" class="field-error" role="alert">{{ requesterErrors.name }}</p>
+                </div>
+                <div>
+                  <label for="requester-email" class="field-label">Email pemohon <span class="text-red-700">*</span></label>
+                  <input id="requester-email" v-model="requester.email" type="email" class="field-input" maxlength="180" autocomplete="email" placeholder="nama@email.com" :disabled="submitting" />
+                  <p v-if="requesterErrors.email" class="field-error" role="alert">{{ requesterErrors.email }}</p>
+                </div>
+                <div class="sm:col-span-2">
+                  <label for="requester-phone" class="field-label">Nomor HP untuk pelacakan <span class="text-slate-400">(opsional)</span></label>
+                  <input id="requester-phone" v-model="requester.phone" type="tel" class="field-input" maxlength="40" autocomplete="tel" placeholder="Nomor HP atau WhatsApp" :disabled="submitting" />
+                  <p v-if="requesterErrors.phone" class="field-error" role="alert">{{ requesterErrors.phone }}</p>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="mt-8 border-t border-line-warm pt-6">
+              <legend class="mb-4 text-[14px] font-bold uppercase tracking-[0.14em] text-slate-500">Detail permohonan</legend>
               <div class="grid gap-5 sm:grid-cols-2">
                 <div
                   v-for="field in regularFields"
@@ -377,7 +422,7 @@ useSeoMeta({
               <div class="flex items-center gap-2 text-[12px] text-slate-500">
                 <Loader2 v-if="draftSaving" :size="13" class="animate-spin" aria-hidden="true" />
                 <Save v-else :size="13" aria-hidden="true" />
-                <span>{{ draftMessage || 'Draft isian disimpan otomatis.' }}</span>
+                <span>{{ draftMessage || (user ? 'Draft isian disimpan otomatis.' : 'Tidak perlu akun untuk mengirim permohonan.') }}</span>
               </div>
               <div class="flex flex-col gap-2 sm:flex-row">
                 <AppButton :to="`/layanan/${service.slug}`" variant="secondary">Batal</AppButton>

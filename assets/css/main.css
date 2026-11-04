@@ -90,6 +90,35 @@
     @apply inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-unu-green;
   }
 
+  .eyebrow-editorial {
+    @apply text-[12px] font-semibold uppercase leading-[1.4] tracking-[0.14em] text-gold-dark sm:text-[13px];
+  }
+
+  .hero-title {
+    @apply font-semibold text-charcoal;
+    font-size: clamp(2.25rem, 1.15rem + 2.85vw, 3.75rem);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+  }
+
+  .section-title {
+    @apply font-semibold text-charcoal;
+    font-size: clamp(1.625rem, 1.25rem + 1.15vw, 2.25rem);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+
+  .metric-figure {
+    @apply font-semibold tabular-nums text-charcoal;
+    font-size: clamp(2.75rem, 1.9rem + 2.6vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .hero-accent {
+    @apply text-gold-text;
+  }
+
   .display-1 {
     @apply text-[2.375rem] font-bold leading-[1.12] tracking-[-0.035em] sm:text-[3rem] lg:text-[3.25rem] xl:text-[3.5rem];
   }
@@ -148,6 +177,20 @@
 
   .field-input {
     @apply block min-h-[46px] w-full rounded-lg border border-line-warm bg-white px-3.5 py-2.5 text-[16px] text-charcoal placeholder:text-[16px] placeholder:text-slate-400 transition hover:border-slate-300 focus:border-unu-green focus:ring-2 focus:ring-unu-green/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400;
+  }
+
+  select.field-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    background-size: 16px 16px;
+    padding-right: 2.6rem;
+  }
+
+  select.field-input::-ms-expand {
+    display: none;
   }
 
   .field-help {
@@ -243,6 +286,11 @@
 
   .admin-shell table tbody td {
     color: #475569;
+  }
+
+  .admin-shell table tbody p {
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   /* Header-only typography. Isolated from content and heading scales. */

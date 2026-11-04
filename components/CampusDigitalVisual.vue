@@ -1,11 +1,4 @@
 <script setup lang="ts">
-withDefaults(
-  defineProps<{
-    serviceCount?: number
-    platformCount?: number
-  }>(),
-  { serviceCount: 0, platformCount: 0 }
-)
 </script>
 
 <template>

@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
   const urls = [
     { loc: '/', lastmod: new Date().toISOString() },
     { loc: '/tentang', lastmod: new Date().toISOString() },
+    { loc: '/tentang-kami/tim', lastmod: new Date().toISOString() },
     { loc: '/layanan', lastmod: new Date().toISOString() },
     { loc: '/ekosistem-digital', lastmod: new Date().toISOString() },
     { loc: '/dokumen', lastmod: new Date().toISOString() },

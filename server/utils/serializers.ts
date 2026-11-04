@@ -7,7 +7,9 @@ import type {
   RequestDetailDTO,
   RequestListItem,
   ServiceDTO,
-  SiteSettingsDTO
+  SiteSettingsDTO,
+  TeamGroupDTO,
+  TeamMemberDTO
 } from '../../shared/types'
 
 export function toIso(value: unknown) {
@@ -63,6 +65,33 @@ export function serializeDocument(doc: any): DocumentDTO {
     fileName: doc.currentVersion?.fileName,
     fileSize: doc.currentVersion?.size,
     archived: Boolean(doc.archived)
+  }
+}
+
+export function serializeTeamMember(member: any, photoBase = '/api/team/members'): TeamMemberDTO {
+  return {
+    id: String(member._id),
+    name: member.name,
+    position: member.position,
+    unit: member.unit || '',
+    bio: member.bio || '',
+    groupId: member.group?._id ? String(member.group._id) : member.group ? String(member.group) : '',
+    groupName: member.group?.name || '',
+    order: Number(member.order || 0),
+    published: Boolean(member.published),
+    photoUrl: member.photoStorageKey ? `${photoBase}/${String(member._id)}/photo` : undefined,
+    focalX: Number(member.focalX ?? 50),
+    focalY: Number(member.focalY ?? 50),
+    updatedAt: toIso(member.updatedAt)
+  }
+}
+
+export function serializeTeamGroup(group: any): TeamGroupDTO {
+  return {
+    id: String(group._id),
+    name: group.name,
+    slug: group.slug,
+    order: Number(group.order || 0)
   }
 }
 
