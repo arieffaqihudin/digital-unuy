@@ -1,12 +1,29 @@
 <script setup lang="ts">
-import { GraduationCap, Landmark, Users } from 'lucide-vue-next'
+import { ArrowRight, GraduationCap, Landmark, Sparkles, Users } from 'lucide-vue-next'
 import { approachContent } from '~/shared/home-content'
 
 withDefaults(defineProps<{ hideLink?: boolean; tag?: 'h1' | 'h2' }>(), { hideLink: false, tag: 'h2' })
 
 const icons = { academic: GraduationCap, users: Users, landmark: Landmark } as const
-const selected = ref(0)
-const chosen = computed(() => approachContent.cycles[selected.value])
+const selected = ref<number | null>(null)
+const toggle = (index: number) => (selected.value = selected.value === index ? null : index)
+
+// Desktop composition on a 1000 x 560 canvas: node centres.
+const hub = { x: 500, y: 270 }
+const nodes = [
+  { x: 170, y: 95 },
+  { x: 830, y: 95 },
+  { x: 500, y: 470 }
+]
+const pct = (n: { x: number; y: number }) => ({ left: `${n.x / 10}%`, top: `${(n.y / 560) * 100}%` })
+// Cross links between cycles (interdependence), drawn behind the nodes.
+const cross = [
+  [0, 1],
+  [1, 2],
+  [2, 0]
+]
+const active = (index: number) => selected.value === index
+const dim = (index: number) => selected.value !== null && selected.value !== index
 </script>
 
 <template>
@@ -17,91 +34,108 @@ const chosen = computed(() => approachContent.cycles[selected.value])
         <component :is="tag" id="approach-title" class="section-title mt-4">{{ approachContent.heading }}</component>
       </div>
 
-      <div v-reveal class="relative mx-auto mt-12 max-w-[1000px] md:mt-16 md:pt-[64px]">
-        <!-- Loop line joining the first and third cycle (desktop) -->
-        <svg
-          class="flow-arc pointer-events-none absolute left-0 top-0 hidden h-[64px] w-full md:block"
-          viewBox="0 0 100 64"
-          preserveAspectRatio="none"
-          fill="none"
-          aria-hidden="true"
-        >
+      <!-- Desktop: hub with three cycles around it -->
+      <div v-reveal class="relative mx-auto mt-14 hidden h-[560px] max-w-[900px] lg:block xl:max-w-[1000px]">
+        <svg class="absolute inset-0 h-full w-full" viewBox="0 0 1000 560" preserveAspectRatio="none" fill="none" aria-hidden="true">
           <path
-            d="M16.67 64 C16.67 -8 83.33 -8 83.33 64"
+            v-for="([a, b], i) in cross"
+            :key="`c${i}`"
+            :d="`M${nodes[a].x} ${nodes[a].y} L${nodes[b].x} ${nodes[b].y}`"
             stroke="#BF8B15"
-            stroke-opacity="0.7"
-            stroke-width="1.5"
+            stroke-opacity="0.45"
+            stroke-width="1.25"
+            stroke-dasharray="4 6"
             vector-effect="non-scaling-stroke"
           />
+          <path
+            v-for="(node, i) in nodes"
+            :key="`s${i}`"
+            :d="`M${hub.x} ${hub.y} L${node.x} ${node.y}`"
+            class="flow-draw"
+            stroke-dasharray="1"
+            :stroke="active(i) ? '#337449' : '#BF8B15'"
+            :stroke-opacity="active(i) ? 1 : 0.8"
+            :stroke-width="active(i) ? 2 : 1.5"
+            vector-effect="non-scaling-stroke"
+            pathLength="1"
+            :style="{ '--flow-delay': `${250 + i * 150}ms`, transition: 'stroke 220ms, stroke-width 220ms, stroke-opacity 220ms' }"
+          />
         </svg>
-        <p
-          class="absolute left-1/2 top-[2px] hidden -translate-x-1/2 bg-white px-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-gold-dark md:block"
+
+        <!-- Hub -->
+        <div class="flow-node absolute z-10 -translate-x-1/2 -translate-y-1/2" :style="pct(hub)">
+          <div class="grid h-[168px] w-[168px] place-items-center rounded-full bg-unu-green p-5 text-center text-white shadow-soft ring-8 ring-unu-green-soft">
+            <div>
+              <Sparkles :size="20" :stroke-width="1.6" class="mx-auto text-gold-soft" aria-hidden="true" />
+              <p class="mt-2 text-[16px] font-semibold leading-[1.2] tracking-[-0.01em]">{{ approachContent.hub.label }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cycles -->
+        <button
+          v-for="(cycle, index) in approachContent.cycles"
+          :key="cycle.title"
+          type="button"
+          class="flow-node absolute z-10 w-[288px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-5 text-left transition-[border-color,box-shadow,opacity] duration-hover ease-unu hover:border-unu-green/60"
+          :class="[active(index) ? 'border-unu-green shadow-[0_0_0_4px_rgba(51,116,73,0.12)]' : 'border-line-warm shadow-card', dim(index) ? 'opacity-60' : '']"
+          :style="{ ...pct(nodes[index]), '--flow-delay': `${index * 150}ms` }"
+          :aria-pressed="active(index)"
+          @click="toggle(index)"
         >
-          {{ approachContent.loopLabel }}
-        </p>
-
-        <ol class="grid gap-10 md:grid-cols-3 md:gap-0">
-          <li
-            v-for="(cycle, index) in approachContent.cycles"
-            :key="cycle.title"
-            class="relative flex items-start gap-5 md:flex-col md:items-center md:text-center"
-          >
-            <!-- Connector to the next cycle -->
+          <span class="flex items-center gap-3">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-unu-green-soft text-unu-green">
+              <component :is="icons[cycle.icon as keyof typeof icons]" :size="20" :stroke-width="1.6" aria-hidden="true" />
+            </span>
+            <span>
+              <span class="block text-[12px] font-semibold tabular-nums text-gold-dark">{{ String(index + 1).padStart(2, '0') }}</span>
+              <span class="block text-[19px] font-semibold leading-tight tracking-[-0.02em]">{{ cycle.title }}</span>
+            </span>
+          </span>
+          <span class="mt-3 block text-[14px] leading-5 text-slate-600">{{ cycle.text }}</span>
+          <span class="mt-3 flex flex-wrap gap-1.5">
             <span
-              v-if="index < approachContent.cycles.length - 1"
-              class="flow-line absolute left-[35px] top-[72px] h-[calc(100%-32px)] w-px bg-gold/60 md:left-[calc(50%+72px)] md:top-[56px] md:h-px md:w-[calc(100%-144px)]"
-              :style="{ '--flow-delay': `${300 + index * 250}ms` }"
-              aria-hidden="true"
-            />
+              v-for="item in cycle.capabilities"
+              :key="item"
+              class="rounded-full border px-2.5 py-1 text-[12px] font-medium leading-4 transition-colors duration-hover"
+              :class="active(index) ? 'border-unu-green/30 bg-unu-green-soft text-unu-green-dark' : 'border-line-warm bg-ivory text-slate-700'"
+            >{{ item }}</span>
+          </span>
+        </button>
+      </div>
 
-            <button
-              type="button"
-              class="flow-node group relative grid h-[72px] w-[72px] shrink-0 place-items-center rounded-full border bg-white transition-[border-color,box-shadow,color] duration-hover ease-unu md:h-28 md:w-28"
-              :class="selected === index ? 'border-unu-green text-unu-green shadow-[0_0_0_4px_rgba(51,116,73,0.12)]' : 'border-gold/60 text-unu-green/70 hover:border-unu-green hover:text-unu-green'"
-              :style="{ '--flow-delay': `${index * 200}ms` }"
-              :aria-pressed="selected === index"
-              :aria-label="`Tampilkan ringkasan siklus ${cycle.title}`"
-              @click="selected = index"
-            >
-              <span
-                class="absolute inset-[6px] rounded-full transition-colors duration-hover ease-unu md:inset-2"
-                :class="selected === index ? 'bg-unu-green-soft' : 'bg-ivory'"
-              />
-              <component :is="icons[cycle.icon as keyof typeof icons]" class="relative h-7 w-7 md:h-9 md:w-9" :stroke-width="1.6" aria-hidden="true" />
-            </button>
-
-            <div class="min-w-0 pt-1 md:mt-5 md:px-4 md:pt-0">
-              <p class="text-[12px] font-semibold tabular-nums text-gold-dark">{{ String(index + 1).padStart(2, '0') }}</p>
-              <h3 class="mt-1 text-[20px] font-semibold leading-[1.25] tracking-[-0.02em] transition-colors duration-hover md:text-[22px]" :class="selected === index ? 'text-charcoal' : 'text-charcoal/75'">{{ cycle.title }}</h3>
-              <p class="mt-1.5 text-[15px] leading-6 text-slate-600">{{ cycle.text }}</p>
+      <!-- Mobile / tablet: vertical connected -->
+      <div v-reveal class="mx-auto mt-12 max-w-[560px] lg:hidden">
+        <div class="flex items-center gap-4 rounded-2xl bg-unu-green p-5 text-white">
+          <Sparkles :size="22" :stroke-width="1.6" class="shrink-0 text-gold-soft" aria-hidden="true" />
+          <div>
+            <p class="text-[17px] font-semibold leading-tight">{{ approachContent.hub.label }}</p>
+            <p class="mt-1 text-[13px] leading-5 text-white/75">{{ approachContent.hub.note }}</p>
+          </div>
+        </div>
+        <ol class="relative ml-6 border-l-2 border-gold/60 pb-1 pt-1">
+          <li v-for="(cycle, index) in approachContent.cycles" :key="cycle.title" class="relative pl-7 pt-6">
+            <span class="absolute -left-[13px] top-[34px] grid h-6 w-6 place-items-center rounded-full border-2 border-gold bg-white" aria-hidden="true">
+              <span class="h-2 w-2 rounded-full bg-gold" />
+            </span>
+            <div class="rounded-2xl border border-line-warm bg-white p-4 shadow-card">
+              <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-unu-green-soft text-unu-green">
+                  <component :is="icons[cycle.icon as keyof typeof icons]" :size="20" :stroke-width="1.6" aria-hidden="true" />
+                </span>
+                <h3 class="text-[18px] font-semibold leading-tight tracking-[-0.02em]">{{ cycle.title }}</h3>
+              </div>
+              <p class="mt-2.5 text-[14px] leading-5 text-slate-600">{{ cycle.text }}</p>
+              <ul class="mt-3 flex flex-wrap gap-1.5">
+                <li v-for="item in cycle.capabilities" :key="item" class="rounded-full border border-line-warm bg-ivory px-2.5 py-1 text-[12px] font-medium leading-4 text-slate-700">{{ item }}</li>
+              </ul>
             </div>
           </li>
         </ol>
-
-        <!-- Selected cycle summary -->
-        <div class="mt-10 border-t border-line-warm pt-6 md:mt-12" aria-live="polite">
-          <Transition name="swap" mode="out-in">
-            <div :key="chosen.title" class="flex flex-wrap items-baseline gap-x-6 gap-y-3 md:justify-center">
-              <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-unu-green">{{ chosen.title }}</p>
-              <ul class="flex flex-wrap gap-2">
-                <li
-                  v-for="example in chosen.examples"
-                  :key="example"
-                  class="rounded-full border border-unu-green/25 bg-unu-green-soft px-3.5 py-1.5 text-[13px] font-medium leading-5 text-unu-green-dark"
-                >
-                  {{ example }}
-                </li>
-              </ul>
-            </div>
-          </Transition>
-        </div>
       </div>
 
-      <p v-reveal class="mt-10 text-center md:hidden">
-        <span class="text-[12px] font-semibold uppercase tracking-[0.14em] text-gold-dark">{{ approachContent.loopLabel }}</span>
-      </p>
-      <div v-if="!hideLink" v-reveal class="mt-8 text-center md:mt-12">
-        <NuxtLink to="/tentang" class="link-arrow">Mengenal Direktorat →</NuxtLink>
+      <div v-if="!hideLink" v-reveal class="mt-12 text-center">
+        <NuxtLink :to="approachContent.cta.to" class="link-arrow">{{ approachContent.cta.label }} <ArrowRight :size="14" aria-hidden="true" /></NuxtLink>
       </div>
     </div>
   </section>

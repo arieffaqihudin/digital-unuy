@@ -71,26 +71,39 @@ export const impactMetrics: ImpactMetric[] = [
 export const approachContent = {
   eyebrow: 'Pendekatan Transformasi',
   heading: 'Satu ekosistem, tiga siklus yang saling terhubung.',
-  loopLabel: 'Satu ekosistem',
+  hub: { label: 'Ekosistem Digital UNU', note: 'Layanan, sistem, dan data yang saling terhubung' },
+  cta: { label: 'Pelajari Pendekatan Kami', to: '/tentang' },
   cycles: [
     {
       title: 'Mahasiswa',
       icon: 'academic',
       text: 'Dari awal studi hingga kelulusan.',
-      examples: ['Ijazah & SKPI']
+      capabilities: ['Akademik', 'Pembelajaran', 'Kelulusan']
     },
     {
       title: 'Dosen & Pegawai',
       icon: 'users',
       text: 'Pekerjaan akademik dan kepegawaian.',
-      examples: ['Portofolio perkuliahan', 'Presensi pegawai']
+      capabilities: ['Presensi', 'Persuratan', 'Operasional']
     },
     {
       title: 'Institusi',
       icon: 'landmark',
       text: 'Tata kelola berbasis data terdokumentasi.',
-      examples: ['Dokumen digital']
+      capabilities: ['Tata Kelola', 'Data', 'Kinerja']
     }
+  ]
+}
+
+export const processContent = {
+  eyebrow: 'Cara Kami Bekerja',
+  heading: 'Kerja transformasi yang terarah.',
+  narrative: 'Setiap inisiatif dimulai dari kebutuhan pengguna, dibangun bersama pemilik proses, dan dievaluasi setelah berjalan.',
+  steps: [
+    { title: 'Memahami', icon: 'search', text: 'Memetakan kebutuhan pengguna, proses, dan data yang sudah ada.' },
+    { title: 'Merancang', icon: 'design', text: 'Menyusun alur, antarmuka, dan arsitektur yang mudah digunakan.' },
+    { title: 'Membangun', icon: 'build', text: 'Mengembangkan dan menguji sistem bersama pemilik proses.' },
+    { title: 'Mengimplementasikan & Mengevaluasi', icon: 'launch', text: 'Meluncurkan, mendampingi pengguna, lalu mengukur dampaknya.' }
   ]
 }
 

@@ -59,13 +59,35 @@ const onTouchEnd = (event: TouchEvent) => {
 <template>
   <section class="section-space bg-ivory" aria-labelledby="ecosystem-title">
     <div class="page-shell">
-      <HomeSectionHead eyebrow="Ekosistem Digital" title="Produk digital yang dibangun untuk kampus." title-id="ecosystem-title">
+      <HomeSectionHead
+        eyebrow="Ekosistem Digital"
+        title="Produk digital yang dibangun untuk kampus."
+        description="Ekosistem digital UNU dikelompokkan ke dalam empat kategori utama agar lebih mudah dipahami dan dijelajahi."
+        title-id="ecosystem-title"
+      >
         <template #action>
           <NuxtLink to="/ekosistem-digital" class="link-arrow">Lihat seluruh ekosistem <ArrowUpRight :size="14" aria-hidden="true" /></NuxtLink>
         </template>
       </HomeSectionHead>
 
-      <div v-if="current" class="mt-10 lg:mt-12">
+      <nav v-if="categories.length" v-reveal class="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Empat kategori ekosistem digital">
+        <NuxtLink
+          v-for="(category, index) in categories"
+          :key="category.id"
+          :to="{ path: '/ekosistem-digital', query: { category: category.slug } }"
+          class="group relative flex min-h-[112px] flex-col justify-between overflow-hidden rounded-xl border p-4 transition-[border-color,background-color,box-shadow] duration-hover ease-unu hover:border-unu-green/60 hover:bg-white"
+          :class="current?.categorySlug === category.slug ? 'border-unu-green bg-white shadow-card' : 'border-line-warm bg-white/50'"
+          :aria-current="current?.categorySlug === category.slug ? 'true' : undefined"
+        >
+          <span class="flex items-start justify-between">
+            <span class="text-[32px] font-semibold leading-none tabular-nums tracking-[-0.04em] transition-colors duration-hover" :class="current?.categorySlug === category.slug ? 'text-unu-green' : 'text-gold/80'">{{ String(index + 1).padStart(2, '0') }}</span>
+            <ArrowUpRight :size="16" class="text-slate-400 transition duration-hover ease-unu group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-unu-green" aria-hidden="true" />
+          </span>
+          <span class="mt-4 text-[15px] font-semibold leading-5 text-charcoal">{{ category.name }}</span>
+        </NuxtLink>
+      </nav>
+
+      <div v-if="current" class="mt-12 lg:mt-14">
         <!-- Product tabs -->
         <div class="-mx-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
           <div role="tablist" aria-label="Produk ekosistem digital" class="flex min-w-max gap-1 border-b border-charcoal/15" @keydown="onKeydown">
@@ -159,19 +181,6 @@ const onTouchEnd = (event: TouchEvent) => {
         Produk belum tersedia.
       </div>
 
-      <nav v-if="categories.length" v-reveal class="mt-14 border-t border-charcoal/15 pt-5" aria-label="Kategori ekosistem">
-        <div class="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
-          <NuxtLink
-            v-for="(category, index) in categories"
-            :key="category.id"
-            :to="{ path: '/ekosistem-digital', query: { category: category.slug } }"
-            class="group flex min-h-[44px] items-baseline gap-3"
-          >
-            <span class="text-[11px] font-bold tabular-nums text-gold-dark">{{ String(index + 1).padStart(2, '0') }}</span>
-            <span class="text-[15px] font-semibold leading-5 text-charcoal transition-colors duration-micro group-hover:text-unu-green">{{ category.name }}</span>
-          </NuxtLink>
-        </div>
-      </nav>
     </div>
   </section>
 </template>

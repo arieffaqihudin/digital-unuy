@@ -409,6 +409,14 @@
     transform: scaleX(0);
   }
 
+  .flow-draw {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 800ms var(--ease-unu) var(--flow-delay, 0ms);
+  }
+  [data-reveal='hidden'] .flow-draw {
+    stroke-dashoffset: 1;
+  }
+
   .flow-arc {
     clip-path: inset(0 0 0 0);
     transition: clip-path 900ms var(--ease-unu) 350ms;
@@ -426,7 +434,6 @@
 
   [data-reveal='hidden'] .flow-node {
     opacity: 0;
-    transform: scale(0.92);
   }
 
   .bar-fill {
@@ -474,6 +481,7 @@
   [data-reveal],
   [data-reveal] .flow-line,
   [data-reveal] .flow-arc,
+  [data-reveal] .flow-draw,
   [data-reveal] .flow-node,
   [data-reveal] .bar-fill {
     opacity: 1 !important;
