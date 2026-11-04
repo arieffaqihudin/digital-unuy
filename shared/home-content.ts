@@ -77,20 +77,20 @@ export const approachContent = {
     {
       title: 'Mahasiswa',
       icon: 'academic',
-      text: 'Dari awal studi hingga kelulusan.',
-      capabilities: ['Akademik', 'Pembelajaran', 'Kelulusan']
+      text: 'Dari pendaftaran hingga menjadi alumni.',
+      capabilities: ['Pendaftaran', 'Pembelajaran', 'Kelulusan']
     },
     {
       title: 'Dosen & Pegawai',
       icon: 'users',
-      text: 'Pekerjaan akademik dan kepegawaian.',
-      capabilities: ['Presensi', 'Persuratan', 'Operasional']
+      text: 'Dari pengangkatan hingga purna tugas.',
+      capabilities: ['Kepegawaian', 'Tridharma', 'Operasional']
     },
     {
       title: 'Institusi',
       icon: 'landmark',
-      text: 'Tata kelola berbasis data terdokumentasi.',
-      capabilities: ['Tata Kelola', 'Data', 'Kinerja']
+      text: 'Dari perencanaan hingga akreditasi.',
+      capabilities: ['Perencanaan', 'Tata Kelola', 'Penjaminan Mutu']
     }
   ]
 }
