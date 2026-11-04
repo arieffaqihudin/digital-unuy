@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, ArrowUpRight, ChevronDown } from 'lucide-vue-next'
+import { ArrowRight, ArrowUpRight } from 'lucide-vue-next'
 import type { DigitalPlatformDTO, PlatformCategoryDTO, TeamMemberDTO } from '~/shared/types'
 
 interface PageResponse {
@@ -337,28 +337,6 @@ usePageSeo(() => ({
             <template #right><ArrowRight :size="16" aria-hidden="true" /></template>
           </AppButton>
         </div>
-      </div>
-    </section>
-
-    <!-- Secondary official information -->
-    <section class="bg-white">
-      <div class="page-shell py-8 sm:py-10">
-        <details class="group border-t border-line-warm pt-5">
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-            <span>
-              <span class="block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Informasi resmi</span>
-              <span class="mt-1 block text-[15px] font-semibold text-charcoal">Peran, fokus kerja, dan batasan informasi</span>
-            </span>
-            <span class="flex shrink-0 items-center gap-2 text-[12px] text-slate-500">
-              <span v-if="page">Diperbarui {{ formatDate(page.updatedAt) }}</span>
-              <ChevronDown :size="16" class="transition group-open:rotate-180" aria-hidden="true" />
-            </span>
-          </summary>
-          <div v-if="page?.content" class="prose-unu mt-6 max-w-3xl" v-html="page.content" />
-          <p v-else class="mt-6 max-w-3xl text-[15px] leading-7 text-slate-600">
-            Informasi resmi belum tersedia melalui CMS.
-          </p>
-        </details>
       </div>
     </section>
   </div>
