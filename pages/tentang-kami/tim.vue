@@ -13,12 +13,11 @@ const allMembers = computed(() => [
   ...(data.value?.ungrouped || [])
 ])
 
-useSeoMeta({
-  title: 'Tim Transformasi Digital',
+usePageSeo({
+  title: 'Tim Transformasi Digital UNU Yogyakarta | Profil Tim',
   description:
-    'Anggota Tim Transformasi Digital Universitas Nahdlatul Ulama Yogyakarta beserta peran dan bidang tanggung jawab yang dipublikasikan.',
-  ogTitle: 'Tim Transformasi Digital · UNU Yogyakarta',
-  ogDescription: 'Kenali anggota Tim Transformasi Digital Universitas Nahdlatul Ulama Yogyakarta.'
+    'Kenali tim di balik pengembangan produk, layanan, dan ekosistem digital Universitas Nahdlatul Ulama Yogyakarta.',
+  breadcrumbs: [{ name: 'Beranda', to: '/' }, { name: 'Tim Kami', to: '/tentang-kami/tim' }]
 })
 </script>
 

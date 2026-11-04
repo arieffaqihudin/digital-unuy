@@ -50,12 +50,11 @@ const totalPages = computed(() => Math.max(1, Math.ceil((result.value?.total || 
 const featured = computed(() => result.value?.items?.[0])
 const rest = computed(() => result.value?.items?.slice(1) || [])
 
-useSeoMeta({
-  title: 'Publikasi',
+usePageSeo({
+  title: 'Berita & Publikasi Transformasi Digital | UNU Yogyakarta',
   description:
-    'Kabar, pembelajaran, dan pembaruan dari Direktorat Tim Transformasi Digital Universitas Nahdlatul Ulama Yogyakarta.',
-  ogTitle: 'Publikasi · Transformasi Digital UNU Yogyakarta',
-  ogDescription: 'Catatan dan pembaruan seputar transformasi digital UNU Yogyakarta.'
+    'Informasi terbaru mengenai pengembangan sistem, program, kegiatan, dan inovasi transformasi digital UNU Yogyakarta.',
+  breadcrumbs: [{ name: 'Beranda', to: '/' }, { name: 'Publikasi', to: '/publikasi' }]
 })
 </script>
 
@@ -73,6 +72,7 @@ useSeoMeta({
     </PublicPageHeader>
 
     <section class="py-10 lg:py-12 bg-soft-white">
+      <h2 class="sr-only">Daftar publikasi</h2>
       <div class="page-shell">
         <div class="flex flex-col gap-3 border-y border-line-warm bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="relative w-full sm:max-w-sm">

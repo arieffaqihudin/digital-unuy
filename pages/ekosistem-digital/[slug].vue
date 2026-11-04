@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowUpRight } from 'lucide-vue-next'
 import type { DigitalPlatformDTO } from '~/shared/types'
+import { softwareLd } from '~/shared/seo-schema'
 
 const route = useRoute()
 const slug = String(route.params.slug || '')
@@ -19,11 +20,28 @@ const statusClasses: Record<string, string> = {
   'Dalam Pengembangan': 'border-amber-200 bg-amber-50 text-amber-900'
 }
 
-useSeoMeta({
-  title: `${platform.name} · Ekosistem Digital`,
+const siteBase = String(useRuntimeConfig().public.siteUrl || '').replace(/\/+$/, '')
+usePageSeo({
+  title: `${platform.name} | Ekosistem Digital UNU Yogyakarta`,
   description: platform.description,
-  ogTitle: `${platform.name} · Ekosistem Digital UNU Yogyakarta`,
-  ogDescription: platform.description
+  seo: platform.seo,
+  image: platform.thumbnail || platform.gallery[0] || undefined,
+  breadcrumbs: [
+    { name: 'Beranda', to: '/' },
+    { name: 'Ekosistem Digital', to: '/ekosistem-digital' },
+    { name: platform.name, to: `/ekosistem-digital/${platform.slug}` }
+  ],
+  jsonLd: [
+    softwareLd(siteBase, {
+      url: `${siteBase}/ekosistem-digital/${platform.slug}`,
+      name: platform.name,
+      description: platform.description,
+      image: platform.thumbnail || platform.gallery[0],
+      category: platform.category,
+      appUrl: platform.url
+    })
+  ],
+  modifiedTime: platform.updatedAt
 })
 </script>
 

@@ -1,4 +1,5 @@
 import type { SiteSettingsDTO } from '~/shared/types'
+import { defaultSeoSettings } from '~/shared/seo'
 
 const defaultSettings: SiteSettingsDTO = {
   directorateName: 'Direktorat Tim Transformasi Digital',
@@ -22,6 +23,7 @@ const defaultSettings: SiteSettingsDTO = {
     secondaryUrl: '/tentang'
   },
   metrics: [],
+  seo: defaultSeoSettings(),
   devSeedMode: false
 }
 

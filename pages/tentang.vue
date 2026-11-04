@@ -100,16 +100,14 @@ function selectProduct(index: number) {
   activeProductIndex.value = index
 }
 
-useSeoMeta({
-  title: page.value?.seoTitle || 'Tentang Direktorat',
+usePageSeo(() => ({
+  title: 'Tentang Direktorat Transformasi Digital | UNU Yogyakarta',
   description:
-    page.value?.seoDescription ||
     page.value?.excerpt ||
-    'Peran Direktorat Tim Transformasi Digital Universitas Nahdlatul Ulama Yogyakarta dalam tata kelola TI, integrasi data, dan layanan digital.',
-  ogTitle: page.value?.seoTitle || 'Tentang Direktorat Tim Transformasi Digital',
-  ogDescription: page.value?.seoDescription || page.value?.excerpt || 'Mengenal peran dan fokus kerja transformasi digital UNU Yogyakarta.',
-  ogType: 'article'
-})
+    'Kenali pendekatan transformasi digital UNU Yogyakarta yang menghubungkan siklus mahasiswa, dosen, pegawai, dan tata kelola institusi.',
+  seo: page.value?.seo,
+  breadcrumbs: [{ name: 'Beranda', to: '/' }, { name: 'Tentang Kami', to: '/tentang' }]
+}))
 </script>
 
 <template>

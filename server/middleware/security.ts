@@ -6,6 +6,10 @@ export default defineEventHandler(async (event) => {
   setHeader(event, 'Cross-Origin-Opener-Policy', 'same-origin')
 
   const path = event.path || ''
+  // Indexing policy: private routes and non-production environments are never indexed.
+  if (!isIndexableEnvironment() || isPrivatePath(path)) {
+    setHeader(event, 'X-Robots-Tag', 'noindex, nofollow')
+  }
   if (!path.startsWith('/api/')) return
 
   await connectDb()

@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const article = await Article.create({
+    seo: parseSeoInput(body?.seo),
     title,
     slug,
     excerpt,

@@ -21,12 +21,15 @@ const statusClass = computed(() => {
   return 'border-slate-200 bg-slate-50 text-slate-500'
 })
 
-useSeoMeta({
+usePageSeo(() => ({
   title: program.value?.title || 'Program',
-  description: program.value?.summary || 'Program transformasi digital UNU Yogyakarta.',
-  ogTitle: `${program.value?.title} · UNU Yogyakarta`,
-  ogDescription: program.value?.summary
-})
+  suffix: true,
+  description: program.value?.summary,
+  breadcrumbs: [
+    { name: 'Beranda', to: '/' },
+    { name: program.value?.title || 'Program', to: `/program/${program.value?.slug}` }
+  ]
+}))
 </script>
 
 <template>

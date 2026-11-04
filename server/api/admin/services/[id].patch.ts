@@ -132,6 +132,12 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  const seoInput = parseSeoInput(body?.seo)
+  if (seoInput) {
+    service.seo = seoInput as any
+    changed.push('seo')
+  }
+
   await service.save()
   await recordAudit(event, user, 'service.updated', 'Service', String(service._id), {
     name: service.name,

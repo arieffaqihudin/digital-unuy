@@ -59,6 +59,12 @@ export default defineEventHandler(async (event) => {
     changed.push('publishedAt')
   }
 
+  const seoInput = parseSeoInput(body?.seo)
+  if (seoInput) {
+    article.seo = seoInput as any
+    changed.push('seo')
+  }
+
   await article.save()
   await recordAudit(event, user, 'article.updated', 'Article', String(article._id), {
     title: article.title,

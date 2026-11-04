@@ -97,6 +97,17 @@ const fieldSchema = new Schema(
   { _id: false }
 )
 
+const seoSchema = new Schema(
+  {
+    title: { type: String, default: '', maxlength: 160 },
+    description: { type: String, default: '', maxlength: 320 },
+    image: { type: String, default: '', maxlength: 500 },
+    canonical: { type: String, default: '', maxlength: 500 },
+    noindex: { type: Boolean, default: false }
+  },
+  { _id: false }
+)
+
 const serviceSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 160 },
@@ -117,6 +128,7 @@ const serviceSchema = new Schema(
     currentFormVersionId: { type: Schema.Types.ObjectId, ref: 'ServiceFormVersion', default: null },
     formVersionNumber: { type: Number, default: 1 },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    seo: { type: seoSchema, default: () => ({}) },
     isSeedData: { type: Boolean, default: false }
   },
   { timestamps: true }
@@ -331,6 +343,7 @@ const digitalPlatformSchema = new Schema(
     modules: { type: [platformModuleSchema], default: [] },
     metrics: { type: [platformMetricSchema], default: [] },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    seo: { type: seoSchema, default: () => ({}) },
     isSeedData: { type: Boolean, default: false }
   },
   { timestamps: true }
@@ -363,6 +376,7 @@ const articleSchema = new Schema(
     publishedAt: { type: Date, default: Date.now },
     status: { type: String, enum: ['draft', 'published'], default: 'draft', index: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    seo: { type: seoSchema, default: () => ({}) },
     isSeedData: { type: Boolean, default: false }
   },
   { timestamps: true }
@@ -376,6 +390,7 @@ const pageSchema = new Schema(
     content: { type: String, default: '' },
     seoTitle: { type: String, default: '' },
     seoDescription: { type: String, default: '' },
+    seo: { type: seoSchema, default: () => ({}) },
     published: { type: Boolean, default: true },
     isSeedData: { type: Boolean, default: false }
   },
@@ -417,6 +432,12 @@ const siteSettingSchema = new Schema(
       primaryUrl: { type: String, default: '/layanan' },
       secondaryLabel: { type: String, default: 'Tentang Direktorat' },
       secondaryUrl: { type: String, default: '/tentang' }
+    },
+    seo: {
+      titleSuffix: { type: String, default: '' },
+      defaultDescription: { type: String, default: '' },
+      defaultOgImage: { type: String, default: '' },
+      googleVerification: { type: String, default: '' }
     },
     metrics: { type: [metricSchema], default: [] },
     devSeedMode: { type: Boolean, default: false }

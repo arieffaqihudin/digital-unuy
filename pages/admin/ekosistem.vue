@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emptySeo } from '~/shared/seo'
 import { Pencil, Plus, Search, Settings2, Trash2, X } from 'lucide-vue-next'
 import type { DigitalPlatformDTO, PlatformCategoryDTO, PlatformMetricDTO, PlatformModuleDTO } from '~/shared/types'
 import { PLATFORM_AUDIENCES, PLATFORM_STATUSES } from '~/shared/types'
@@ -45,7 +46,8 @@ const form = reactive({
   benefits: '',
   features: '',
   modules: [] as PlatformModuleDTO[],
-  metrics: [] as PlatformMetricDTO[]
+  metrics: [] as PlatformMetricDTO[],
+  seo: emptySeo()
 })
 
 const categoryModalOpen = ref(false)
@@ -117,7 +119,8 @@ function resetForm() {
     benefits: '',
     features: '',
     modules: [],
-    metrics: []
+    metrics: [],
+    seo: emptySeo()
   })
 }
 
@@ -149,7 +152,8 @@ function openEdit(item: DigitalPlatformDTO) {
     benefits: item.benefits,
     features: item.features,
     modules: item.modules.map((module) => ({ ...module })),
-    metrics: item.metrics.map((metric) => ({ ...metric }))
+    metrics: item.metrics.map((metric) => ({ ...metric })),
+    seo: { ...emptySeo(), ...(item.seo || {}) }
   })
   formError.value = ''
   modalOpen.value = true
@@ -481,6 +485,7 @@ useSeoMeta({ title: 'Ekosistem Digital', robots: 'noindex, nofollow' })
           <div class="mt-4 grid gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2"><label for="platform-thumbnail" class="admin-label">Screenshot utama (URL/path)</label><input id="platform-thumbnail" v-model="form.thumbnail" class="field-input" placeholder="/images/… atau https://…" maxlength="500" /><p class="field-help">Kosongkan untuk memakai fallback visual UNU.</p></div>
             <div class="sm:col-span-2"><label for="platform-gallery" class="admin-label">Screenshot tambahan</label><textarea id="platform-gallery" v-model="form.galleryText" rows="2" class="field-input font-mono text-[13px]" placeholder="Satu URL/path per baris" /></div>
+            <SeoFields v-model="form.seo" :fallback-title="form.name" :fallback-description="form.description" :path="form.slug ? `/ekosistem-digital/${form.slug}` : '/ekosistem-digital/…'" />
             <label class="flex min-h-[48px] items-center justify-between gap-3 rounded-lg border border-admin-border px-4 text-[14px] font-medium"><span>Produk unggulan</span><input v-model="form.featured" type="checkbox" class="h-5 w-5 accent-unu-green" /></label>
             <label class="flex min-h-[48px] items-center justify-between gap-3 rounded-lg border border-admin-border px-4 text-[14px] font-medium"><span>Publikasikan</span><input v-model="form.published" type="checkbox" class="h-5 w-5 accent-unu-green" /></label>
           </div>

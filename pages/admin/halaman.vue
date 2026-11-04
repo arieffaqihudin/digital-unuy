@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emptySeo, type SeoDTO } from '~/shared/seo'
 import { ExternalLink, Pencil, Plus } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'admin' })
@@ -11,6 +12,7 @@ interface AdminPage {
   content: string
   seoTitle: string
   seoDescription: string
+  seo?: SeoDTO
   published: boolean
   updatedAt: string
 }
@@ -25,7 +27,7 @@ const modalOpen = ref(false)
 const editingId = ref('')
 const saving = ref(false)
 const errorMessage = ref('')
-const form = reactive({ title: '', slug: '', excerpt: '', content: '', seoTitle: '', seoDescription: '', published: true })
+const form = reactive({ title: '', slug: '', excerpt: '', content: '', published: true, seo: emptySeo() })
 
 async function load() {
   loading.value = true
@@ -42,7 +44,7 @@ await load()
 
 function openCreate() {
   editingId.value = ''
-  Object.assign(form, { title: '', slug: '', excerpt: '', content: '', seoTitle: '', seoDescription: '', published: true })
+  Object.assign(form, { title: '', slug: '', excerpt: '', content: '', published: true, seo: emptySeo() })
   errorMessage.value = ''
   modalOpen.value = true
 }
@@ -53,9 +55,8 @@ function openEdit(page: AdminPage) {
     slug: page.slug,
     excerpt: page.excerpt || '',
     content: page.content || '',
-    seoTitle: page.seoTitle || '',
-    seoDescription: page.seoDescription || '',
-    published: page.published
+    published: page.published,
+    seo: { ...emptySeo(), ...(page.seo || {}), title: page.seo?.title || page.seoTitle || '', description: page.seo?.description || page.seoDescription || '' }
   })
   errorMessage.value = ''
   modalOpen.value = true
@@ -116,8 +117,7 @@ useSeoMeta({ title: 'Halaman & Profil', robots: 'noindex, nofollow' })
         <div><label class="admin-label">Status</label><select v-model="form.published" class="field-input"><option :value="true">Publik</option><option :value="false">Draft</option></select></div>
         <div class="sm:col-span-2"><label class="admin-label">Ringkasan</label><textarea v-model="form.excerpt" rows="2" class="field-input" maxlength="400" /></div>
         <div class="sm:col-span-2"><label class="admin-label">Konten</label><textarea v-model="form.content" rows="12" class="field-input font-mono text-xs" placeholder="Markdown atau HTML dasar…" /><p class="field-help">Konten disanitasi sebelum disimpan.</p></div>
-        <div><label class="admin-label">SEO title</label><input v-model="form.seoTitle" class="field-input" maxlength="160" /></div>
-        <div><label class="admin-label">SEO description</label><textarea v-model="form.seoDescription" rows="2" class="field-input" maxlength="300" /></div>
+        <SeoFields v-model="form.seo" :fallback-title="form.title ? `${form.title} | UNU Yogyakarta` : ''" :fallback-description="form.excerpt" :path="form.slug ? `/halaman/${form.slug}` : '/halaman/…'" />
       </div>
       <template #footer><div class="flex justify-end gap-2"><AppButton variant="secondary" @click="modalOpen = false">Batal</AppButton><AppButton :loading="saving" @click="save">Simpan</AppButton></div></template>
     </ModalDialog>

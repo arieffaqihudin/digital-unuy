@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emptySeo } from '~/shared/seo'
 import { ExternalLink, Pencil, Plus, Search } from 'lucide-vue-next'
 import type { ArticleDTO } from '~/shared/types'
 
@@ -25,7 +26,8 @@ const form = reactive({
   category: 'Berita',
   author: 'Direktorat Transformasi Digital',
   publishedAt: '',
-  status: 'draft'
+  status: 'draft',
+  seo: emptySeo()
 })
 let timer: ReturnType<typeof setTimeout> | null = null
 
@@ -69,7 +71,8 @@ function openCreate() {
     category: 'Berita',
     author: 'Direktorat Transformasi Digital',
     publishedAt: toLocalInput(new Date().toISOString()),
-    status: 'draft'
+    status: 'draft',
+    seo: emptySeo()
   })
   errorMessage.value = ''
   modalOpen.value = true
@@ -85,7 +88,8 @@ function openEdit(item: ArticleDTO) {
     category: item.category,
     author: item.author,
     publishedAt: toLocalInput(item.publishedAt),
-    status: item.status
+    status: item.status,
+    seo: { ...emptySeo(), ...(item.seo || {}) }
   })
   errorMessage.value = ''
   modalOpen.value = true
@@ -151,6 +155,7 @@ useSeoMeta({ title: 'Publikasi', robots: 'noindex, nofollow' })
         <div><label class="admin-label">Thumbnail URL</label><input v-model="form.thumbnail" type="url" class="field-input" placeholder="https://" /></div>
         <div class="sm:col-span-2"><label class="admin-label">Ringkasan</label><textarea v-model="form.excerpt" rows="2" class="field-input" maxlength="400" /></div>
         <div class="sm:col-span-2"><label class="admin-label">Konten</label><textarea v-model="form.content" rows="10" class="field-input font-mono text-xs" placeholder="Tulis konten dengan Markdown…" /><p class="field-help">Markdown didukung. HTML berbahaya akan disanitasi.</p></div>
+        <SeoFields v-model="form.seo" :fallback-title="form.title ? `${form.title} | UNU Yogyakarta` : ''" :fallback-description="form.excerpt" :path="form.slug ? `/publikasi/${form.slug}` : '/publikasi/…'" />
       </div>
       <template #footer><div class="flex justify-end gap-2"><AppButton variant="secondary" @click="modalOpen = false">Batal</AppButton><AppButton :loading="saving" @click="save">Simpan</AppButton></div></template>
     </ModalDialog>

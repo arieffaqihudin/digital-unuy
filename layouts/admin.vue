@@ -12,6 +12,7 @@ import {
   LogOut,
   History,
   Mail,
+  Search,
   Menu,
   Newspaper,
   Users,
@@ -83,6 +84,7 @@ const menuGroups: {
     label: 'Administrasi',
     items: [
       { label: 'Pengguna', to: '/admin/pengguna', icon: Users, permission: 'users.manage' },
+      { label: 'SEO & Indexing', to: '/admin/seo', icon: Search, permission: 'settings.manage' },
       { label: 'Log Aktivitas', to: '/admin/audit', icon: History, permission: 'audit.read' }
     ]
   }

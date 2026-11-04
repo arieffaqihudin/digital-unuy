@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next'
+import { organizationLd, websiteLd } from '~/shared/seo-schema'
 import type {
   ArticleDTO,
   DigitalPlatformDTO,
@@ -30,32 +31,15 @@ const { formatDate } = useFormat()
 
 
 
-useSeoMeta({
-  title: 'Portal Transformasi Digital UNU Yogyakarta',
-  description:
-    'Layanan digital, ekosistem teknologi, dokumentasi, dan publikasi Direktorat Tim Transformasi Digital Universitas Nahdlatul Ulama Yogyakarta.',
-  ogTitle: 'Portal Transformasi Digital UNU Yogyakarta',
-  ogDescription:
-    'Layanan digital, ekosistem teknologi, dokumentasi, dan publikasi Direktorat Tim Transformasi Digital UNU Yogyakarta.',
-  ogType: 'website'
-})
-
 const runtimeConfig = useRuntimeConfig()
-useHead(() => ({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: home.value?.settings.universityName || 'Universitas Nahdlatul Ulama Yogyakarta',
-        department: {
-          '@type': 'Organization',
-          name: home.value?.settings.directorateName || 'Direktorat Tim Transformasi Digital'
-        },
-        url: runtimeConfig.public.siteUrl
-      })
-    }
+const { settings } = useSite()
+usePageSeo(() => ({
+  title: 'Transformasi Digital UNU Yogyakarta | Ekosistem & Layanan Digital',
+  description:
+    'Jelajahi ekosistem digital UNU Yogyakarta, mulai dari layanan akademik, Green Team, OBA, hingga layanan teknologi informasi universitas.',
+  jsonLd: [
+    organizationLd(runtimeConfig.public.siteUrl.replace(/\/+$/, ''), home.value?.settings || settings.value),
+    websiteLd(runtimeConfig.public.siteUrl.replace(/\/+$/, ''))
   ]
 }))
 </script>

@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
 
   const active = Boolean(body?.active)
   const service = await Service.create({
+    seo: parseSeoInput(body?.seo),
     name,
     slug,
     shortDescription,

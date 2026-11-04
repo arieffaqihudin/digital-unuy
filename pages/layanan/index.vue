@@ -58,12 +58,11 @@ const hasFilters = computed(() => Boolean(search.value || category.value))
 const items = computed<ServiceDTO[]>(() => result.value?.items || [])
 const totalPages = computed(() => Math.max(1, Math.ceil((result.value?.total || 0) / (result.value?.pageSize || 12))))
 
-useSeoMeta({
-  title: 'Layanan Digital',
+usePageSeo({
+  title: 'Layanan Digital UNU Yogyakarta | Permohonan Teknologi Informasi',
   description:
-    'Telusuri layanan teknologi informasi UNU Yogyakarta: email institusi, pengembangan sistem, domain dan server, Google Workspace, bantuan teknis, integrasi data, website unit, serta keamanan akses.',
-  ogTitle: 'Layanan Digital UNU Yogyakarta',
-  ogDescription: 'Satu pintu untuk kebutuhan teknologi informasi di lingkungan UNU Yogyakarta.'
+    'Ajukan kebutuhan email institusi, Google Workspace, domain, server, pengembangan sistem informasi, dan layanan digital UNU Yogyakarta.',
+  breadcrumbs: [{ name: 'Beranda', to: '/' }, { name: 'Layanan Digital', to: '/layanan' }]
 })
 </script>
 
@@ -84,6 +83,7 @@ useSeoMeta({
     </PublicPageHeader>
 
     <section class="py-10 lg:py-12 bg-soft-white">
+      <h2 class="sr-only">Daftar layanan digital</h2>
       <div class="page-shell">
         <div class="border-y border-line-warm bg-white px-4 py-3 sm:px-5">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-center">

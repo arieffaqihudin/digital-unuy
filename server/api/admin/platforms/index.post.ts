@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
   const audiences = platformAudiences(body?.audiences)
 
   const platform = await DigitalPlatform.create({
+    seo: parseSeoInput(body?.seo),
     name,
     slug,
     description,

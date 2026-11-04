@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight, CalendarDays, UserRound } from 'lucide-vue-next'
 import type { ArticleDTO } from '~/shared/types'
+import { articleLd } from '~/shared/seo-schema'
 
 interface ArticleResponse {
   article: ArticleDTO
@@ -16,36 +17,39 @@ if (!article.value) throw createError({ statusCode: 404, statusMessage: 'Publika
 const { formatDate } = useFormat()
 const runtimeConfig = useRuntimeConfig()
 
-useSeoMeta({
-  title: article.value?.title || 'Publikasi',
-  description: article.value?.excerpt || 'Publikasi Direktorat Tim Transformasi Digital UNU Yogyakarta.',
-  ogTitle: article.value?.title,
-  ogDescription: article.value?.excerpt,
-  ogImage: article.value?.thumbnail || undefined,
-  ogType: 'article',
-  articlePublishedTime: article.value?.publishedAt
+const siteBase = String(runtimeConfig.public.siteUrl || '').replace(/\/+$/, '')
+usePageSeo(() => {
+  const item = article.value
+  return {
+    title: item?.title || 'Publikasi',
+    suffix: true,
+    description: item?.excerpt,
+    seo: item?.seo,
+    image: item?.thumbnail || undefined,
+    type: 'article' as const,
+    publishedTime: item?.publishedAt,
+    modifiedTime: item?.updatedAt,
+    breadcrumbs: [
+      { name: 'Beranda', to: '/' },
+      { name: 'Publikasi', to: '/publikasi' },
+      { name: item?.title || '', to: `/publikasi/${item?.slug}` }
+    ],
+    jsonLd: item
+      ? [
+          articleLd(siteBase, {
+            url: `${siteBase}/publikasi/${item.slug}`,
+            headline: item.title,
+            description: item.excerpt,
+            image: item.thumbnail,
+            datePublished: item.publishedAt,
+            dateModified: item.updatedAt,
+            author: item.author,
+            section: item.category
+          })
+        ]
+      : []
+  }
 })
-
-useHead(() => ({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: article.value?.title,
-        description: article.value?.excerpt,
-        datePublished: article.value?.publishedAt,
-        author: { '@type': 'Person', name: article.value?.author },
-        publisher: {
-          '@type': 'Organization',
-          name: 'Universitas Nahdlatul Ulama Yogyakarta'
-        },
-        mainEntityOfPage: `${runtimeConfig.public.siteUrl}/publikasi/${article.value?.slug}`
-      })
-    }
-  ]
-}))
 </script>
 
 <template>
