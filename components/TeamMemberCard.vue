@@ -20,8 +20,7 @@ const initials = computed(() =>
         :src="member.photoUrl"
         :alt="`Foto ${member.name}`"
         loading="lazy"
-        class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.015]"
-        :style="{ objectPosition: `${member.focalX}% ${member.focalY}%` }"
+        class="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.015]"
       />
       <div v-else class="flex h-full flex-col items-center justify-center gap-3 text-center">
         <span class="grid h-14 w-14 place-items-center rounded-full bg-ivory/80 text-xl font-bold text-unu-green">{{ initials || 'TD' }}</span>
@@ -31,7 +30,6 @@ const initials = computed(() =>
     <div class="pt-4">
       <h3 class="text-[18px] font-semibold leading-[1.3] tracking-[-0.015em] text-charcoal">{{ member.name }}</h3>
       <p class="mt-1 text-[14px] leading-5 text-slate-600">{{ member.position }}</p>
-      <p v-if="member.unit && !compact" class="mt-1.5 text-[12px] leading-5 text-slate-400">{{ member.unit }}</p>
       <p v-if="member.bio && !compact" class="mt-2.5 line-clamp-3 text-[14px] leading-6 text-slate-500">{{ member.bio }}</p>
     </div>
   </article>

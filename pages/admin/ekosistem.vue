@@ -1,42 +1,77 @@
 <script setup lang="ts">
-import { Pencil, Plus, Search } from 'lucide-vue-next'
-import type { DigitalPlatformDTO } from '~/shared/types'
-import { PLATFORM_CATEGORIES, PLATFORM_STATUSES } from '~/shared/types'
+import { Pencil, Plus, Search, Settings2, Trash2, X } from 'lucide-vue-next'
+import type { DigitalPlatformDTO, PlatformCategoryDTO, PlatformMetricDTO, PlatformModuleDTO } from '~/shared/types'
+import { PLATFORM_AUDIENCES, PLATFORM_STATUSES } from '~/shared/types'
 
 definePageMeta({ layout: 'admin' })
+
+type CategoryWithCount = PlatformCategoryDTO & { platformCount: number }
 
 const requestFetch = useRequestFetch()
 const api = useApi()
 const toast = useToast()
-const { formatDate } = useFormat()
 const search = ref('')
-const status = ref('')
+const categoryFilter = ref('')
+const statusFilter = ref('')
+const page = ref(1)
 const loading = ref(true)
-const result = ref<{ items: DigitalPlatformDTO[]; total: number; page: number; pageSize: number } | null>(null)
+const result = ref<{ items: DigitalPlatformDTO[]; total: number; page: number; pageSize: number; categories: CategoryWithCount[] } | null>(null)
+const categories = ref<CategoryWithCount[]>([])
+const publicationBusy = ref('')
+
 const modalOpen = ref(false)
 const editingId = ref('')
 const saving = ref(false)
-const errorMessage = ref('')
+const formError = ref('')
+
 const form = reactive({
   name: '',
   slug: '',
   description: '',
-  category: 'Akademik',
+  categoryId: '',
+  status: 'Belum Dikonfirmasi' as (typeof PLATFORM_STATUSES)[number],
+  audiences: [] as string[],
   unit: '',
-  status: 'Dalam Pengembangan',
   url: '',
-  audience: '',
-  icon: 'globe',
-  order: 0
+  order: 0,
+  published: false,
+  featured: false,
+  thumbnail: '',
+  galleryText: '',
+  problem: '',
+  solution: '',
+  benefits: '',
+  features: '',
+  modules: [] as PlatformModuleDTO[],
+  metrics: [] as PlatformMetricDTO[]
 })
+
+const categoryModalOpen = ref(false)
+const categorySaving = ref(false)
+const categoryError = ref('')
+const categoryForm = reactive({ id: '', name: '', description: '', order: 0, active: true })
+const categoryDeleteTarget = ref<CategoryWithCount | null>(null)
+const deletingCategory = ref(false)
+
 let timer: ReturnType<typeof setTimeout> | null = null
 
 async function load() {
   loading.value = true
   try {
-    result.value = await requestFetch('/api/admin/platforms', {
-      query: { q: search.value || undefined, status: status.value || undefined, pageSize: 48 }
-    })
+    const data = await requestFetch<{ items: DigitalPlatformDTO[]; total: number; page: number; pageSize: number; categories: CategoryWithCount[] }>(
+      '/api/admin/platforms',
+      {
+        query: {
+          q: search.value || undefined,
+          category: categoryFilter.value || undefined,
+          status: statusFilter.value || undefined,
+          page: page.value,
+          pageSize: 24
+        }
+      }
+    )
+    result.value = data
+    categories.value = data.categories
   } catch (error: any) {
     toast.error('Gagal memuat', error?.data?.statusMessage)
   } finally {
@@ -44,30 +79,50 @@ async function load() {
   }
 }
 await load()
-watch(status, load)
+watch([categoryFilter, statusFilter], () => {
+  page.value = 1
+  load()
+})
+watch(page, load)
 watch(search, () => {
   if (timer) clearTimeout(timer)
-  timer = setTimeout(load, 350)
+  timer = setTimeout(() => {
+    page.value = 1
+    load()
+  }, 350)
 })
 onBeforeUnmount(() => {
   if (timer) clearTimeout(timer)
 })
 
-function openCreate() {
-  editingId.value = ''
+function resetForm() {
   Object.assign(form, {
     name: '',
     slug: '',
     description: '',
-    category: 'Akademik',
+    categoryId: categories.value[0]?.id || '',
+    status: 'Belum Dikonfirmasi',
+    audiences: [],
     unit: '',
-    status: 'Dalam Pengembangan',
     url: '',
-    audience: '',
-    icon: 'globe',
-    order: 0
+    order: (result.value?.total || 0) + 1,
+    published: false,
+    featured: false,
+    thumbnail: '',
+    galleryText: '',
+    problem: '',
+    solution: '',
+    benefits: '',
+    features: '',
+    modules: [],
+    metrics: []
   })
-  errorMessage.value = ''
+}
+
+function openCreate() {
+  editingId.value = ''
+  resetForm()
+  formError.value = ''
   modalOpen.value = true
 }
 
@@ -77,37 +132,180 @@ function openEdit(item: DigitalPlatformDTO) {
     name: item.name,
     slug: item.slug,
     description: item.description,
-    category: item.category,
-    unit: item.unit,
+    categoryId: item.categoryId || categories.value[0]?.id || '',
     status: item.status,
+    audiences: [...item.audiences],
+    unit: item.unit,
     url: item.url || '',
-    audience: item.audience,
-    icon: item.icon,
-    order: item.order
+    order: item.order,
+    published: item.published,
+    featured: item.featured,
+    thumbnail: item.thumbnail,
+    galleryText: item.gallery.join('\n'),
+    problem: item.problem,
+    solution: item.solution,
+    benefits: item.benefits,
+    features: item.features,
+    modules: item.modules.map((module) => ({ ...module })),
+    metrics: item.metrics.map((metric) => ({ ...metric }))
   })
-  errorMessage.value = ''
+  formError.value = ''
   modalOpen.value = true
 }
 
+function toggleAudience(name: string) {
+  if (form.audiences.includes(name)) form.audiences = form.audiences.filter((item) => item !== name)
+  else form.audiences.push(name)
+}
+
+function addModule() {
+  form.modules.push({ name: '', description: '', order: form.modules.length + 1, active: true })
+}
+
+function removeModule(index: number) {
+  form.modules.splice(index, 1)
+}
+
+function addMetric() {
+  form.metrics.push({ value: 0, suffix: '', label: '', period: '', source: '' })
+}
+
+function removeMetric(index: number) {
+  form.metrics.splice(index, 1)
+}
+
 async function save() {
-  errorMessage.value = ''
+  formError.value = ''
+  if (form.name.trim().length < 2) {
+    formError.value = 'Nama produk minimal 2 karakter.'
+    return
+  }
+  if (form.description.trim().length < 10) {
+    formError.value = 'Deskripsi singkat minimal 10 karakter.'
+    return
+  }
+  if (!form.categoryId) {
+    formError.value = 'Pilih kategori utama.'
+    return
+  }
   saving.value = true
   try {
+    const payload = {
+      ...form,
+      gallery: form.galleryText.split('\n').map((line) => line.trim()).filter(Boolean)
+    }
+    delete (payload as any).galleryText
     if (editingId.value) {
-      await api(`/api/admin/platforms/${editingId.value}`, { method: 'PATCH', body: form })
-      toast.success('Platform diperbarui')
+      await api(`/api/admin/platforms/${editingId.value}`, { method: 'PATCH', body: payload })
+      toast.success('Produk diperbarui')
     } else {
-      await api('/api/admin/platforms', { method: 'POST', body: form })
-      toast.success('Platform ditambahkan')
+      await api('/api/admin/platforms', { method: 'POST', body: payload })
+      toast.success('Produk ditambahkan')
     }
     modalOpen.value = false
     await load()
   } catch (error: any) {
-    errorMessage.value = error?.data?.statusMessage || 'Gagal menyimpan platform.'
+    formError.value = error?.data?.statusMessage || 'Gagal menyimpan produk.'
   } finally {
     saving.value = false
   }
 }
+
+async function togglePublished(item: DigitalPlatformDTO) {
+  if (publicationBusy.value) return
+  publicationBusy.value = item.id
+  try {
+    await api(`/api/admin/platforms/${item.id}`, { method: 'PATCH', body: { published: !item.published } })
+    toast.success(item.published ? 'Produk disembunyikan dari publik' : 'Produk dipublikasikan')
+    await load()
+  } catch (error: any) {
+    toast.error('Gagal mengubah publikasi', error?.data?.statusMessage || 'Status publikasi tidak berubah.')
+  } finally {
+    publicationBusy.value = ''
+  }
+}
+
+function openCategoryManager() {
+  categoryError.value = ''
+  resetCategoryForm()
+  categoryModalOpen.value = true
+}
+
+function resetCategoryForm() {
+  categoryForm.id = ''
+  categoryForm.name = ''
+  categoryForm.description = ''
+  categoryForm.order = categories.value.length + 1
+  categoryForm.active = true
+  categoryError.value = ''
+}
+
+function editCategory(item: CategoryWithCount) {
+  categoryForm.id = item.id
+  categoryForm.name = item.name
+  categoryForm.description = item.description
+  categoryForm.order = item.order
+  categoryForm.active = item.active
+  categoryError.value = ''
+}
+
+async function saveCategory() {
+  categoryError.value = ''
+  if (categoryForm.name.trim().length < 2) {
+    categoryError.value = 'Nama kategori minimal 2 karakter.'
+    return
+  }
+  categorySaving.value = true
+  try {
+    const body = {
+      name: categoryForm.name,
+      description: categoryForm.description,
+      order: categoryForm.order,
+      active: categoryForm.active
+    }
+    if (categoryForm.id) {
+      await api(`/api/admin/platform-categories/${categoryForm.id}`, { method: 'PATCH', body })
+      toast.success('Kategori diperbarui')
+    } else {
+      await api('/api/admin/platform-categories', { method: 'POST', body })
+      toast.success('Kategori ditambahkan')
+    }
+    resetCategoryForm()
+    await load()
+  } catch (error: any) {
+    categoryError.value = error?.data?.statusMessage || 'Gagal menyimpan kategori.'
+  } finally {
+    categorySaving.value = false
+  }
+}
+
+async function deleteCategory() {
+  if (!categoryDeleteTarget.value) return
+  deletingCategory.value = true
+  try {
+    await api(`/api/admin/platform-categories/${categoryDeleteTarget.value.id}`, { method: 'DELETE' })
+    toast.success('Kategori dihapus')
+    if (categoryForm.id === categoryDeleteTarget.value.id) resetCategoryForm()
+    categoryDeleteTarget.value = null
+    await load()
+  } catch (error: any) {
+    toast.error('Gagal menghapus kategori', error?.data?.statusMessage || 'Coba lagi.')
+  } finally {
+    deletingCategory.value = false
+  }
+}
+
+const totalPages = computed(() => Math.max(1, Math.ceil((result.value?.total || 0) / (result.value?.pageSize || 24))))
+const statusClass = (status: string) =>
+  status === 'Aktif'
+    ? 'border-unu-green/20 bg-unu-green-soft text-unu-green-dark'
+    : status === 'Pilot'
+      ? 'border-sky-200 bg-sky-50 text-sky-800'
+      : status === 'Tidak Aktif'
+        ? 'border-slate-200 bg-slate-50 text-slate-500'
+        : status === 'Belum Dikonfirmasi'
+          ? 'border-line-warm bg-[#F7F4E8] text-slate-600'
+          : 'border-amber-200 bg-amber-50 text-amber-900'
 
 useSeoMeta({ title: 'Ekosistem Digital', robots: 'noindex, nofollow' })
 </script>
@@ -115,45 +313,260 @@ useSeoMeta({ title: 'Ekosistem Digital', robots: 'noindex, nofollow' })
 <template>
   <div class="space-y-5">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div><p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Konten</p><h2 class="mt-2 text-2xl font-semibold tracking-tight">Ekosistem Digital</h2><p class="mt-1 text-sm text-admin-muted">Catat platform digital dan status implementasinya.</p></div>
-      <AppButton size="sm" @click="openCreate"><template #left><Plus :size="14" /></template>Tambah Platform</AppButton>
+      <div>
+        <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Konten Website</p>
+        <h2 class="mt-2">Ekosistem Digital</h2>
+        <p class="mt-1 text-[14px] text-admin-muted">Kelola produk, kategori, sasaran pengguna, modul, dan publikasi.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <AppButton variant="secondary" size="sm" @click="openCategoryManager"><template #left><Settings2 :size="14" /></template>Kelola Kategori</AppButton>
+        <AppButton size="sm" @click="openCreate"><template #left><Plus :size="14" /></template>Tambah Produk</AppButton>
+      </div>
     </div>
 
-    <div class="flex flex-col gap-3 rounded-xl border border-admin-border bg-white p-4 sm:flex-row">
-      <div class="relative flex-1"><Search :size="16" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-admin-muted" /><input v-model="search" type="search" class="field-input pl-10" placeholder="Cari platform…" aria-label="Cari platform" /></div>
-      <select v-model="status" class="field-input sm:w-56" aria-label="Filter status"><option value="">Semua status</option><option v-for="item in PLATFORM_STATUSES" :key="item" :value="item">{{ item }}</option></select>
-      <span class="self-center px-2 text-[14px] text-admin-muted">{{ result?.total ?? 0 }} platform</span>
+    <div class="flex flex-col gap-3 rounded-xl border border-admin-border bg-white p-4 lg:flex-row">
+      <div class="relative flex-1">
+        <Search :size="16" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-admin-muted" aria-hidden="true" />
+        <input v-model="search" type="search" class="field-input pl-10" placeholder="Cari produk, kategori, atau unit…" aria-label="Cari produk" />
+      </div>
+      <select v-model="categoryFilter" class="field-input lg:w-64" aria-label="Filter kategori">
+        <option value="">Semua kategori</option>
+        <option v-for="item in categories" :key="item.id" :value="item.slug">{{ item.name }}</option>
+      </select>
+      <select v-model="statusFilter" class="field-input lg:w-52" aria-label="Filter status">
+        <option value="">Semua status</option>
+        <option v-for="item in PLATFORM_STATUSES" :key="item" :value="item">{{ item }}</option>
+      </select>
+      <span class="self-center px-2 text-[14px] text-admin-muted">{{ result?.total ?? 0 }} produk</span>
     </div>
 
     <div class="overflow-hidden rounded-xl border border-admin-border bg-white">
-      <div v-if="loading" class="space-y-2 p-4"><div v-for="i in 4" :key="i" class="skeleton h-14 rounded-lg" /></div>
-      <EmptyState v-else-if="!result?.items.length" class="m-4" title="Belum ada platform" description="Tambahkan platform digital pertama." compact><AppButton size="sm" @click="openCreate">Tambah Platform</AppButton></EmptyState>
+      <div v-if="loading" class="space-y-2 p-4">
+        <div v-for="i in 5" :key="i" class="skeleton h-16 rounded-lg" />
+      </div>
+      <EmptyState v-else-if="!result?.items.length" class="m-4" title="Belum ada produk" description="Tambahkan produk digital pertama." compact>
+        <AppButton size="sm" @click="openCreate">Tambah Produk</AppButton>
+      </EmptyState>
       <template v-else>
         <div class="hidden overflow-x-auto md:block">
-          <table class="w-full min-w-[820px] text-left">
-            <thead><tr class="border-b border-admin-border bg-slate-50 text-[12px] uppercase tracking-wide text-admin-muted"><th class="px-5 py-3 font-bold">Nama</th><th class="px-5 py-3 font-bold">Kategori</th><th class="px-5 py-3 font-bold">Unit</th><th class="px-5 py-3 font-bold">Status</th><th class="px-5 py-3 font-bold">Diperbarui</th><th class="px-5 py-3 text-right font-bold">Aksi</th></tr></thead>
-            <tbody class="divide-y divide-admin-border"><tr v-for="item in result.items" :key="item.id" class="hover:bg-slate-50/60"><td class="px-5 py-3.5"><p class="text-xs font-semibold">{{ item.name }}</p><p class="mt-0.5 text-[12px] text-admin-muted">/{{ item.slug }}</p></td><td class="px-5 py-3.5 text-xs">{{ item.category }}</td><td class="px-5 py-3.5 text-xs text-admin-muted">{{ item.unit || '—' }}</td><td class="px-5 py-3.5"><span class="rounded-full border border-admin-border bg-slate-50 px-2.5 py-1 text-[12px] font-bold">{{ item.status }}</span></td><td class="px-5 py-3.5 text-[14px] text-admin-muted">{{ formatDate(item.updatedAt) }}</td><td class="px-5 py-3.5 text-right"><button type="button" class="text-xs font-semibold text-unu-green hover:underline" @click="openEdit(item)"><Pencil :size="12" class="inline" /> Edit</button></td></tr></tbody>
+          <table class="w-full min-w-[1040px] text-left">
+            <thead>
+              <tr class="border-b border-admin-border bg-slate-50 text-[12px] uppercase tracking-wide text-admin-muted">
+                <th class="px-5 py-3 font-bold">Produk</th>
+                <th class="px-5 py-3 font-bold">Kategori</th>
+                <th class="px-5 py-3 font-bold">Sasaran Pengguna</th>
+                <th class="px-5 py-3 font-bold">Status</th>
+                <th class="px-5 py-3 font-bold">Publikasi</th>
+                <th class="px-5 py-3 text-right font-bold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-admin-border">
+              <tr v-for="item in result.items" :key="item.id" class="hover:bg-slate-50/60">
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <div class="h-12 w-16 shrink-0 overflow-hidden rounded-md bg-slate-100">
+                      <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.name" class="h-full w-full object-cover object-top" />
+                      <span v-else class="grid h-full w-full place-items-center text-[12px] font-bold text-slate-400">{{ item.name.slice(0, 1) }}</span>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-[14px] font-semibold">{{ item.name }}</p>
+                      <p class="mt-0.5 truncate text-[12px] text-admin-muted">/{{ item.slug }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 text-[13px] text-slate-600">{{ item.category }}</td>
+                <td class="max-w-[220px] px-5 py-3.5 text-[13px] text-slate-600">{{ item.audiences.length ? item.audiences.join(', ') : '—' }}</td>
+                <td class="px-5 py-3.5"><span class="inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold" :class="statusClass(item.status)">{{ item.status }}</span></td>
+                <td class="px-5 py-3.5">
+                  <button
+                    type="button"
+                    role="switch"
+                    :aria-checked="item.published"
+                    :aria-label="`Publikasi ${item.name}`"
+                    :disabled="publicationBusy === item.id"
+                    class="inline-flex min-h-[36px] items-center gap-2 text-[13px] font-medium disabled:opacity-50"
+                    @click="togglePublished(item)"
+                  >
+                    <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors" :class="item.published ? 'bg-unu-green' : 'bg-slate-300'">
+                      <span class="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform" :class="item.published ? 'translate-x-5' : 'translate-x-0'" />
+                    </span>
+                    <span :class="item.published ? 'text-unu-green' : 'text-slate-500'">{{ publicationBusy === item.id ? 'Menyimpan…' : item.published ? 'Publikasi ON' : 'Publikasi OFF' }}</span>
+                  </button>
+                </td>
+                <td class="px-5 py-3.5 text-right">
+                  <button type="button" class="text-[13px] font-semibold text-unu-green hover:underline" @click="openEdit(item)"><Pencil :size="12" class="inline" /> Edit</button>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
-        <div class="divide-y divide-admin-border md:hidden"><button v-for="item in result.items" :key="item.id" type="button" class="block w-full p-4 text-left" @click="openEdit(item)"><div class="flex items-start justify-between gap-3"><div><p class="text-sm font-semibold">{{ item.name }}</p><p class="mt-0.5 text-[12px] text-admin-muted">{{ item.category }}</p></div><span class="rounded-full border px-2 py-1 text-[12px] font-bold">{{ item.status }}</span></div></button></div>
+
+        <div class="divide-y divide-admin-border md:hidden">
+          <div v-for="item in result.items" :key="item.id" class="p-4">
+            <div class="flex items-start gap-3">
+              <div class="h-16 w-20 shrink-0 overflow-hidden rounded-md bg-slate-100">
+                <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.name" class="h-full w-full object-cover object-top" />
+                <span v-else class="grid h-full w-full place-items-center text-[14px] font-bold text-slate-400">{{ item.name.slice(0, 1) }}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[14px] font-semibold">{{ item.name }}</p>
+                <p class="mt-0.5 text-[13px] text-slate-600">{{ item.category }}</p>
+                <p class="mt-0.5 text-[12px] text-admin-muted">{{ item.audiences.length ? item.audiences.join(' · ') : 'Sasaran belum diisi' }}</p>
+              </div>
+              <span class="shrink-0 rounded-full border px-2 py-1 text-[11px] font-bold" :class="statusClass(item.status)">{{ item.status }}</span>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-4">
+              <button type="button" role="switch" :aria-checked="item.published" :aria-label="`Publikasi ${item.name}`" :disabled="publicationBusy === item.id" class="inline-flex min-h-[36px] items-center gap-2 text-[13px] font-medium disabled:opacity-50" @click="togglePublished(item)">
+                <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors" :class="item.published ? 'bg-unu-green' : 'bg-slate-300'">
+                  <span class="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform" :class="item.published ? 'translate-x-5' : 'translate-x-0'" />
+                </span>
+                <span :class="item.published ? 'text-unu-green' : 'text-slate-500'">{{ publicationBusy === item.id ? 'Menyimpan…' : item.published ? 'Publikasi ON' : 'Publikasi OFF' }}</span>
+              </button>
+              <button type="button" class="text-[13px] font-semibold text-unu-green" @click="openEdit(item)">Edit</button>
+            </div>
+          </div>
+        </div>
       </template>
     </div>
 
-    <ModalDialog v-model="modalOpen" :title="editingId ? 'Edit Platform' : 'Tambah Platform'" description="Status implementasi harus mencerminkan kondisi operasional yang terverifikasi." size="lg">
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div v-if="errorMessage" class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-900 sm:col-span-2">{{ errorMessage }}</div>
-        <div class="sm:col-span-2"><label class="admin-label">Nama platform</label><input v-model="form.name" class="field-input" maxlength="160" /></div>
-        <div><label class="admin-label">Slug</label><input v-model="form.slug" class="field-input font-mono text-xs" placeholder="otomatis" /></div>
-        <div><label class="admin-label">Kategori</label><select v-model="form.category" class="field-input"><option v-for="item in PLATFORM_CATEGORIES" :key="item" :value="item">{{ item }}</option></select></div>
-        <div><label class="admin-label">Status</label><select v-model="form.status" class="field-input"><option v-for="item in PLATFORM_STATUSES" :key="item" :value="item">{{ item }}</option></select></div>
-        <div><label class="admin-label">Unit pengelola</label><input v-model="form.unit" class="field-input" maxlength="160" /></div>
-        <div class="sm:col-span-2"><label class="admin-label">Deskripsi</label><textarea v-model="form.description" rows="3" class="field-input" maxlength="500" /></div>
-        <div><label class="admin-label">Pengguna sasaran</label><input v-model="form.audience" class="field-input" maxlength="200" /></div>
-        <div><label class="admin-label">URL</label><input v-model="form.url" type="url" class="field-input" placeholder="https://" maxlength="500" /></div>
-        <div><label class="admin-label">Ikon</label><input v-model="form.icon" class="field-input" maxlength="40" placeholder="globe, academic, users…" /></div>
-        <div><label class="admin-label">Urutan</label><input v-model.number="form.order" type="number" class="field-input" /></div>
+    <Pagination v-if="totalPages > 1" :page="page" :total-pages="totalPages" @update:page="page = $event" />
+
+    <ModalDialog v-model="modalOpen" :title="editingId ? 'Edit Produk' : 'Tambah Produk'" description="Kelola informasi produk, visual, modul, dan capaian." size="lg">
+      <div v-if="formError" class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-[13px] text-red-900">{{ formError }}</div>
+
+      <div class="space-y-7">
+        <section>
+          <h3 class="text-[14px] font-bold uppercase tracking-[0.12em] text-unu-green">Informasi utama</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2"><label for="platform-name" class="admin-label">Nama produk</label><input id="platform-name" v-model="form.name" class="field-input" maxlength="160" /></div>
+            <div><label for="platform-slug" class="admin-label">Slug</label><input id="platform-slug" v-model="form.slug" class="field-input font-mono text-[13px]" placeholder="otomatis" maxlength="160" /></div>
+            <div><label for="platform-category" class="admin-label">Kategori utama</label><select id="platform-category" v-model="form.categoryId" class="field-input"><option v-for="item in categories" :key="item.id" :value="item.id">{{ item.name }}</option></select></div>
+            <div><label for="platform-status" class="admin-label">Status implementasi</label><select id="platform-status" v-model="form.status" class="field-input"><option v-for="item in PLATFORM_STATUSES" :key="item" :value="item">{{ item }}</option></select></div>
+            <div><label for="platform-order" class="admin-label">Urutan tampil</label><input id="platform-order" v-model.number="form.order" type="number" class="field-input" /></div>
+            <div class="sm:col-span-2"><label for="platform-description" class="admin-label">Deskripsi singkat</label><textarea id="platform-description" v-model="form.description" rows="3" class="field-input" maxlength="500" /></div>
+            <div class="sm:col-span-2">
+              <p class="admin-label">Sasaran pengguna</p>
+              <div class="flex flex-wrap gap-2">
+                <button v-for="item in PLATFORM_AUDIENCES" :key="item" type="button" class="min-h-[40px] rounded-full border px-3 text-[13px] font-semibold transition" :class="form.audiences.includes(item) ? 'border-unu-green bg-unu-green text-white' : 'border-admin-border bg-white text-admin-text hover:border-unu-green/40'" @click="toggleAudience(item)">{{ item }}</button>
+              </div>
+            </div>
+            <div><label for="platform-unit" class="admin-label">Unit pengelola</label><input id="platform-unit" v-model="form.unit" class="field-input" maxlength="160" /></div>
+            <div><label for="platform-url" class="admin-label">URL produk</label><input id="platform-url" v-model="form.url" type="url" class="field-input" placeholder="https://" maxlength="500" /></div>
+          </div>
+        </section>
+
+        <section class="border-t border-admin-border pt-6">
+          <h3 class="text-[14px] font-bold uppercase tracking-[0.12em] text-unu-green">Visual & publikasi</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2"><label for="platform-thumbnail" class="admin-label">Screenshot utama (URL/path)</label><input id="platform-thumbnail" v-model="form.thumbnail" class="field-input" placeholder="/images/… atau https://…" maxlength="500" /><p class="field-help">Kosongkan untuk memakai fallback visual UNU.</p></div>
+            <div class="sm:col-span-2"><label for="platform-gallery" class="admin-label">Screenshot tambahan</label><textarea id="platform-gallery" v-model="form.galleryText" rows="2" class="field-input font-mono text-[13px]" placeholder="Satu URL/path per baris" /></div>
+            <label class="flex min-h-[48px] items-center justify-between gap-3 rounded-lg border border-admin-border px-4 text-[14px] font-medium"><span>Produk unggulan</span><input v-model="form.featured" type="checkbox" class="h-5 w-5 accent-unu-green" /></label>
+            <label class="flex min-h-[48px] items-center justify-between gap-3 rounded-lg border border-admin-border px-4 text-[14px] font-medium"><span>Publikasikan</span><input v-model="form.published" type="checkbox" class="h-5 w-5 accent-unu-green" /></label>
+          </div>
+        </section>
+
+        <section class="border-t border-admin-border pt-6">
+          <h3 class="text-[14px] font-bold uppercase tracking-[0.12em] text-unu-green">Detail produk</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2"><label for="platform-problem" class="admin-label">Permasalahan</label><textarea id="platform-problem" v-model="form.problem" rows="3" class="field-input" maxlength="2000" /></div>
+            <div class="sm:col-span-2"><label for="platform-solution" class="admin-label">Solusi</label><textarea id="platform-solution" v-model="form.solution" rows="3" class="field-input" maxlength="2000" /></div>
+            <div class="sm:col-span-2"><label for="platform-benefits" class="admin-label">Manfaat</label><textarea id="platform-benefits" v-model="form.benefits" rows="3" class="field-input" maxlength="2000" /></div>
+            <div class="sm:col-span-2"><label for="platform-features" class="admin-label">Fitur utama (satu per baris)</label><textarea id="platform-features" v-model="form.features" rows="3" class="field-input" maxlength="2000" /></div>
+          </div>
+        </section>
+
+        <section class="border-t border-admin-border pt-6">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-[14px] font-bold uppercase tracking-[0.12em] text-unu-green">Modul terintegrasi</h3>
+            <AppButton variant="secondary" size="sm" @click="addModule"><template #left><Plus :size="13" /></template>Tambah Modul</AppButton>
+          </div>
+          <p class="mt-2 text-[13px] leading-5 text-admin-muted">Modul tampil di halaman detail produk induk. Tidak perlu membuat produk terpisah.</p>
+          <div v-if="form.modules.length" class="mt-4 space-y-3">
+            <div v-for="(module, index) in form.modules" :key="index" class="rounded-lg border border-admin-border bg-slate-50 p-3">
+              <div class="grid gap-3 sm:grid-cols-[1fr_100px_auto] sm:items-end">
+                <div><label class="admin-label">Nama modul</label><input v-model="module.name" class="field-input" maxlength="120" /></div>
+                <div><label class="admin-label">Urutan</label><input v-model.number="module.order" type="number" class="field-input" /></div>
+                <button type="button" class="grid h-10 w-10 place-items-center rounded-lg text-red-700 hover:bg-red-50" aria-label="Hapus modul" @click="removeModule(index)"><X :size="15" /></button>
+              </div>
+              <div class="mt-3"><label class="admin-label">Deskripsi</label><input v-model="module.description" class="field-input" maxlength="500" /></div>
+              <label class="mt-3 inline-flex items-center gap-2 text-[13px] font-medium"><input v-model="module.active" type="checkbox" class="h-4 w-4 accent-unu-green" /> Modul aktif</label>
+            </div>
+          </div>
+          <p v-else class="mt-4 rounded-lg border border-dashed border-admin-border p-4 text-[13px] text-admin-muted">Belum ada modul.</p>
+        </section>
+
+        <section class="border-t border-admin-border pt-6">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-[14px] font-bold uppercase tracking-[0.12em] text-unu-green">Dampak & capaian</h3>
+            <AppButton variant="secondary" size="sm" @click="addMetric"><template #left><Plus :size="13" /></template>Tambah Capaian</AppButton>
+          </div>
+          <p class="mt-2 text-[13px] leading-5 text-admin-muted">Cantumkan sumber dan periode agar angka tidak dibaca sebagai data real-time.</p>
+          <div v-if="form.metrics.length" class="mt-4 space-y-3">
+            <div v-for="(metric, index) in form.metrics" :key="index" class="rounded-lg border border-admin-border bg-slate-50 p-3">
+              <div class="grid gap-3 sm:grid-cols-[110px_80px_1fr_auto] sm:items-end">
+                <div><label class="admin-label">Nilai</label><input v-model.number="metric.value" type="number" class="field-input" /></div>
+                <div><label class="admin-label">Suffix</label><input v-model="metric.suffix" class="field-input" maxlength="12" placeholder="%, +" /></div>
+                <div><label class="admin-label">Label</label><input v-model="metric.label" class="field-input" maxlength="160" /></div>
+                <button type="button" class="grid h-10 w-10 place-items-center rounded-lg text-red-700 hover:bg-red-50" aria-label="Hapus capaian" @click="removeMetric(index)"><X :size="15" /></button>
+              </div>
+              <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                <div><label class="admin-label">Periode</label><input v-model="metric.period" class="field-input" maxlength="80" placeholder="Data 2026" /></div>
+                <div><label class="admin-label">Sumber</label><input v-model="metric.source" class="field-input" maxlength="200" /></div>
+              </div>
+            </div>
+          </div>
+          <p v-else class="mt-4 rounded-lg border border-dashed border-admin-border p-4 text-[13px] text-admin-muted">Belum ada capaian terkait.</p>
+        </section>
       </div>
-      <template #footer><div class="flex justify-end gap-2"><AppButton variant="secondary" @click="modalOpen = false">Batal</AppButton><AppButton :loading="saving" @click="save">Simpan</AppButton></div></template>
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <AppButton variant="secondary" @click="modalOpen = false">Batal</AppButton>
+          <AppButton :loading="saving" @click="save">Simpan Produk</AppButton>
+        </div>
+      </template>
+    </ModalDialog>
+
+    <ModalDialog v-model="categoryModalOpen" title="Kategori Ekosistem" description="Kategori utama menentukan pengelompokan produk pada halaman publik." size="md">
+      <div class="grid gap-5 sm:grid-cols-[1fr_1fr]">
+        <div>
+          <p class="text-[14px] font-semibold">Kategori tersedia</p>
+          <div v-if="categoryDeleteTarget" class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+            <p class="text-[13px] leading-5 text-red-900">Hapus kategori <strong>{{ categoryDeleteTarget.name }}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="mt-3 flex gap-2">
+              <AppButton size="sm" variant="secondary" @click="categoryDeleteTarget = null">Batal</AppButton>
+              <AppButton size="sm" variant="danger" :loading="deletingCategory" @click="deleteCategory">Hapus</AppButton>
+            </div>
+          </div>
+          <div v-if="categories.length" class="mt-3 divide-y divide-admin-border rounded-lg border border-admin-border">
+            <div v-for="item in categories" :key="item.id" class="flex items-center justify-between gap-3 px-3 py-2.5">
+              <div class="min-w-0">
+                <p class="text-[14px] font-medium">{{ item.name }}</p>
+                <p class="text-[12px] text-admin-muted">{{ item.platformCount }} produk · urutan {{ item.order }} · {{ item.active ? 'aktif' : 'nonaktif' }}</p>
+              </div>
+              <div class="flex shrink-0 gap-2">
+                <button type="button" class="text-[12px] font-semibold text-unu-green" @click="editCategory(item)">Edit</button>
+                <button type="button" class="text-[12px] font-semibold text-red-700 disabled:cursor-not-allowed disabled:text-slate-300" :disabled="item.platformCount > 0" :title="item.platformCount > 0 ? 'Pindahkan produk ke kategori lain sebelum menghapus.' : 'Hapus kategori'" @click="categoryDeleteTarget = item">Hapus</button>
+              </div>
+            </div>
+          </div>
+          <p v-else class="mt-3 rounded-lg border border-dashed border-admin-border p-4 text-[13px] text-admin-muted">Belum ada kategori.</p>
+          <p class="mt-3 text-[12px] leading-5 text-admin-muted">Kategori yang masih digunakan tidak dapat dihapus.</p>
+        </div>
+        <div class="rounded-lg border border-admin-border bg-slate-50 p-4">
+          <p class="text-[14px] font-semibold">{{ categoryForm.id ? 'Edit Kategori' : 'Tambah Kategori' }}</p>
+          <div v-if="categoryError" class="mt-3 rounded-md border border-red-200 bg-red-50 p-2 text-[12px] text-red-900">{{ categoryError }}</div>
+          <div class="mt-3"><label for="category-name" class="admin-label">Nama kategori</label><input id="category-name" v-model="categoryForm.name" class="field-input" maxlength="100" /></div>
+          <div class="mt-3"><label for="category-description" class="admin-label">Deskripsi</label><textarea id="category-description" v-model="categoryForm.description" rows="3" class="field-input" maxlength="500" /></div>
+          <div class="mt-3"><label for="category-order" class="admin-label">Urutan</label><input id="category-order" v-model.number="categoryForm.order" type="number" class="field-input" /></div>
+          <label class="mt-3 flex items-center gap-2 text-[13px] font-medium"><input v-model="categoryForm.active" type="checkbox" class="h-4 w-4 accent-unu-green" /> Kategori aktif</label>
+          <div class="mt-4 flex gap-2">
+            <AppButton size="sm" :loading="categorySaving" @click="saveCategory">{{ categoryForm.id ? 'Simpan Perubahan' : 'Tambah' }}</AppButton>
+            <AppButton v-if="categoryForm.id" size="sm" variant="secondary" @click="resetCategoryForm">Batal</AppButton>
+          </div>
+        </div>
+      </div>
+      <template #footer><div class="flex justify-end"><AppButton variant="secondary" @click="categoryModalOpen = false">Tutup</AppButton></div></template>
     </ModalDialog>
   </div>
 </template>

@@ -62,7 +62,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Beranda dengan hero, layanan unggulan, profil direktorat, ekosistem, program, dokumen, capaian, publikasi, dan footer dari database/CMS.
 - Katalog layanan dengan pencarian, filter kategori, pagination, loading, empty state, dan detail layanan.
 - Detail layanan: sasaran, persyaratan, dokumen, prosedur, estimasi waktu, SOP terkait, status ketersediaan.
-- Halaman ekosistem digital dengan filter kategori/status.
+- Halaman ekosistem digital dengan empat kategori, filter sasaran pengguna, showcase produk unggulan, detail produk, dan modul terintegrasi.
 - Dokumentasi publik dengan pencarian, kategori, detail, preview PDF, unduh, versi, dan layanan terkait.
 - Publikasi dengan kategori, pencarian, detail, dan render konten tersanitasi.
 - Halaman profil/kustom dari CMS.
@@ -80,7 +80,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Token aktivasi tidak bisa dipakai ulang, dapat dikirim ulang tanpa membuat akun duplikat.
 - Akun nonaktif tidak dapat membuat sesi/login.
 - Role: Superadmin dan Admin/Petugas. Akun pemohon tidak digunakan; pengajuan dilakukan tanpa login.
-- Role & permission dapat diubah superadmin untuk role non-superadmin.
+- RBAC diterapkan di server; menu pengelolaan role tidak ditampilkan di sidebar.
 - Admin tidak dapat menonaktifkan/menurunkan role akun sendiri; perlindungan superadmin aktif terakhir.
 - Semua perubahan sensitif masuk audit log.
 
@@ -113,9 +113,9 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - CMS: platform ekosistem, program, publikasi, halaman/profil, dan Tim Kami (anggota, kelompok, foto, urutan, publikasi).
 - Dokumentasi: unggah, metadata, publish/unpublish, arsip, versi baru, hubungkan ke layanan.
 - Pengguna: buat, edit, aktif/nonaktif, kirim ulang aktivasi.
-- Role & permission.
-- Pengaturan global: identitas, URL logo, hero, kontak, sosial, email notifikasi, metrik terverifikasi, mode seed.
-- Log notifikasi dan audit log.
+- RBAC aktif di server. Menu **Hak Akses** dan **Pengaturan** tidak ditampilkan di sidebar sesuai keputusan produk.
+- Log notifikasi dapat diakses dari ikon di kanan atas; log aktivitas memakai bahasa yang mudah dipahami.
+- Pengaturan global tetap tersedia melalui API/seed, bukan melalui menu sidebar.
 - Tabel responsif: tabel desktop dan daftar kartu mobile.
 
 ### Keamanan
@@ -136,7 +136,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 
 ```text
 pages/
-  index.vue, tentang.vue, layanan/, ekosistem-digital.vue,
+  index.vue, tentang.vue, layanan/, ekosistem-digital/,
   dokumen/, publikasi/, masuk.vue, aktivasi.vue, lacak.vue,
   tentang-kami/tim.vue, halaman/, admin/
 layouts/
@@ -150,7 +150,8 @@ server/
   models/index.ts
   utils/{security,validation,uploads,email,serializers,audit,rate-limit}.ts
 scripts/
-  seed.ts, e2e.mjs, visual-check.mjs
+  seed.ts, seed-team-members.ts, migrate-ecosystem.ts, ecosystem-data.ts,
+  e2e.mjs, visual-check.mjs, responsive-audit.mjs
 shared/
   types.ts, permissions.ts
 ```
@@ -162,7 +163,7 @@ shared/
 - `GET /api/home`
 - `GET /api/site`
 - `GET /api/services` / `GET /api/services/:slug`
-- `GET /api/platforms`
+- `GET /api/platforms` / `GET /api/platforms/:slug`
 - `GET /api/documents` / `GET /api/documents/:slug`
 - `GET /api/documents/:slug/download`
 - `GET /api/articles` / `GET /api/articles/:slug`
@@ -195,6 +196,7 @@ shared/
 - `POST /api/admin/documents/:id/versions`
 - `GET /api/admin/documents/:id/download`
 - `GET|POST /api/admin/platforms`, `PATCH /api/admin/platforms/:id`
+- `GET|POST /api/admin/platform-categories`, `PATCH|DELETE /api/admin/platform-categories/:id`
 - `GET|POST /api/admin/programs`, `PATCH /api/admin/programs/:id`
 - `GET|POST /api/admin/articles`, `GET|PATCH /api/admin/articles/:id`
 - `GET|POST /api/admin/pages`, `PATCH /api/admin/pages/:id`
@@ -213,14 +215,14 @@ Dengan server development berjalan:
 ```bash
 npm run test:e2e         # 84 pemeriksaan API & alur end-to-end
 npm run test:visual      # 44 pemeriksaan render & error console
-npm run test:responsive  # 128 kombinasi halaman × 10 viewport (320–1920px)
+npm run test:responsive  # 134 kombinasi halaman × 10 viewport (320–1920px)
 ```
 
 Hasil yang sudah dijalankan pada lingkungan ini:
 
 - **E2E:** 84/84 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
 - **Visual:** 44/44 lulus — halaman publik, admin desktop/mobile, form pengajuan, permohonan saya. Tidak ada page error atau console error.
-- **Responsive:** 128/128 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
+- **Responsive:** 134/134 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
 - **Login standalone:** layout autentikasi tanpa public header/footer/sidebar, split-screen 50:50, light mode permanen, diuji pada 320–1440px.
 
 Screenshot pengujian disimpan di `.data/screenshots/`.
@@ -230,7 +232,7 @@ Screenshot pengujian disimpan di `.data/screenshots/`.
 Hal-hal berikut **belum** diklaim selesai:
 
 1. **Logo resmi sudah digunakan** pada header, footer (versi putih), dan halaman login. Foto dokumentasi resmi belum tersedia; ilustrasi editorial saat ini bersifat kustom, bukan foto aktivitas kampus.
-2. **Kontak, alamat, dan media sosial sengaja kosong pada seed** agar tidak menampilkan data rekaan. Isi melalui **Admin → Pengaturan**.
+2. **Kontak, alamat, dan media sosial sengaja kosong pada seed** agar tidak menampilkan data rekaan. Isi melalui API pengaturan/seed; menu Pengaturan tidak ditampilkan di sidebar.
 3. **SMTP belum dikonfigurasi.** Email development masuk ke `.data/mail-outbox` dan ditandai `simulated`, bukan terkirim. Konfigurasikan `NUXT_SMTP_*` untuk email nyata.
 4. **Penyimpanan file masih filesystem lokal.** Untuk produksi multi-instance, gunakan object storage privat (S3/R2/GCS) melalui adapter. Jangan memindahkan folder upload ke `public/`.
 5. **Rate limit masih in-memory** sehingga berlaku per proses. Untuk deployment multi-instance gunakan Redis/upstash.

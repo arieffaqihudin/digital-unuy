@@ -273,18 +273,63 @@ documentSchema.virtual('currentVersion', {
   justOne: true
 })
 
+const platformCategorySchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    slug: { type: String, required: true, unique: true },
+    description: { type: String, default: '', maxlength: 500 },
+    order: { type: Number, default: 0, index: true },
+    active: { type: Boolean, default: true },
+    isSeedData: { type: Boolean, default: false }
+  },
+  { timestamps: true }
+)
+
+const platformModuleSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 120 },
+    description: { type: String, default: '', maxlength: 500 },
+    order: { type: Number, default: 0 },
+    active: { type: Boolean, default: true }
+  },
+  { _id: true }
+)
+
+const platformMetricSchema = new Schema(
+  {
+    value: { type: Number, required: true },
+    suffix: { type: String, default: '', maxlength: 12 },
+    label: { type: String, required: true, trim: true, maxlength: 160 },
+    period: { type: String, default: '', maxlength: 80 },
+    source: { type: String, default: '', maxlength: 200 }
+  },
+  { _id: true }
+)
+
 const digitalPlatformSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 160 },
     slug: { type: String, required: true, unique: true },
     description: { type: String, required: true, maxlength: 500 },
     category: { type: String, required: true },
+    categoryId: { type: Schema.Types.ObjectId, ref: 'PlatformCategory', default: null, index: true },
     unit: { type: String, default: '' },
-    status: { type: String, enum: PLATFORM_STATUSES, default: 'Dalam Pengembangan', index: true },
+    status: { type: String, enum: PLATFORM_STATUSES, default: 'Belum Dikonfirmasi', index: true },
     url: { type: String, default: '' },
     audience: { type: String, default: '' },
+    audiences: { type: [String], default: [] },
     icon: { type: String, default: 'globe' },
     order: { type: Number, default: 0 },
+    published: { type: Boolean, default: false, index: true },
+    featured: { type: Boolean, default: false, index: true },
+    thumbnail: { type: String, default: '' },
+    gallery: { type: [String], default: [] },
+    problem: { type: String, default: '', maxlength: 2000 },
+    solution: { type: String, default: '', maxlength: 2000 },
+    benefits: { type: String, default: '', maxlength: 2000 },
+    features: { type: String, default: '', maxlength: 2000 },
+    modules: { type: [platformModuleSchema], default: [] },
+    metrics: { type: [platformMetricSchema], default: [] },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     isSeedData: { type: Boolean, default: false }
   },
@@ -421,6 +466,7 @@ export const Document = defineModel('Document', documentSchema)
 export const DocumentVersion = defineModel('DocumentVersion', documentVersionSchema)
 export const TeamGroup = defineModel('TeamGroup', teamGroupSchema)
 export const TeamMember = defineModel('TeamMember', teamMemberSchema)
+export const PlatformCategory = defineModel('PlatformCategory', platformCategorySchema)
 export const DigitalPlatform = defineModel('DigitalPlatform', digitalPlatformSchema)
 export const Program = defineModel('Program', programSchema)
 export const Article = defineModel('Article', articleSchema)

@@ -1,14 +1,15 @@
-import { Article, Document, Page, Program, Service } from '../models'
+import { Article, DigitalPlatform, Document, Page, Program, Service } from '../models'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const base = String(config.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
-  const [services, documents, articles, pages, programs] = await Promise.all([
+  const [services, documents, articles, pages, programs, platforms] = await Promise.all([
     Service.find({ active: true }).select('slug updatedAt').lean(),
     Document.find({ published: true, archived: false }).select('slug updatedAt').lean(),
     Article.find({ status: 'published' }).select('slug updatedAt').lean(),
     Page.find({ published: true }).select('slug updatedAt').lean(),
-    Program.find({}).select('slug updatedAt').lean()
+    Program.find({}).select('slug updatedAt').lean(),
+    DigitalPlatform.find({ published: true }).select('slug updatedAt').lean()
   ])
 
   const urls = [
@@ -23,6 +24,7 @@ export default defineEventHandler(async (event) => {
     ...documents.map((doc) => ({ loc: `/dokumen/${doc.slug}`, lastmod: doc.updatedAt })),
     ...articles.map((article) => ({ loc: `/publikasi/${article.slug}`, lastmod: article.updatedAt })),
     ...programs.map((program) => ({ loc: `/program/${program.slug}`, lastmod: program.updatedAt })),
+    ...platforms.map((platform) => ({ loc: `/ekosistem-digital/${platform.slug}`, lastmod: platform.updatedAt })),
     ...pages
       .filter((page) => page.slug !== 'tentang-kami')
       .map((page) => ({ loc: `/halaman/${page.slug}`, lastmod: page.updatedAt }))

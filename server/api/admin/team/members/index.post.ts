@@ -48,12 +48,10 @@ export default defineEventHandler(async (event) => {
       bio: String(payload?.bio || '').trim().slice(0, 1500),
       group: groupId,
       order: Number(payload?.order) || 0,
-      published: Boolean(payload?.published),
+      published: false,
       photoStorageKey: photo?.storageKey || '',
       photoMimeType: photo?.mimeType || '',
       photoSize: photo?.size || 0,
-      focalX: clampPercent(payload?.focalX),
-      focalY: clampPercent(payload?.focalY),
       createdBy: user.id
     })
 
@@ -70,9 +68,3 @@ export default defineEventHandler(async (event) => {
     throw error
   }
 })
-
-function clampPercent(value: unknown) {
-  const number = Number(value)
-  if (!Number.isFinite(number)) return 50
-  return Math.min(100, Math.max(0, Math.round(number)))
-}

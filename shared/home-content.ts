@@ -7,40 +7,65 @@ export interface ImpactMetric {
 }
 
 export const heroContent = {
-  eyebrow: 'Direktorat Transformasi Digital · UNU Yogyakarta',
+  eyebrow: 'Direktorat Transformasi Digital',
+  headline: {
+    lead: 'Satu Kampus, Satu',
+    accent: 'Ekosistem Digital.'
+  },
   supporting:
-    'Kami membangun ekosistem digital berdasarkan siklus kehidupan kampus—mahasiswa, dosen dan pegawai, serta institusi—agar teknologi benar-benar menjawab kebutuhan nyata.',
-  primaryCta: { label: 'Jelajahi Ekosistem Digital', to: '/ekosistem-digital' },
+    'Menghubungkan layanan, sistem, dan data untuk mendukung aktivitas akademik, operasional, dan tata kelola UNU Yogyakarta.',
+  primaryCta: { label: 'Jelajahi Ekosistem', to: '/ekosistem-digital' },
   secondaryCta: { label: 'Ajukan Layanan', to: '/layanan' },
   visual: {
-    src: '/images/home/portal-layanan.webp',
-    srcset: '/images/home/portal-layanan-1080.webp 1080w, /images/home/portal-layanan.webp 2160w',
-    width: 2160,
-    height: 1170,
-    alt: 'Tangkapan layar halaman Layanan Digital pada portal Transformasi Digital UNU Yogyakarta',
-    caption: 'Portal Layanan Digital UNU Yogyakarta'
+    src: '/images/home/campus-digital-ecosystem.webp',
+    srcset: '/images/home/campus-digital-ecosystem-836.webp 836w, /images/home/campus-digital-ecosystem.webp 1400w',
+    width: 1400,
+    height: 788,
+    alt: 'Gedung Universitas Nahdlatul Ulama Yogyakarta terhubung dengan layanan, dokumen, dan sistem digital kampus',
+    building: {
+      src: '/images/home/hero-building.webp',
+      srcset: '/images/home/hero-building-560.webp 560w, /images/home/hero-building.webp 820w',
+      width: 820,
+      height: 831,
+      alt: 'Gedung kampus Universitas Nahdlatul Ulama Yogyakarta'
+    },
+    screens: [
+      {
+        key: 'layanan',
+        src: '/images/home/hero-screen-layanan.webp',
+        alt: 'Tampilan katalog Layanan Digital pada portal UNU Yogyakarta'
+      },
+      {
+        key: 'dokumen',
+        src: '/images/home/hero-screen-dokumen.webp',
+        alt: 'Tampilan halaman Panduan & Dokumen pada portal UNU Yogyakarta'
+      },
+      {
+        key: 'lacak',
+        src: '/images/home/hero-screen-lacak.webp',
+        alt: 'Tampilan halaman Lacak Permohonan pada portal UNU Yogyakarta'
+      }
+    ]
   }
 }
 
 export const impactContent = {
   eyebrow: 'Dampak Transformasi',
-  heading: 'Bukan Sekadar Membangun Sistem. Menghadirkan Perubahan Nyata.',
-  description: 'Dari proses akademik hingga operasional kampus, hasil transformasi digital mulai terukur.',
   cta: { label: 'Lihat Dampak Transformasi', to: '/dampak' },
-  source: 'Sumber: presentasi Transformasi Digital UNU Yogyakarta. Data per periode yang tertera, bukan data real-time.'
+  source: 'Sumber: presentasi Transformasi Digital UNU Yogyakarta. Bukan data real-time.'
 }
 
 export const impactMetrics: ImpactMetric[] = [
   {
     value: 88,
     suffix: '%',
-    label: 'Portofolio perkuliahan dihasilkan otomatis',
-    period: 'Semester Genap 2025/2026',
-    detail: '370 dari 421 portofolio'
+    label: 'Portofolio otomatis',
+    period: 'Smt. Genap 2025/2026',
+    detail: '370 dari 421'
   },
   { value: 652, label: 'Ijazah diterbitkan', period: 'Data 2025' },
-  { value: 2141, label: 'Dokumen digital dikelola', period: 'Data 2026' },
-  { value: 16401, label: 'Aktivitas presensi pegawai tercatat', period: 'Data 2026' }
+  { value: 2141, label: 'Dokumen digital', period: 'Data 2026' },
+  { value: 16401, label: 'Presensi tercatat', period: 'Data 2026' }
 ]
 
 export const approachContent = {

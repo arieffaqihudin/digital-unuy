@@ -4,6 +4,7 @@ import type {
   ArticleDTO,
   DigitalPlatformDTO,
   DocumentDTO,
+  PlatformCategoryDTO,
   ProgramDTO,
   ServiceDTO,
   SiteSettingsDTO
@@ -13,6 +14,7 @@ interface HomeResponse {
   settings: SiteSettingsDTO
   services: ServiceDTO[]
   platforms: DigitalPlatformDTO[]
+  platformCategories: PlatformCategoryDTO[]
   programs: ProgramDTO[]
   documents: DocumentDTO[]
   articles: ArticleDTO[]
@@ -66,9 +68,8 @@ useHead(() => ({
 <template>
   <div>
     <HomeHero />
-    <HomeImpactPreview />
     <HomeApproach />
-    <HomeEcosystem :platforms="home?.platforms || []" />
+    <HomeEcosystem :platforms="home?.platforms || []" :categories="home?.platformCategories || []" />
 
     <section class="section-space bg-white" aria-labelledby="services-title">
       <div class="page-shell">

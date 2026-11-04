@@ -100,10 +100,10 @@
   }
 
   .hero-title {
-    @apply font-semibold text-charcoal;
-    font-size: clamp(2.25rem, 1.15rem + 2.85vw, 3.75rem);
-    line-height: 1.08;
-    letter-spacing: -0.035em;
+    @apply font-bold text-charcoal;
+    font-size: clamp(2.125rem, 0.5rem + 3.9vw, 3.5rem);
+    line-height: 1.14;
+    letter-spacing: -0.03em;
   }
 
   .section-title {
@@ -116,6 +116,13 @@
   .metric-figure {
     @apply font-semibold tabular-nums text-charcoal;
     font-size: clamp(2.75rem, 1.9rem + 2.6vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .metric-figure-sm {
+    @apply font-semibold tabular-nums text-charcoal;
+    font-size: clamp(2.25rem, 1.6rem + 1.9vw, 3.25rem);
     line-height: 1;
     letter-spacing: -0.04em;
   }

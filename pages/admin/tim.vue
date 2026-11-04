@@ -3,8 +3,6 @@ import {
   ArrowDown,
   ArrowUp,
   Camera,
-  Eye,
-  EyeOff,
   Pencil,
   Plus,
   Trash2,
@@ -40,23 +38,24 @@ const photoInputKey = ref(0)
 const memberForm = reactive({
   name: '',
   position: '',
-  unit: '',
-  bio: '',
   groupId: '',
+  bio: '',
   order: 0,
-  published: false,
-  focalX: 50,
-  focalY: 50,
   removePhoto: false
 })
+
+const publishTarget = ref<TeamMemberDTO | null>(null)
+const publishBusy = ref('')
+const deleteTarget = ref<TeamMemberDTO | null>(null)
+const deletingMember = ref(false)
 
 const groupModalOpen = ref(false)
 const groupForm = reactive({ id: '', name: '', order: 0 })
 const groupSaving = ref(false)
 const groupError = ref('')
+const groupDeleteTarget = ref<GroupWithCount | null>(null)
+const deletingGroup = ref(false)
 
-const deleteTarget = ref<TeamMemberDTO | null>(null)
-const deleting = ref(false)
 const toggleBusy = ref('')
 const orderBusy = ref('')
 
@@ -83,7 +82,6 @@ const previewUrl = computed(() => {
   if (memberForm.removePhoto) return ''
   return localPhotoPreview.value || editingMember.value?.photoUrl || ''
 })
-const previewPosition = computed(() => `${memberForm.focalX}% ${memberForm.focalY}%`)
 const initials = computed(() =>
   memberForm.name
     .split(/\s+/)
@@ -107,13 +105,9 @@ function openCreateMember() {
   Object.assign(memberForm, {
     name: '',
     position: '',
-    unit: '',
-    bio: '',
     groupId: '',
+    bio: '',
     order: members.value.length,
-    published: false,
-    focalX: 50,
-    focalY: 50,
     removePhoto: false
   })
   memberError.value = ''
@@ -129,13 +123,9 @@ function openEditMember(member: TeamMemberDTO) {
   Object.assign(memberForm, {
     name: member.name,
     position: member.position,
-    unit: member.unit,
-    bio: member.bio,
     groupId: member.groupId,
+    bio: member.bio,
     order: member.order,
-    published: member.published,
-    focalX: member.focalX,
-    focalY: member.focalY,
     removePhoto: false
   })
   memberError.value = ''
@@ -193,27 +183,22 @@ async function saveMember() {
   }
   savingMember.value = true
   try {
-    const metadata = {
+    const formData = new FormData()
+    formData.append('metadata', JSON.stringify({
       name: memberForm.name,
       position: memberForm.position,
-      unit: memberForm.unit,
-      bio: memberForm.bio,
       groupId: memberForm.groupId || null,
+      bio: memberForm.bio,
       order: memberForm.order,
-      published: memberForm.published,
-      focalX: memberForm.focalX,
-      focalY: memberForm.focalY,
       removePhoto: memberForm.removePhoto
-    }
-    const formData = new FormData()
-    formData.append('metadata', JSON.stringify(metadata))
+    }))
     if (photoFile.value) formData.append('photo', photoFile.value)
     if (editingId.value) {
       await api(`/api/admin/team/members/${editingId.value}`, { method: 'PATCH', body: formData })
       toast.success('Anggota diperbarui')
     } else {
       await api('/api/admin/team/members', { method: 'POST', body: formData })
-      toast.success('Anggota ditambahkan')
+      toast.success('Anggota ditambahkan', 'Status publikasi otomatis OFF.')
     }
     closeMemberModal()
     await load()
@@ -224,18 +209,28 @@ async function saveMember() {
   }
 }
 
-async function togglePublished(member: TeamMemberDTO) {
+function requestTogglePublication(member: TeamMemberDTO) {
+  if (toggleBusy.value) return
+  if (member.published) {
+    setPublication(member, false)
+  } else {
+    publishTarget.value = member
+  }
+}
+
+async function setPublication(member: TeamMemberDTO, published: boolean) {
+  publishBusy.value = member.id
   toggleBusy.value = member.id
   try {
-    await api(`/api/admin/team/members/${member.id}`, {
-      method: 'PATCH',
-      body: { published: !member.published }
-    })
-    toast.success(member.published ? 'Anggota disembunyikan dari publik' : 'Anggota dipublikasikan')
+    await api(`/api/admin/team/members/${member.id}`, { method: 'PATCH', body: { published } })
+    toast.success(published ? 'Anggota dipublikasikan' : 'Publikasi anggota dinonaktifkan')
+    publishTarget.value = null
     await load()
   } catch (e: any) {
-    toast.error('Gagal mengubah status', e?.data?.statusMessage || 'Coba lagi.')
+    publishTarget.value = null
+    toast.error('Gagal mengubah publikasi', e?.data?.statusMessage || 'Status anggota tidak berubah.')
   } finally {
+    publishBusy.value = ''
     toggleBusy.value = ''
   }
 }
@@ -259,9 +254,9 @@ async function moveMember(member: TeamMemberDTO, direction: -1 | 1) {
   }
 }
 
-async function confirmDelete() {
+async function confirmDeleteMember() {
   if (!deleteTarget.value) return
-  deleting.value = true
+  deletingMember.value = true
   try {
     await api(`/api/admin/team/members/${deleteTarget.value.id}`, { method: 'DELETE' })
     toast.success('Anggota dihapus')
@@ -270,7 +265,7 @@ async function confirmDelete() {
   } catch (e: any) {
     toast.error('Gagal menghapus', e?.data?.statusMessage || 'Coba lagi.')
   } finally {
-    deleting.value = false
+    deletingMember.value = false
   }
 }
 
@@ -279,6 +274,7 @@ function openGroupManager() {
   groupForm.id = ''
   groupForm.name = ''
   groupForm.order = groups.value.length
+  groupDeleteTarget.value = null
   groupModalOpen.value = true
 }
 
@@ -309,7 +305,7 @@ async function saveGroup() {
         method: 'PATCH',
         body: { name: groupForm.name, order: groupForm.order }
       })
-      toast.success('Kelompok diperbarui')
+      toast.success('Nama kelompok diperbarui')
     } else {
       await api('/api/admin/team/groups', {
         method: 'POST',
@@ -326,15 +322,19 @@ async function saveGroup() {
   }
 }
 
-async function deleteGroup(group: GroupWithCount) {
-  if (!window.confirm(`Hapus kelompok "${group.name}"? Anggota pada kelompok ini tetap tersimpan tanpa kelompok.`)) return
+async function deleteGroup() {
+  if (!groupDeleteTarget.value) return
+  deletingGroup.value = true
   try {
-    await api(`/api/admin/team/groups/${group.id}`, { method: 'DELETE' })
+    await api(`/api/admin/team/groups/${groupDeleteTarget.value.id}`, { method: 'DELETE' })
     toast.success('Kelompok dihapus')
-    if (groupForm.id === group.id) resetGroupForm()
+    if (groupForm.id === groupDeleteTarget.value.id) resetGroupForm()
+    groupDeleteTarget.value = null
     await load()
   } catch (e: any) {
     toast.error('Gagal menghapus kelompok', e?.data?.statusMessage || 'Coba lagi.')
+  } finally {
+    deletingGroup.value = false
   }
 }
 
@@ -355,7 +355,7 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
       <div>
         <p class="text-[12px] font-bold uppercase tracking-[0.18em] text-unu-green">Konten Website</p>
         <h2 class="mt-2">Tim Kami</h2>
-        <p class="mt-1 text-[14px] text-admin-muted">Kelola anggota, kelompok, urutan, foto, dan status publikasi.</p>
+        <p class="mt-1 text-[14px] text-admin-muted">Kelola anggota, kelompok, urutan, foto, dan publikasi.</p>
       </div>
       <div class="flex flex-wrap gap-2">
         <AppButton variant="secondary" size="sm" @click="openGroupManager"><template #left><UsersRound :size="14" /></template>Kelompok Tim</AppButton>
@@ -369,7 +369,7 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-admin-border px-5 py-4">
         <div>
           <p class="text-[16px] font-semibold">Daftar Anggota</p>
-          <p class="mt-0.5 text-[13px] text-admin-muted">Hanya anggota berstatus publik yang tampil di website.</p>
+          <p class="mt-0.5 text-[13px] text-admin-muted">Gunakan toggle publikasi untuk menampilkan atau menyembunyikan profil.</p>
         </div>
         <span class="rounded-full bg-unu-green-soft px-3 py-1 text-[12px] font-semibold text-unu-green">{{ members.length }} anggota</span>
       </div>
@@ -384,14 +384,14 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
 
       <template v-else>
         <div class="hidden overflow-x-auto md:block">
-          <table class="w-full min-w-[880px] text-left">
+          <table class="w-full min-w-[800px] text-left">
             <thead>
               <tr class="border-b border-admin-border bg-slate-50 text-[13px] uppercase tracking-wide text-admin-muted">
                 <th class="px-5 py-3 font-semibold">Anggota</th>
-                <th class="px-5 py-3 font-semibold">Jabatan</th>
-                <th class="px-5 py-3 font-semibold">Kelompok</th>
+                <th class="px-5 py-3 font-semibold">Jabatan / Posisi</th>
+                <th class="px-5 py-3 font-semibold">Kelompok Tim</th>
                 <th class="px-5 py-3 font-semibold">Urutan</th>
-                <th class="px-5 py-3 font-semibold">Status</th>
+                <th class="px-5 py-3 font-semibold">Publikasi</th>
                 <th class="px-5 py-3 text-right font-semibold">Aksi</th>
               </tr>
             </thead>
@@ -400,10 +400,10 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
                 <td class="px-5 py-3">
                   <div class="flex items-center gap-3">
                     <div class="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-slate-100">
-                      <img v-if="member.photoUrl" :src="member.photoUrl" :alt="member.name" class="h-full w-full object-cover" :style="{ objectPosition: `${member.focalX}% ${member.focalY}%` }" />
+                      <img v-if="member.photoUrl" :src="member.photoUrl" :alt="member.name" class="h-full w-full object-cover object-center" />
                       <span v-else class="grid h-full w-full place-items-center text-[12px] font-bold text-slate-400">{{ member.name.slice(0, 1) }}</span>
                     </div>
-                    <div><p class="text-[14px] font-semibold">{{ member.name }}</p><p class="text-[13px] text-admin-muted">{{ member.unit || '—' }}</p></div>
+                    <p class="text-[14px] font-semibold">{{ member.name }}</p>
                   </div>
                 </td>
                 <td class="px-5 py-3 text-[14px] text-slate-600">{{ member.position }}</td>
@@ -416,8 +416,19 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
                   </div>
                 </td>
                 <td class="px-5 py-3">
-                  <button type="button" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] font-semibold disabled:opacity-50" :class="member.published ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-admin-border bg-slate-50 text-slate-500'" :disabled="toggleBusy === member.id" @click="togglePublished(member)">
-                    <component :is="member.published ? Eye : EyeOff" :size="12" />{{ member.published ? 'Publik' : 'Nonaktif' }}
+                  <button
+                    type="button"
+                    role="switch"
+                    :aria-checked="member.published"
+                    :aria-label="`Publikasi ${member.name}`"
+                    :disabled="toggleBusy === member.id"
+                    class="inline-flex min-h-[36px] items-center gap-2 rounded-lg px-1 text-[13px] font-medium disabled:opacity-50"
+                    @click="requestTogglePublication(member)"
+                  >
+                    <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors" :class="member.published ? 'bg-unu-green' : 'bg-slate-300'">
+                      <span class="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform" :class="member.published ? 'translate-x-5' : 'translate-x-0'" />
+                    </span>
+                    <span :class="member.published ? 'text-unu-green' : 'text-slate-500'">{{ publishBusy === member.id ? 'Menyimpan…' : member.published ? 'Publikasi ON' : 'Publikasi OFF' }}</span>
                   </button>
                 </td>
                 <td class="px-5 py-3">
@@ -435,7 +446,7 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
           <div v-for="member in sortedMembers" :key="member.id" class="p-4">
             <div class="flex items-start gap-3">
               <div class="h-16 w-12 shrink-0 overflow-hidden rounded-md bg-slate-100">
-                <img v-if="member.photoUrl" :src="member.photoUrl" :alt="member.name" class="h-full w-full object-cover" :style="{ objectPosition: `${member.focalX}% ${member.focalY}%` }" />
+                <img v-if="member.photoUrl" :src="member.photoUrl" :alt="member.name" class="h-full w-full object-cover object-center" />
                 <span v-else class="grid h-full w-full place-items-center text-[14px] font-bold text-slate-400">{{ member.name.slice(0, 1) }}</span>
               </div>
               <div class="min-w-0 flex-1">
@@ -443,13 +454,15 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
                 <p class="mt-0.5 text-[13px] text-slate-600">{{ member.position }}</p>
                 <p class="mt-1 text-[12px] text-admin-muted">{{ member.groupName || 'Tanpa kelompok' }} · urutan {{ member.order }}</p>
               </div>
-              <span class="rounded-full border px-2 py-1 text-[12px] font-semibold" :class="member.published ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-admin-border bg-slate-50 text-slate-500'">{{ member.published ? 'Publik' : 'Nonaktif' }}</span>
             </div>
-            <div class="mt-3 flex flex-wrap gap-4">
+            <div class="mt-3 flex flex-wrap items-center gap-4">
+              <button type="button" role="switch" :aria-checked="member.published" :aria-label="`Publikasi ${member.name}`" :disabled="toggleBusy === member.id" class="inline-flex min-h-[36px] items-center gap-2 text-[13px] font-medium disabled:opacity-50" @click="requestTogglePublication(member)">
+                <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors" :class="member.published ? 'bg-unu-green' : 'bg-slate-300'">
+                  <span class="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform" :class="member.published ? 'translate-x-5' : 'translate-x-0'" />
+                </span>
+                <span :class="member.published ? 'text-unu-green' : 'text-slate-500'">{{ publishBusy === member.id ? 'Menyimpan…' : member.published ? 'Publikasi ON' : 'Publikasi OFF' }}</span>
+              </button>
               <button type="button" class="text-[13px] font-semibold text-unu-green" @click="openEditMember(member)">Edit</button>
-              <button type="button" class="text-[13px] font-semibold text-slate-600" @click="togglePublished(member)">{{ member.published ? 'Sembunyikan' : 'Publikasikan' }}</button>
-              <button type="button" class="text-[13px] font-semibold text-slate-600" @click="moveMember(member, -1)">Naik</button>
-              <button type="button" class="text-[13px] font-semibold text-slate-600" @click="moveMember(member, 1)">Turun</button>
               <button type="button" class="text-[13px] font-semibold text-red-700" @click="deleteTarget = member">Hapus</button>
             </div>
           </div>
@@ -457,12 +470,12 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
       </template>
     </div>
 
-    <ModalDialog v-model="memberModalOpen" :title="editingId ? 'Edit Anggota' : 'Tambah Anggota'" description="Foto akan dioptimalkan otomatis. Data hanya tampil di publik jika status publikasi aktif." size="lg">
-      <div class="grid gap-5 sm:grid-cols-[190px_1fr]">
-        <div>
-          <p class="admin-label">Pratinjau foto</p>
+    <ModalDialog v-model="memberModalOpen" :title="editingId ? 'Edit Anggota' : 'Tambah Anggota'" :description="editingId ? 'Perubahan profil tidak mengubah status publikasi.' : 'Profil baru otomatis berstatus tidak dipublikasikan.'" size="md">
+      <div class="grid gap-5 sm:grid-cols-[180px_1fr]">
+        <div class="mx-auto w-full max-w-[200px] sm:mx-0 sm:max-w-none">
+          <p class="admin-label">Foto anggota</p>
           <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-slate-100 ring-1 ring-admin-border">
-            <img v-if="previewUrl" :src="previewUrl" alt="Pratinjau foto anggota" class="h-full w-full object-cover" :style="{ objectPosition: previewPosition }" />
+            <img v-if="previewUrl" :src="previewUrl" alt="Pratinjau foto anggota" class="h-full w-full object-cover object-center" />
             <div v-else class="flex h-full flex-col items-center justify-center gap-2 text-center">
               <span class="grid h-12 w-12 place-items-center rounded-full bg-white text-[16px] font-bold text-slate-400">{{ initials || 'TD' }}</span>
               <span class="text-[12px] text-slate-400">Belum ada foto</span>
@@ -480,58 +493,67 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
           <div v-if="memberError" class="rounded-lg border border-red-200 bg-red-50 p-3 text-[13px] text-red-900">{{ memberError }}</div>
           <div><label for="team-name" class="admin-label">Nama lengkap</label><input id="team-name" v-model="memberForm.name" class="field-input" maxlength="120" /></div>
           <div><label for="team-position" class="admin-label">Jabatan / posisi</label><input id="team-position" v-model="memberForm.position" class="field-input" maxlength="160" /></div>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div><label for="team-unit" class="admin-label">Bidang / unit</label><input id="team-unit" v-model="memberForm.unit" class="field-input" maxlength="160" /></div>
-            <div>
-              <label for="team-group" class="admin-label">Kelompok tim</label>
-              <select id="team-group" v-model="memberForm.groupId" class="field-input">
-                <option value="">Tanpa kelompok</option>
-                <option v-for="group in groups" :key="group.id" :value="group.id">{{ group.name }}</option>
-              </select>
-            </div>
+          <div>
+            <label for="team-group" class="admin-label">Kelompok tim</label>
+            <select id="team-group" v-model="memberForm.groupId" class="field-input">
+              <option value="">Tanpa kelompok</option>
+              <option v-for="group in groups" :key="group.id" :value="group.id">{{ group.name }}</option>
+            </select>
           </div>
           <div><label for="team-bio" class="admin-label">Deskripsi singkat</label><textarea id="team-bio" v-model="memberForm.bio" rows="3" class="field-input" maxlength="1500" /></div>
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div><label for="team-order" class="admin-label">Urutan tampil</label><input id="team-order" v-model.number="memberForm.order" type="number" class="field-input" /></div>
-            <label class="flex min-h-[46px] cursor-pointer items-center gap-2 self-end rounded-lg border border-admin-border px-3 text-[14px] font-medium">
-              <input v-model="memberForm.published" type="checkbox" class="h-4 w-4 accent-unu-green" /> Publikasikan
-            </label>
-          </div>
-          <div class="rounded-lg border border-admin-border bg-slate-50 p-3">
-            <p class="text-[12px] font-semibold uppercase tracking-wide text-admin-muted">Focal point foto</p>
-            <div class="mt-3 grid gap-3 sm:grid-cols-2">
-              <label class="text-[12px] text-slate-500">Horizontal
-                <input v-model.number="memberForm.focalX" type="range" min="0" max="100" class="mt-1 w-full accent-unu-green" />
-              </label>
-              <label class="text-[12px] text-slate-500">Vertikal
-                <input v-model.number="memberForm.focalY" type="range" min="0" max="100" class="mt-1 w-full accent-unu-green" />
-              </label>
-            </div>
-          </div>
+          <div><label for="team-order" class="admin-label">Urutan tampil</label><input id="team-order" v-model.number="memberForm.order" type="number" class="field-input" /></div>
         </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
           <AppButton variant="secondary" @click="closeMemberModal">Batal</AppButton>
-          <AppButton :loading="savingMember" @click="saveMember"><template #left><Camera :size="14" /></template>Simpan Anggota</AppButton>
+          <AppButton :loading="savingMember" @click="saveMember">Simpan Anggota</AppButton>
         </div>
       </template>
     </ModalDialog>
 
-    <ModalDialog v-model="groupModalOpen" title="Kelompok Tim" description="Kelompok bersifat opsional. Anggota tanpa kelompok tetap dapat dipublikasikan." size="lg">
+    <ModalDialog :model-value="Boolean(publishTarget)" title="Publikasikan Anggota Tim?" size="sm" @update:model-value="publishTarget = null">
+      <p class="text-[14px] leading-6 text-slate-600">Profil anggota ini akan ditampilkan pada halaman Tim Transformasi Digital dan dapat dilihat oleh publik.</p>
+      <div v-if="publishTarget" class="mt-4 rounded-lg border border-admin-border bg-slate-50 px-4 py-3">
+        <p class="text-[14px] font-semibold text-admin-text">{{ publishTarget.name }}</p>
+        <p class="mt-0.5 text-[13px] text-admin-muted">{{ publishTarget.position }}</p>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <AppButton variant="secondary" @click="publishTarget = null">Batal</AppButton>
+          <AppButton :loading="publishBusy === publishTarget?.id" @click="publishTarget && setPublication(publishTarget, true)">Ya, Publikasikan</AppButton>
+        </div>
+      </template>
+    </ModalDialog>
+
+    <ModalDialog v-model="groupModalOpen" title="Kelompok Tim" description="Kelompok digunakan untuk mengelompokkan anggota pada halaman publik." size="lg">
       <div class="grid gap-5 sm:grid-cols-[1fr_1fr]">
         <div>
           <p class="text-[14px] font-semibold">Kelompok tersedia</p>
+          <div v-if="groupDeleteTarget" class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+            <p class="text-[13px] leading-5 text-red-900">Hapus kelompok <strong>{{ groupDeleteTarget.name }}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="mt-3 flex gap-2">
+              <AppButton size="sm" variant="secondary" @click="groupDeleteTarget = null">Batal</AppButton>
+              <AppButton size="sm" variant="danger" :loading="deletingGroup" @click="deleteGroup">Hapus</AppButton>
+            </div>
+          </div>
           <div v-if="groups.length" class="mt-3 divide-y divide-admin-border rounded-lg border border-admin-border">
             <div v-for="group in groups" :key="group.id" class="flex items-center justify-between gap-3 px-3 py-2.5">
               <div><p class="text-[14px] font-medium">{{ group.name }}</p><p class="text-[12px] text-admin-muted">{{ group.memberCount }} anggota · urutan {{ group.order }}</p></div>
               <div class="flex gap-2">
                 <button type="button" class="text-[12px] font-semibold text-unu-green" @click="editGroup(group)">Edit</button>
-                <button type="button" class="text-[12px] font-semibold text-red-700" @click="deleteGroup(group)">Hapus</button>
+                <button
+                  type="button"
+                  class="text-[12px] font-semibold text-red-700 disabled:cursor-not-allowed disabled:text-slate-300"
+                  :disabled="group.memberCount > 0"
+                  :title="group.memberCount > 0 ? 'Pindahkan anggota ke kelompok lain sebelum menghapus.' : 'Hapus kelompok'"
+                  @click="groupDeleteTarget = group"
+                >Hapus</button>
               </div>
             </div>
           </div>
           <p v-else class="mt-3 rounded-lg border border-dashed border-admin-border p-4 text-[13px] text-admin-muted">Belum ada kelompok.</p>
+          <p class="mt-3 text-[12px] leading-5 text-admin-muted">Kelompok yang masih memiliki anggota tidak dapat dihapus.</p>
         </div>
         <div class="rounded-lg border border-admin-border bg-slate-50 p-4">
           <p class="text-[14px] font-semibold">{{ groupForm.id ? 'Edit Kelompok' : 'Tambah Kelompok' }}</p>
@@ -552,7 +574,7 @@ useSeoMeta({ title: 'Tim Kami', robots: 'noindex, nofollow' })
       <template #footer>
         <div class="flex justify-end gap-2">
           <AppButton variant="secondary" @click="deleteTarget = null">Batal</AppButton>
-          <AppButton variant="danger" :loading="deleting" @click="confirmDelete">Hapus</AppButton>
+          <AppButton variant="danger" :loading="deletingMember" @click="confirmDeleteMember">Hapus</AppButton>
         </div>
       </template>
     </ModalDialog>

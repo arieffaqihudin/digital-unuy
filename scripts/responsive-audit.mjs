@@ -26,6 +26,7 @@ const corePublicPages = [
   ['/layanan', 'services'],
   ['/layanan/pembuatan-email-institusi', 'service-detail'],
   ['/ekosistem-digital', 'ecosystem'],
+  ['/ekosistem-digital/portal-pegawai-green-team', 'ecosystem-detail'],
   ['/dokumen', 'documents'],
   ['/publikasi', 'publications']
 ]
@@ -45,7 +46,6 @@ const adminPages = [
   ['/admin/layanan', 'admin-services'],
   ['/admin/permohonan', 'admin-requests'],
   ['/admin/pengguna', 'admin-users'],
-  ['/admin/pengaturan', 'admin-settings'],
   ['/admin/audit', 'admin-audit'],
   ['/admin/notifikasi', 'admin-notifications'],
   ['/admin/layanan/baru', 'admin-service-new'],

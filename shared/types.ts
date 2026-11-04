@@ -185,18 +185,58 @@ export interface TeamGroupDTO {
   order: number
 }
 
+export interface PlatformModuleDTO {
+  id?: string
+  name: string
+  description: string
+  order: number
+  active: boolean
+}
+
+export interface PlatformMetricDTO {
+  value: number
+  suffix?: string
+  label: string
+  period: string
+  source: string
+}
+
+export interface PlatformCategoryDTO {
+  id: string
+  name: string
+  slug: string
+  description: string
+  order: number
+  active: boolean
+  platformCount?: number
+}
+
 export interface DigitalPlatformDTO {
   id: string
   name: string
   slug: string
   description: string
   category: string
+  categoryId: string
+  categorySlug: string
+  categoryOrder: number
   unit: string
-  status: 'Aktif' | 'Pilot' | 'Dalam Pengembangan' | 'Tidak Aktif'
+  status: (typeof PLATFORM_STATUSES)[number]
   url?: string
   audience: string
+  audiences: string[]
   icon: string
   order: number
+  published: boolean
+  featured: boolean
+  thumbnail: string
+  gallery: string[]
+  problem: string
+  solution: string
+  benefits: string
+  features: string
+  modules: PlatformModuleDTO[]
+  metrics: PlatformMetricDTO[]
   updatedAt: string
 }
 
@@ -311,16 +351,15 @@ export interface Paginated<T> {
   pageSize: number
 }
 
-export const PLATFORM_STATUSES = ['Aktif', 'Pilot', 'Dalam Pengembangan', 'Tidak Aktif'] as const
+export const PLATFORM_STATUSES = ['Aktif', 'Pilot', 'Dalam Pengembangan', 'Tidak Aktif', 'Belum Dikonfirmasi'] as const
+
+export const PLATFORM_AUDIENCES = ['Mahasiswa', 'Dosen', 'Tenaga Kependidikan', 'Pengelola Unit'] as const
 
 export const PLATFORM_CATEGORIES = [
-  'Akademik',
-  'Tata Kelola',
-  'Sumber Daya Manusia',
-  'Penjaminan Mutu',
-  'Website & Publikasi',
-  'Pengabdian Masyarakat',
-  'Infrastruktur Digital'
+  'Akademik & Pembelajaran',
+  'Operasional & Tata Kelola',
+  'Pengabdian & Pengembangan Masyarakat',
+  'Platform & Infrastruktur Digital'
 ]
 
 export const PROGRAM_CATEGORIES = [

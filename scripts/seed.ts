@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs'
 import { markdownToSafeHtml } from '../server/utils/content'
 import { PERMISSION_META } from '../shared/permissions'
 import { ROLE_PERMISSIONS } from '../shared/types'
+import { PLATFORM_CATEGORY_SEED, PLATFORM_SEED } from './ecosystem-data'
 import {
   Article,
   DigitalPlatform,
@@ -13,6 +14,7 @@ import {
   DocumentVersion,
   Page,
   Permission,
+  PlatformCategory,
   Program,
   Role,
   Service,
@@ -592,96 +594,33 @@ for (const definition of serviceDefinitions) {
   serviceIdBySlug.set(definition.slug, service._id)
 }
 
-const platformDefinitions = [
-  {
-    name: 'Portal Akademik Terpadu',
-    slug: 'portal-akademik-terpadu',
-    description:
-      'Pusat informasi dan layanan akademik bagi mahasiswa serta pengelola program studi. Status pada data contoh ini belum merupakan konfirmasi operasional.',
-    category: 'Akademik',
-    unit: 'Unit Pengelola Akademik',
-    status: 'Pilot',
-    audience: 'Mahasiswa, dosen, pengelola program studi',
-    icon: 'academic',
-    order: 1
-  },
-  {
-    name: 'Portal Tata Kelola Digital',
-    slug: 'portal-tata-kelola-digital',
-    description:
-      'Ruang kerja digital untuk proses tata kelola, persuratan, dan koordinasi unit kerja. Status menunjukkan tahap pengembangan, bukan klaim produksi.',
-    category: 'Tata Kelola',
-    unit: 'Pengelola Tata Kelola',
-    status: 'Dalam Pengembangan',
-    audience: 'Tenaga kependidikan, pimpinan unit',
-    icon: 'briefcase',
-    order: 2
-  },
-  {
-    name: 'Layanan Data Kepegawaian',
-    slug: 'layanan-data-kepegawaian',
-    description:
-      'Katalog layanan dan informasi sumber daya manusia yang terhubung dengan proses administrasi kepegawaian.',
-    category: 'Sumber Daya Manusia',
-    unit: 'Pengelola SDM',
-    status: 'Pilot',
-    audience: 'Dosen, tenaga kependidikan',
-    icon: 'users',
-    order: 3
-  },
-  {
-    name: 'Portal Penjaminan Mutu',
-    slug: 'portal-penjaminan-mutu',
-    description:
-      'Dokumentasi dan alur kerja penjaminan mutu internal yang sedang disiapkan untuk integrasi bertahap.',
-    category: 'Penjaminan Mutu',
-    unit: 'Pengelola Penjaminan Mutu',
-    status: 'Dalam Pengembangan',
-    audience: 'Unit penjaminan mutu, program studi',
-    icon: 'badge',
-    order: 4
-  },
-  {
-    name: 'Jaringan Website Unit Kerja',
-    slug: 'jaringan-website-unit-kerja',
-    description:
-      'Kumpulan website resmi fakultas dan unit kerja yang menggunakan standar identitas serta pengelolaan konten terpusat.',
-    category: 'Website & Publikasi',
-    unit: 'Pengelola Komunikasi & Website',
-    status: 'Pilot',
-    audience: 'Publik, sivitas akademika',
-    icon: 'globe',
-    order: 5
-  },
-  {
-    name: 'Portal Pengabdian Masyarakat',
-    slug: 'portal-pengabdian-masyarakat',
-    description:
-      'Ruang pendataan kegiatan pengabdian masyarakat, mitra, dan luaran kegiatan. Tahap implementasi masih dalam pengembangan.',
-    category: 'Pengabdian Masyarakat',
-    unit: 'Pengelola Pengabdian',
-    status: 'Dalam Pengembangan',
-    audience: 'Dosen, lembaga pengabdian',
-    icon: 'workflow',
-    order: 6
-  },
-  {
-    name: 'Fondasi Infrastruktur Digital',
-    slug: 'fondasi-infrastruktur-digital',
-    description:
-      'Kumpulan layanan dasar seperti identitas, jaringan, dan penyimpanan yang menjadi fondasi layanan digital universitas.',
-    category: 'Infrastruktur Digital',
-    unit: 'Pengelola Infrastruktur TI',
-    status: 'Pilot',
-    audience: 'Pengelola sistem, unit TI',
-    icon: 'server',
-    order: 7
-  }
-]
-for (const definition of platformDefinitions) {
-  await DigitalPlatform.findOneAndUpdate(
+for (const definition of PLATFORM_CATEGORY_SEED) {
+  await PlatformCategory.findOneAndUpdate(
     { slug: definition.slug },
     { $set: { ...definition, isSeedData: true } },
+    { upsert: true }
+  )
+}
+
+const platformCategories = await PlatformCategory.find({}).lean()
+const platformCategoryBySlug = new Map(platformCategories.map((category) => [category.slug, category]))
+
+for (const definition of PLATFORM_SEED) {
+  const category = platformCategoryBySlug.get(definition.categorySlug)
+  if (!category) throw new Error(`Kategori platform tidak ditemukan: ${definition.categorySlug}`)
+  const { categorySlug, ...data } = definition
+  await DigitalPlatform.findOneAndUpdate(
+    { slug: definition.slug },
+    {
+      $set: {
+        ...data,
+        category: category.name,
+        categoryId: category._id,
+        audience: definition.audiences.join(', '),
+        published: true,
+        isSeedData: true
+      }
+    },
     { upsert: true }
   )
 }
@@ -1020,6 +959,7 @@ await Promise.all([
   Page.init(),
   TeamGroup.init(),
   TeamMember.init(),
+  PlatformCategory.init(),
   DigitalPlatform.init(),
   Program.init(),
   Article.init(),

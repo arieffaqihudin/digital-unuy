@@ -10,12 +10,10 @@ import {
   Layers,
   LayoutDashboard,
   LogOut,
+  History,
   Mail,
   Menu,
   Newspaper,
-  ScrollText,
-  Settings,
-  ShieldCheck,
   Users,
   UsersRound,
   Workflow,
@@ -85,10 +83,7 @@ const menuGroups: {
     label: 'Administrasi',
     items: [
       { label: 'Pengguna', to: '/admin/pengguna', icon: Users, permission: 'users.manage' },
-      { label: 'Hak Akses', to: '/admin/akses', icon: ShieldCheck, permission: 'roles.manage' },
-      { label: 'Pengaturan', to: '/admin/pengaturan', icon: Settings, permission: 'settings.manage' },
-      { label: 'Notifikasi', to: '/admin/notifikasi', icon: Mail, permission: 'notifications.read' },
-      { label: 'Audit Log', to: '/admin/audit', icon: ScrollText, permission: 'audit.read' }
+      { label: 'Log Aktivitas', to: '/admin/audit', icon: History, permission: 'audit.read' }
     ]
   }
 ]
@@ -252,6 +247,15 @@ useSeoMeta({ robots: 'noindex, nofollow', title: computed(() => `${currentLabel.
           <div class="flex items-center gap-2">
             <span class="hidden text-[12px] font-medium text-admin-muted md:inline">{{ settings.directorateName }}</span>
             <span class="mx-1 hidden h-5 w-px bg-admin-border md:block" aria-hidden="true" />
+
+            <NuxtLink
+              to="/admin/notifikasi"
+              class="relative grid h-9 w-9 place-items-center rounded-lg border border-admin-border bg-white text-admin-muted transition hover:border-unu-green/30 hover:text-unu-green"
+              aria-label="Notifikasi"
+              title="Notifikasi"
+            >
+              <Mail :size="16" aria-hidden="true" />
+            </NuxtLink>
 
             <div v-if="user" ref="accountMenu" class="relative">
               <button

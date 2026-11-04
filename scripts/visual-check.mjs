@@ -59,6 +59,7 @@ const publicPages = [
   ['/layanan', 'services'],
   ['/layanan/pembuatan-email-institusi', 'service-detail'],
   ['/ekosistem-digital', 'ecosystem'],
+  ['/ekosistem-digital/portal-pegawai-green-team', 'ecosystem-detail'],
   ['/dokumen', 'documents'],
   ['/dokumen/sop-pengajuan-layanan-digital', 'document-detail'],
   ['/publikasi', 'publications'],
@@ -94,8 +95,6 @@ const adminPages = [
   ['/admin/halaman', 'admin-pages'],
   ['/admin/dokumen', 'admin-documents'],
   ['/admin/pengguna', 'admin-users'],
-  ['/admin/akses', 'admin-access'],
-  ['/admin/pengaturan', 'admin-settings'],
   ['/admin/notifikasi', 'admin-notifications'],
   ['/admin/audit', 'admin-audit']
 ]
@@ -112,7 +111,7 @@ for (const [path, name] of [
   ['/admin/permohonan', 'admin-requests'],
   ['/admin/layanan', 'admin-services'],
   ['/admin/pengguna', 'admin-users'],
-  ['/admin/pengaturan', 'admin-settings']
+  ['/admin/notifikasi', 'admin-notifications']
 ]) {
   await auditPage(mobileAdminPage, path, `${name}-mobile`, 'mobile')
 }

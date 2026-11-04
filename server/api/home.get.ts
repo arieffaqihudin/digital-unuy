@@ -2,17 +2,23 @@ import {
   Article,
   DigitalPlatform,
   Document,
+  PlatformCategory,
   Program,
   Service,
   SiteSetting
 } from '../models'
 
 export default defineEventHandler(async () => {
-  const [featuredServices, allServices, platforms, programs, documents, articles, settings] =
+  const [featuredServices, allServices, platforms, platformCategories, programs, documents, articles, settings] =
     await Promise.all([
       Service.find({ active: true, featured: true }).sort({ order: 1 }).limit(6).lean(),
       Service.find({ active: true }).sort({ order: 1 }).limit(6).lean(),
-      DigitalPlatform.find({}).sort({ order: 1, name: 1 }).limit(6).lean(),
+      DigitalPlatform.find({ published: true })
+        .populate('categoryId', 'name slug order')
+        .sort({ featured: -1, order: 1, name: 1 })
+        .limit(6)
+        .lean(),
+      PlatformCategory.find({ active: true }).sort({ order: 1, name: 1 }).lean(),
       Program.find({}).sort({ order: 1, updatedAt: -1 }).limit(4).lean(),
       Document.find({ published: true, archived: false })
         .sort({ updatedAt: -1 })
@@ -30,13 +36,14 @@ export default defineEventHandler(async () => {
     settings: serializeSettings(settings),
     services: serviceItems.map((service) => serializeService(service)),
     platforms: platforms.map((platform) => serializePlatform(platform)),
+    platformCategories: platformCategories.map((category) => serializePlatformCategory(category)),
     programs: programs.map((program) => serializeProgram(program)),
     documents: documents.map((doc) => serializeDocument(doc)),
     articles: articles.map((article) => serializeArticle(article)),
     metrics: verifiedMetrics,
     counts: {
       services: await Service.countDocuments({ active: true }),
-      platforms: await DigitalPlatform.countDocuments({})
+      platforms: await DigitalPlatform.countDocuments({ published: true })
     }
   }
 })

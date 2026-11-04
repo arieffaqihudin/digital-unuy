@@ -25,6 +25,9 @@ for (const [name, path] of shots) {
   const png = await page.screenshot({ clip: { x: 0, y: 73, width: 1440, height: 780 } })
   await sharp(png).webp({ quality: 84 }).toFile(resolve(outDir, `${name}.webp`))
   await sharp(png).resize({ width: 1080 }).webp({ quality: 82 }).toFile(resolve(outDir, `${name}-1080.webp`))
+  // Hero variant: starts below the breadcrumb so no page chrome shows inside the hero visual.
+  const heroPng = await page.screenshot({ clip: { x: 0, y: 150, width: 1440, height: 780 } })
+  await sharp(heroPng).resize({ width: 1080 }).webp({ quality: 84 }).toFile(resolve(outDir, `hero-screen-${name.replace('portal-', '')}.webp`))
   console.log(`saved ${name}`)
 }
 await browser.close()

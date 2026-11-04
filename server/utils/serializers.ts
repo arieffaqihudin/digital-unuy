@@ -3,6 +3,7 @@ import type {
   DigitalPlatformDTO,
   DocumentDTO,
   FormField,
+  PlatformCategoryDTO,
   ProgramDTO,
   RequestDetailDTO,
   RequestListItem,
@@ -96,21 +97,66 @@ export function serializeTeamGroup(group: any): TeamGroupDTO {
 }
 
 export function serializePlatform(platform: any): DigitalPlatformDTO {
+  const category = platform.categoryId && typeof platform.categoryId === 'object'
+    ? platform.categoryId
+    : null
   return {
     id: String(platform._id),
     name: platform.name,
     slug: platform.slug,
     description: platform.description,
-    category: platform.category,
+    category: category?.name || platform.category || '',
+    categoryId: category?._id ? String(category._id) : platform.categoryId ? String(platform.categoryId) : '',
+    categorySlug: category?.slug || '',
+    categoryOrder: Number(category?.order || 0),
     unit: platform.unit || '',
     status: platform.status,
     url: platform.url || '',
     audience: platform.audience || '',
+    audiences: Array.isArray(platform.audiences) ? platform.audiences.map((item: unknown) => String(item)) : [],
     icon: platform.icon || 'globe',
     order: Number(platform.order || 0),
+    published: Boolean(platform.published),
+    featured: Boolean(platform.featured),
+    thumbnail: platform.thumbnail || '',
+    gallery: Array.isArray(platform.gallery) ? platform.gallery.map((item: unknown) => String(item)) : [],
+    problem: platform.problem || '',
+    solution: platform.solution || '',
+    benefits: platform.benefits || '',
+    features: platform.features || '',
+    modules: Array.isArray(platform.modules)
+      ? platform.modules.map((module: any) => ({
+          id: module._id ? String(module._id) : undefined,
+          name: module.name,
+          description: module.description || '',
+          order: Number(module.order || 0),
+          active: module.active !== false
+        }))
+      : [],
+    metrics: Array.isArray(platform.metrics)
+      ? platform.metrics.map((metric: any) => ({
+          value: Number(metric.value || 0),
+          suffix: metric.suffix || '',
+          label: metric.label,
+          period: metric.period || '',
+          source: metric.source || ''
+        }))
+      : [],
     updatedAt: toIso(platform.updatedAt)
   }
 }
+
+export function serializePlatformCategory(category: any): PlatformCategoryDTO {
+  return {
+    id: String(category._id),
+    name: category.name,
+    slug: category.slug,
+    description: category.description || '',
+    order: Number(category.order || 0),
+    active: category.active !== false
+  }
+}
+
 
 export function serializeProgram(program: any): ProgramDTO {
   return {

@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const changed: string[] = []
+  const publishedBefore = Boolean(member.published)
   if (payload?.name !== undefined) {
     const name = String(payload.name).trim()
     if (name.length < 2) throw createError({ statusCode: 422, statusMessage: 'Nama anggota minimal 2 karakter.' })
@@ -64,7 +65,18 @@ export default defineEventHandler(async (event) => {
     changed.push('order')
   }
   if (payload?.published !== undefined) {
-    member.published = Boolean(payload.published)
+    const nextPublished = Boolean(payload.published)
+    if (nextPublished) {
+      const name = String(payload?.name ?? member.name).trim()
+      const position = String(payload?.position ?? member.position).trim()
+      if (name.length < 2 || position.length < 2) {
+        throw createError({
+          statusCode: 422,
+          statusMessage: 'Lengkapi nama dan jabatan anggota sebelum mempublikasikan.'
+        })
+      }
+    }
+    member.published = nextPublished
     changed.push('published')
   }
   if (payload?.focalX !== undefined) {
@@ -110,9 +122,13 @@ export default defineEventHandler(async (event) => {
     await deletePrivateUpload(oldStorageKey)
   }
 
+  const publishedAfter = Boolean(member.published)
+
   await recordAudit(event, user, 'team_member.updated', 'TeamMember', String(member._id), {
     name: member.name,
-    changed
+    changed,
+    publishedBefore,
+    publishedAfter
   })
 
   const populated = await TeamMember.findById(member._id).populate('group', 'name slug order').lean()
