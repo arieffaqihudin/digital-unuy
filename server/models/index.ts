@@ -314,7 +314,7 @@ const digitalPlatformSchema = new Schema(
     category: { type: String, required: true },
     categoryId: { type: Schema.Types.ObjectId, ref: 'PlatformCategory', default: null, index: true },
     unit: { type: String, default: '' },
-    status: { type: String, enum: PLATFORM_STATUSES, default: 'Belum Dikonfirmasi', index: true },
+    status: { type: String, enum: PLATFORM_STATUSES, default: 'Dalam Pengembangan', index: true },
     url: { type: String, default: '' },
     audience: { type: String, default: '' },
     audiences: { type: [String], default: [] },

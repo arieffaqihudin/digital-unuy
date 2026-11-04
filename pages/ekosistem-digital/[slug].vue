@@ -14,11 +14,9 @@ const platform = data.value.platform
 const activeModules = computed(() => platform.modules.filter((module) => module.active).sort((a, b) => a.order - b.order))
 const featureLines = computed(() => platform.features.split('\n').map((line) => line.trim()).filter(Boolean))
 const statusClasses: Record<string, string> = {
-  Aktif: 'border-unu-green/20 bg-unu-green-soft text-unu-green-dark',
-  Pilot: 'border-sky-200 bg-sky-50 text-sky-800',
-  'Dalam Pengembangan': 'border-amber-200 bg-amber-50 text-amber-900',
-  'Tidak Aktif': 'border-slate-200 bg-slate-50 text-slate-500',
-  'Belum Dikonfirmasi': 'border-line-warm bg-[#F7F4E8] text-slate-600'
+  'Sudah Rilis': 'border-unu-green/20 bg-unu-green-soft text-unu-green-dark',
+  'Pilot / Beta': 'border-sky-200 bg-sky-50 text-sky-800',
+  'Dalam Pengembangan': 'border-amber-200 bg-amber-50 text-amber-900'
 }
 
 useSeoMeta({
@@ -41,7 +39,7 @@ useSeoMeta({
             <p class="body-lg mt-4 max-w-2xl">{{ platform.description }}</p>
           </div>
           <div class="flex flex-wrap items-center gap-2 lg:justify-end">
-            <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wide" :class="statusClasses[platform.status] || statusClasses['Belum Dikonfirmasi']">
+            <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wide" :class="statusClasses[platform.status] || 'border-admin-border bg-slate-50 text-slate-600'">
               <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
               {{ platform.status }}
             </span>

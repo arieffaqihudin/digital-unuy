@@ -66,7 +66,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Dokumentasi publik dengan pencarian, kategori, detail, preview PDF, unduh, versi, dan layanan terkait.
 - Publikasi dengan kategori, pencarian, detail, dan render konten tersanitasi.
 - Halaman profil/kustom dari CMS.
-- Halaman **Tim Kami** (`/tentang-kami/tim`) dengan grid anggota, kelompok opsional, foto 3:4, focal point, dan empty state.
+- Halaman **Tim Kami** (`/tentang-kami/tim`) dengan grid anggota per empat kelompok final (Pimpinan, Product, Engineering, Design), foto 3:4, dan empty state.
 - SEO: title, description, Open Graph, canonical, JSON-LD, sitemap, robots, dan noindex pada area privat.
 - Desain responsif mobile-first, token warna ivory/charcoal/gold/sage, navigasi mobile, skeleton, error, dan empty state.
 
@@ -110,7 +110,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Antrean tindakan dan permohonan terbaru.
 - Manajemen permohonan: filter, pencarian, detail, penugasan, perubahan status tervalidasi, catatan internal/publik, lampiran, timeline.
 - Manajemen layanan: CRUD metadata, aktif/nonaktif, unggulan, urutan, form builder berversi, penghubung dokumen.
-- CMS: platform ekosistem, program, publikasi, halaman/profil, dan Tim Kami (anggota, kelompok, foto, urutan, publikasi).
+- CMS: platform ekosistem, program, publikasi, halaman/profil, dan Tim Kami (anggota, foto, urutan, publikasi, serta empat kelompok final).
 - Dokumentasi: unggah, metadata, publish/unpublish, arsip, versi baru, hubungkan ke layanan.
 - Pengguna: buat, edit, aktif/nonaktif, kirim ulang aktivasi.
 - RBAC aktif di server. Menu **Hak Akses** dan **Pengaturan** tidak ditampilkan di sidebar sesuai keputusan produk.
@@ -195,7 +195,7 @@ shared/
 - `GET|POST /api/admin/documents`, `GET|PATCH /api/admin/documents/:id`
 - `POST /api/admin/documents/:id/versions`
 - `GET /api/admin/documents/:id/download`
-- `GET|POST /api/admin/platforms`, `PATCH /api/admin/platforms/:id`
+- `GET|POST /api/admin/platforms`, `PATCH|DELETE /api/admin/platforms/:id`
 - `GET|POST /api/admin/platform-categories`, `PATCH|DELETE /api/admin/platform-categories/:id`
 - `GET|POST /api/admin/programs`, `PATCH /api/admin/programs/:id`
 - `GET|POST /api/admin/articles`, `GET|PATCH /api/admin/articles/:id`

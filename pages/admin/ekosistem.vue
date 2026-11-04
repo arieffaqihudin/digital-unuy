@@ -18,6 +18,8 @@ const loading = ref(true)
 const result = ref<{ items: DigitalPlatformDTO[]; total: number; page: number; pageSize: number; categories: CategoryWithCount[] } | null>(null)
 const categories = ref<CategoryWithCount[]>([])
 const publicationBusy = ref('')
+const deleteTarget = ref<DigitalPlatformDTO | null>(null)
+const deletingProduct = ref(false)
 
 const modalOpen = ref(false)
 const editingId = ref('')
@@ -29,7 +31,7 @@ const form = reactive({
   slug: '',
   description: '',
   categoryId: '',
-  status: 'Belum Dikonfirmasi' as (typeof PLATFORM_STATUSES)[number],
+  status: 'Dalam Pengembangan' as (typeof PLATFORM_STATUSES)[number],
   audiences: [] as string[],
   unit: '',
   url: '',
@@ -101,7 +103,7 @@ function resetForm() {
     slug: '',
     description: '',
     categoryId: categories.value[0]?.id || '',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: [],
     unit: '',
     url: '',
@@ -225,6 +227,21 @@ async function togglePublished(item: DigitalPlatformDTO) {
   }
 }
 
+async function deleteProduct() {
+  if (!deleteTarget.value) return
+  deletingProduct.value = true
+  try {
+    await api(`/api/admin/platforms/${deleteTarget.value.id}`, { method: 'DELETE' })
+    toast.success('Produk dihapus')
+    deleteTarget.value = null
+    await load()
+  } catch (error: any) {
+    toast.error('Gagal menghapus produk', error?.data?.statusMessage || 'Produk tidak dihapus.')
+  } finally {
+    deletingProduct.value = false
+  }
+}
+
 function openCategoryManager() {
   categoryError.value = ''
   resetCategoryForm()
@@ -297,15 +314,11 @@ async function deleteCategory() {
 
 const totalPages = computed(() => Math.max(1, Math.ceil((result.value?.total || 0) / (result.value?.pageSize || 24))))
 const statusClass = (status: string) =>
-  status === 'Aktif'
+  status === 'Sudah Rilis'
     ? 'border-unu-green/20 bg-unu-green-soft text-unu-green-dark'
-    : status === 'Pilot'
+    : status === 'Pilot / Beta'
       ? 'border-sky-200 bg-sky-50 text-sky-800'
-      : status === 'Tidak Aktif'
-        ? 'border-slate-200 bg-slate-50 text-slate-500'
-        : status === 'Belum Dikonfirmasi'
-          ? 'border-line-warm bg-[#F7F4E8] text-slate-600'
-          : 'border-amber-200 bg-amber-50 text-amber-900'
+      : 'border-amber-200 bg-amber-50 text-amber-900'
 
 useSeoMeta({ title: 'Ekosistem Digital', robots: 'noindex, nofollow' })
 </script>
@@ -393,8 +406,15 @@ useSeoMeta({ title: 'Ekosistem Digital', robots: 'noindex, nofollow' })
                     <span :class="item.published ? 'text-unu-green' : 'text-slate-500'">{{ publicationBusy === item.id ? 'Menyimpan…' : item.published ? 'Publikasi ON' : 'Publikasi OFF' }}</span>
                   </button>
                 </td>
-                <td class="px-5 py-3.5 text-right">
-                  <button type="button" class="text-[13px] font-semibold text-unu-green hover:underline" @click="openEdit(item)"><Pencil :size="12" class="inline" /> Edit</button>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center justify-end gap-1">
+                    <button type="button" class="grid h-9 w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-unu-green-soft hover:text-unu-green" :aria-label="`Edit ${item.name}`" title="Edit produk" @click="openEdit(item)">
+                      <Pencil :size="15" aria-hidden="true" />
+                    </button>
+                    <button type="button" class="grid h-9 w-9 place-items-center rounded-lg text-red-700/75 transition hover:bg-red-50 hover:text-red-800" :aria-label="`Hapus ${item.name}`" title="Hapus produk" @click="deleteTarget = item">
+                      <Trash2 :size="15" aria-hidden="true" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -422,7 +442,8 @@ useSeoMeta({ title: 'Ekosistem Digital', robots: 'noindex, nofollow' })
                 </span>
                 <span :class="item.published ? 'text-unu-green' : 'text-slate-500'">{{ publicationBusy === item.id ? 'Menyimpan…' : item.published ? 'Publikasi ON' : 'Publikasi OFF' }}</span>
               </button>
-              <button type="button" class="text-[13px] font-semibold text-unu-green" @click="openEdit(item)">Edit</button>
+              <button type="button" class="inline-flex min-h-[36px] items-center gap-1 text-[13px] font-semibold text-unu-green" :aria-label="`Edit ${item.name}`" @click="openEdit(item)"><Pencil :size="13" aria-hidden="true" /> Edit</button>
+              <button type="button" class="inline-flex min-h-[36px] items-center gap-1 text-[13px] font-semibold text-red-700" :aria-label="`Hapus ${item.name}`" @click="deleteTarget = item"><Trash2 :size="13" aria-hidden="true" /> Hapus</button>
             </div>
           </div>
         </div>
@@ -523,6 +544,22 @@ useSeoMeta({ title: 'Ekosistem Digital', robots: 'noindex, nofollow' })
         <div class="flex justify-end gap-2">
           <AppButton variant="secondary" @click="modalOpen = false">Batal</AppButton>
           <AppButton :loading="saving" @click="save">Simpan Produk</AppButton>
+        </div>
+      </template>
+    </ModalDialog>
+
+    <ModalDialog :model-value="Boolean(deleteTarget)" title="Hapus Produk Ekosistem?" size="sm" @update:model-value="deleteTarget = null">
+      <p class="text-[14px] leading-6 text-slate-600">Produk akan dihapus permanen beserta modul dan capaian yang tersimpan di dalamnya. Tindakan ini tidak dapat dibatalkan.</p>
+      <div v-if="deleteTarget" class="mt-4 rounded-lg border border-admin-border bg-slate-50 px-4 py-3">
+        <p class="text-[14px] font-semibold text-admin-text">{{ deleteTarget.name }}</p>
+        <p class="mt-1 text-[13px] text-admin-muted">{{ deleteTarget.category }} · {{ deleteTarget.status }}</p>
+        <p class="mt-1 text-[12px] text-admin-muted">Publikasi: {{ deleteTarget.published ? 'ON' : 'OFF' }} · {{ deleteTarget.audiences.length ? deleteTarget.audiences.join(', ') : 'Sasaran belum diisi' }}</p>
+      </div>
+      <p v-if="deleteTarget?.published" class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] leading-5 text-amber-900">Produk ini sedang dipublikasikan dan akan langsung hilang dari halaman publik.</p>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <AppButton variant="secondary" @click="deleteTarget = null">Batal</AppButton>
+          <AppButton variant="danger" :loading="deletingProduct" @click="deleteProduct">Hapus Produk</AppButton>
         </div>
       </template>
     </ModalDialog>

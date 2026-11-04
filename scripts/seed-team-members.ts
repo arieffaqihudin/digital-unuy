@@ -19,41 +19,35 @@ type MemberDefinition = {
 
 const GROUP_DEFINITIONS: GroupDefinition[] = [
   { name: 'Pimpinan', order: 1 },
-  { name: 'Tech Leadership', order: 2 },
-  { name: 'Product', order: 3 },
-  { name: 'UI/UX Design', order: 4 },
-  { name: 'Mobile Engineering', order: 5 },
-  { name: 'Frontend Engineering', order: 6 },
-  { name: 'Backend Engineering', order: 7 },
-  { name: 'Quality Assurance', order: 8 },
-  { name: 'DevOps & Infrastructure', order: 9 }
+  { name: 'Product', order: 2 },
+  { name: 'Engineering', order: 3 },
+  { name: 'Design', order: 4 }
 ]
 
 const MEMBER_DEFINITIONS: MemberDefinition[] = [
-  { name: 'Ujang Fahmi', position: 'Tech Head', group: 'Tech Leadership' },
-  { name: 'Zhafirah Majdina', position: 'Quality Assurance', group: 'Quality Assurance' },
-  { name: 'Mardiyah Nurhayati', position: 'Quality Assurance', group: 'Quality Assurance' },
-  { name: 'Intani Damayanti', position: 'Quality Assurance', group: 'Quality Assurance' },
+  { name: 'Ujang Fahmi', position: 'Tech Head', group: 'Pimpinan' },
   { name: 'Nur Muna Nadiya', position: 'Product Manager', group: 'Product' },
   { name: 'Putri', position: 'Product Manager', group: 'Product' },
-  { name: 'Seto Rahardyanto', position: 'UI-UX Designer', group: 'UI/UX Design' },
-  { name: 'Ridwan Adjie Santoso', position: 'UI-UX Designer', group: 'UI/UX Design' },
-  { name: 'Annurdien Rasyid', position: 'Mobile Engineer', group: 'Mobile Engineering' },
-  { name: 'Asrofin Raharjo', position: 'Mobile Engineer', group: 'Mobile Engineering' },
-  { name: 'Abdul Basith', position: 'Front End Engineer', group: 'Frontend Engineering' },
-  { name: 'Ibnu Adam', position: 'Front End Engineer', group: 'Frontend Engineering' },
-  { name: 'Yulianto Andi', position: 'Front End Engineer', group: 'Frontend Engineering' },
-  { name: 'Achmad Ibrahim Humam', position: 'Front End Engineer', group: 'Frontend Engineering' },
-  { name: "Muhammad Asy'ari Indra Putra", position: 'Front End Engineer', group: 'Frontend Engineering' },
-  { name: 'Ibnu Absori Abdul Aziz', position: 'Front End Engineer', group: 'Frontend Engineering' },
-  { name: 'Zamahsyari', position: 'Dev Ops', group: 'DevOps & Infrastructure' },
-  { name: 'Untara Vivi Cahya', position: 'Back End Engineer', group: 'Backend Engineering' },
-  { name: 'Ahsan Firdaus', position: 'Back End Engineer', group: 'Backend Engineering' },
-  { name: 'Ikhwan Inzaghi', position: 'Back End Engineer', group: 'Backend Engineering' },
-  { name: 'Dhista Ardiansyah', position: 'Back End Engineer', group: 'Backend Engineering' },
-  { name: 'Dimas Mahendra Kusuma', position: 'Back End Engineer', group: 'Backend Engineering' }
+  { name: 'Zhafirah Majdina', position: 'Quality Assurance', group: 'Product' },
+  { name: 'Mardiyah Nurhayati', position: 'Quality Assurance', group: 'Product' },
+  { name: 'Intani Damayanti', position: 'Quality Assurance', group: 'Product' },
+  { name: 'Annurdien Rasyid', position: 'Mobile Engineer', group: 'Engineering' },
+  { name: 'Asrofin Raharjo', position: 'Mobile Engineer', group: 'Engineering' },
+  { name: 'Abdul Basith', position: 'Front End Engineer', group: 'Engineering' },
+  { name: 'Ibnu Adam', position: 'Front End Engineer', group: 'Engineering' },
+  { name: 'Yulianto Andi', position: 'Front End Engineer', group: 'Engineering' },
+  { name: 'Achmad Ibrahim Humam', position: 'Front End Engineer', group: 'Engineering' },
+  { name: "Muhammad Asy'ari Indra Putra", position: 'Front End Engineer', group: 'Engineering' },
+  { name: 'Ibnu Absori Abdul Aziz', position: 'Front End Engineer', group: 'Engineering' },
+  { name: 'Zamahsyari', position: 'Dev Ops', group: 'Engineering' },
+  { name: 'Untara Vivi Cahya', position: 'Back End Engineer', group: 'Engineering' },
+  { name: 'Ahsan Firdaus', position: 'Back End Engineer', group: 'Engineering' },
+  { name: 'Ikhwan Inzaghi', position: 'Back End Engineer', group: 'Engineering' },
+  { name: 'Dhista Ardiansyah', position: 'Back End Engineer', group: 'Engineering' },
+  { name: 'Dimas Mahendra Kusuma', position: 'Back End Engineer', group: 'Engineering' },
+  { name: 'Seto Rahardyanto', position: 'UI-UX Designer', group: 'Design' },
+  { name: 'Ridwan Adjie Santoso', position: 'UI-UX Designer', group: 'Design' }
 ]
-
 function normalizeText(value: unknown) {
   return String(value ?? '')
     .normalize('NFKC')

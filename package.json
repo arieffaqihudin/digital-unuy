@@ -12,6 +12,7 @@
     "seed:team-members": "tsx scripts/seed-team-members.ts",
     "seed:ecosystem": "tsx scripts/migrate-ecosystem.ts",
     "migrate:ecosystem": "tsx scripts/migrate-ecosystem.ts",
+    "migrate:team-groups": "tsx scripts/restructure-team-groups.ts",
     "test:e2e": "node scripts/e2e.mjs",
     "test:visual": "node scripts/visual-check.mjs",
     "test:responsive": "node scripts/responsive-audit.mjs"

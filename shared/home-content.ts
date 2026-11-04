@@ -111,7 +111,7 @@ export const showcaseContent = {
     name: 'Portal Layanan Digital',
     cluster: 'Layanan & Tata Kelola Digital',
     summary: 'Satu pintu untuk mengajukan layanan TI, melacak status, dan membaca panduan.',
-    status: 'Pilot',
+    status: 'Pilot / Beta',
     cta: { label: 'Buka Portal Layanan', to: '/layanan' }
   },
   screens: [

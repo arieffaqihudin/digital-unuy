@@ -351,7 +351,7 @@ export interface Paginated<T> {
   pageSize: number
 }
 
-export const PLATFORM_STATUSES = ['Aktif', 'Pilot', 'Dalam Pengembangan', 'Tidak Aktif', 'Belum Dikonfirmasi'] as const
+export const PLATFORM_STATUSES = ['Sudah Rilis', 'Dalam Pengembangan', 'Pilot / Beta'] as const
 
 export const PLATFORM_AUDIENCES = ['Mahasiswa', 'Dosen', 'Tenaga Kependidikan', 'Pengelola Unit'] as const
 

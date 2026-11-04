@@ -6,11 +6,9 @@ const props = defineProps<{ platforms: DigitalPlatformDTO[]; categories: Platfor
 
 const featured = computed(() => props.platforms.find((platform) => platform.featured) || props.platforms[0] || null)
 const statusClasses: Record<string, string> = {
-  Aktif: 'border-unu-green/20 bg-unu-green-soft text-unu-green-dark',
-  Pilot: 'border-sky-200 bg-sky-50 text-sky-800',
-  'Dalam Pengembangan': 'border-amber-200 bg-amber-50 text-amber-900',
-  'Tidak Aktif': 'border-slate-200 bg-slate-50 text-slate-500',
-  'Belum Dikonfirmasi': 'border-line-warm bg-[#F7F4E8] text-slate-600'
+  'Sudah Rilis': 'border-unu-green/20 bg-unu-green-soft text-unu-green-dark',
+  'Pilot / Beta': 'border-sky-200 bg-sky-50 text-sky-800',
+  'Dalam Pengembangan': 'border-amber-200 bg-amber-50 text-amber-900'
 }
 </script>
 
@@ -47,7 +45,7 @@ const statusClasses: Record<string, string> = {
           <div>
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ featured.category }}</span>
-              <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide" :class="statusClasses[featured.status] || statusClasses['Belum Dikonfirmasi']">
+              <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide" :class="statusClasses[featured.status] || 'border-admin-border bg-slate-50 text-slate-600'">
                 <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                 {{ featured.status }}
               </span>

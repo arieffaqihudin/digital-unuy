@@ -19,7 +19,7 @@ export type PlatformSeed = {
   slug: string
   description: string
   categorySlug: string
-  status: 'Aktif' | 'Pilot' | 'Dalam Pengembangan' | 'Tidak Aktif' | 'Belum Dikonfirmasi'
+  status: 'Sudah Rilis' | 'Dalam Pengembangan' | 'Pilot / Beta'
   audiences: string[]
   unit?: string
   url?: string
@@ -89,7 +89,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Menyatukan data akademik mahasiswa, kurikulum, penilaian, dan administrasi kelulusan dalam satu sistem.',
     categorySlug: 'akademik-pembelajaran',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Mahasiswa', 'Dosen', 'Tenaga Kependidikan'],
     order: 1,
     featured: true,
@@ -104,7 +104,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Mendukung pengelolaan portofolio perkuliahan dan penilaian secara otomatis.',
     categorySlug: 'akademik-pembelajaran',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Dosen', 'Pengelola Unit'],
     order: 2,
     problem: 'Portofolio perkuliahan disusun berulang dari banyak dokumen sehingga menyita waktu dosen dan pengelola.',
@@ -127,7 +127,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Mempercepat penyiapan dan penerbitan ijazah dengan data kelulusan yang konsisten.',
     categorySlug: 'akademik-pembelajaran',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Tenaga Kependidikan', 'Pengelola Unit'],
     order: 3,
     problem: 'Penerbitan ijazah membutuhkan pencocokan data kelulusan secara manual dan berulang.',
@@ -149,7 +149,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Mengelola data dan penerbitan Surat Keterangan Pendamping Ijazah secara terintegrasi.',
     categorySlug: 'akademik-pembelajaran',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Tenaga Kependidikan', 'Pengelola Unit'],
     order: 4,
     problem: 'Data kegiatan mahasiswa untuk SKPI tersebar dan proses verifikasinya tidak seragam.',
@@ -163,7 +163,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Portal terpadu untuk administrasi kepegawaian, cuti, presensi, persuratan, dan agenda kerja.',
     categorySlug: 'operasional-tata-kelola',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Dosen', 'Tenaga Kependidikan'],
     order: 5,
     featured: true,
@@ -190,7 +190,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Mendukung perencanaan, realisasi, dan pemantauan anggaran unit kerja secara tertata.',
     categorySlug: 'operasional-tata-kelola',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Tenaga Kependidikan', 'Pengelola Unit'],
     order: 6,
     problem: 'Informasi anggaran unit kerja tersebar dan rekonsiliasi realisasi membutuhkan waktu.',
@@ -204,7 +204,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Mendukung perencanaan, pelaksanaan, dan monitoring kegiatan pengabdian serta pengembangan masyarakat.',
     categorySlug: 'pengabdian-pengembangan-masyarakat',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Mahasiswa', 'Dosen', 'Pengelola Unit'],
     order: 7,
     problem: 'Data kegiatan pengabdian, mitra, dan luaran belum tercatat dalam satu alur yang mudah ditelusuri.',
@@ -218,7 +218,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Memudahkan unit kerja membangun dan mengelola website resmi secara mandiri.',
     categorySlug: 'platform-infrastruktur-digital',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Pengelola Unit'],
     order: 8,
     problem: 'Pembuatan website unit kerja membutuhkan waktu karena bergantung pada pengembangan teknis.',
@@ -232,7 +232,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Memungkinkan unit kerja menyusun formulir digital tanpa pengembangan teknis.',
     categorySlug: 'platform-infrastruktur-digital',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Dosen', 'Tenaga Kependidikan', 'Pengelola Unit'],
     order: 9,
     problem: 'Kebutuhan formulir baru sering menunggu antrean pengembangan aplikasi.',
@@ -246,7 +246,7 @@ export const PLATFORM_SEED: PlatformSeed[] = [
     description:
       'Menyederhanakan tautan resmi kampus untuk dibagikan dan dipantau.',
     categorySlug: 'platform-infrastruktur-digital',
-    status: 'Belum Dikonfirmasi',
+    status: 'Dalam Pengembangan',
     audiences: ['Dosen', 'Tenaga Kependidikan', 'Pengelola Unit'],
     order: 10,
     problem: 'Tautan layanan yang panjang menyulitkan proses berbagi dan pencatatan kanal informasi.',
