@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { DigitalPlatformDTO } from '~/shared/types'
 
-const props = withDefaults(defineProps<{ platform: DigitalPlatformDTO; eager?: boolean; compact?: boolean }>(), {
+const props = withDefaults(defineProps<{ platform: DigitalPlatformDTO; number?: number; eager?: boolean; compact?: boolean; overlayLabel?: boolean }>(), {
   eager: false,
-  compact: false
+  compact: false,
+  overlayLabel: false
 })
 
 
@@ -15,7 +16,7 @@ const palettes = [
   { background: '#E8EFEA', accent: '#245B37', ink: '#1C1A1A', line: 'rgba(36,91,55,0.16)' }
 ]
 const palette = computed(() => palettes[Math.max(0, Math.min(palettes.length - 1, (props.platform.categoryOrder || 1) - 1))])
-const orderLabel = computed(() => String(props.platform.categoryOrder || 1).padStart(2, '0'))
+const orderLabel = computed(() => String(props.number ?? props.platform.order ?? 1).padStart(2, '0'))
 </script>
 
 <template>
@@ -28,7 +29,7 @@ const orderLabel = computed(() => String(props.platform.categoryOrder || 1).padS
       decoding="async"
       class="h-full w-full object-cover object-top"
     />
-    <div v-else class="absolute inset-0">
+    <div v-if="!platform.thumbnail" class="absolute inset-0">
       <div
         class="absolute inset-0"
         :style="{
@@ -42,15 +43,18 @@ const orderLabel = computed(() => String(props.platform.categoryOrder || 1).padS
       <div class="absolute -right-2 top-16 h-32 w-32 rounded-full border" :style="{ borderColor: palette.line }" aria-hidden="true" />
       <span class="absolute right-4 top-1 text-[76px] font-bold leading-none tabular-nums" :style="{ color: palette.accent, opacity: 0.14 }" aria-hidden="true">{{ orderLabel }}</span>
       <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-charcoal/[0.08] to-transparent" aria-hidden="true" />
-      <div class="relative flex h-full flex-col justify-between" :class="compact ? 'p-4' : 'p-5 sm:p-6'">
-        <div class="flex items-start justify-between gap-4">
-          <span class="text-[10px] font-bold uppercase tracking-[0.18em]" :style="{ color: palette.accent }">Ekosistem Digital</span>
-        </div>
-        <div>
-          <div class="h-1.5 w-10 rounded-full" :style="{ backgroundColor: palette.accent }" aria-hidden="true" />
-          <p class="mt-3 text-[11px] font-semibold uppercase leading-4 tracking-[0.14em]" :style="{ color: palette.accent }">{{ platform.category }}</p>
-          <p class="mt-1 text-[19px] font-semibold leading-[1.2] tracking-[-0.02em] text-charcoal sm:text-[21px]">{{ platform.name }}</p>
-        </div>
+    </div>
+
+    <div v-if="platform.thumbnail && overlayLabel" class="absolute inset-0 bg-gradient-to-t from-charcoal/85 via-charcoal/20 to-transparent" aria-hidden="true" />
+
+    <div v-if="!platform.thumbnail || overlayLabel" class="relative flex h-full flex-col justify-between" aria-hidden="true" :class="compact ? 'p-4' : 'p-5 sm:p-6'">
+      <div class="flex items-start justify-between gap-4">
+        <span class="text-[10px] font-bold uppercase tracking-[0.18em]" :style="{ color: platform.thumbnail ? 'rgba(255,255,255,0.75)' : palette.accent }">Ekosistem Digital</span>
+      </div>
+      <div>
+        <div class="h-1.5 w-10 rounded-full" :style="{ backgroundColor: platform.thumbnail ? '#E8C766' : palette.accent }" aria-hidden="true" />
+        <p class="mt-3 text-[11px] font-semibold uppercase leading-4 tracking-[0.14em]" :style="{ color: platform.thumbnail ? 'rgba(255,255,255,0.78)' : palette.accent }">{{ platform.category }}</p>
+        <p class="mt-1 text-[19px] font-semibold leading-[1.2] tracking-[-0.02em] sm:text-[21px]" :class="platform.thumbnail ? 'text-white' : 'text-charcoal'">{{ platform.name }}</p>
       </div>
     </div>
   </div>

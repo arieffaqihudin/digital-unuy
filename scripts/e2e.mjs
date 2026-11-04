@@ -101,6 +101,12 @@ check('Homepage tidak menampilkan metrik belum terverifikasi', Array.isArray(hom
 const aboutPage = await publicClient.get('/tentang')
 check('Halaman Tentang menampilkan narasi visual', aboutPage.text.includes('Teknologi Bukan Tujuan') && aboutPage.text.includes('Tiga Siklus. Satu Ekosistem.'))
 check('Halaman Tentang menampilkan dampak historis', aboutPage.text.includes('Yang Kami Bangun Harus Memberi Dampak'))
+const publicSearch = await publicClient.get('/api/search?q=layanan')
+check('Pencarian publik mengembalikan hasil', publicSearch.status === 200 && publicSearch.data?.items?.length > 0)
+check('Pencarian hanya mengembalikan jenis konten publik', publicSearch.data?.items?.every((item) => ['service', 'platform', 'document', 'article', 'page'].includes(item.type)))
+check('Filter jenis pencarian berfungsi', (await publicClient.get('/api/search?q=layanan&type=service')).data?.items?.every((item) => item.type === 'service'))
+check('Pencarian mengecualikan dokumen belum terbit', (await publicClient.get('/api/search?q=Dokumen%20E2E%20Publikasi')).data?.total === 0)
+check('Halaman hasil pencarian tersedia', (await publicClient.get('/pencarian?q=layanan')).text.includes('Hasil Pencarian'))
 
 const serviceList = await publicClient.get('/api/services')
 check('Katalog layanan 200', serviceList.status === 200)
@@ -132,7 +138,7 @@ check('Publikasi publik hanya published', (await publicClient.get('/api/articles
 check('Halaman Tim Kami publik 200', (await publicClient.get('/api/team')).status === 200)
 check('Sitemap tersedia', (await publicClient.get('/sitemap.xml')).text.includes('/tentang-kami/tim'))
 const robots = await publicClient.get('/robots.txt')
-check('Robots memblokir area privat', robots.text.includes('Disallow: /admin'))
+check('Robots memblokir area privat', robots.text.includes('Disallow: /admin') || /Disallow: \/\s*(\n|$)/.test(robots.text))
 check('Halaman permohonan lama tidak tersedia', (await publicClient.get('/permohonan-saya')).status === 404)
 check('API dashboard pemohon lama tidak tersedia', (await publicClient.get('/api/requests/mine')).status === 404)
 

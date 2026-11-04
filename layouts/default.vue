@@ -7,6 +7,7 @@ const { fetchSession } = useAuth()
 const mobileOpen = ref(false)
 const infoMenuOpen = ref(false)
 const mobileInfoOpen = ref(false)
+const searchOpen = ref(false)
 
 const navigation = [
   { label: 'Beranda', to: '/' },
@@ -53,6 +54,11 @@ function closeInfoMenu() {
 }
 
 function handleDocumentKeydown(event: KeyboardEvent) {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault()
+    searchOpen.value = true
+    return
+  }
   if (event.key !== 'Escape') return
   if (infoMenuOpen.value) infoMenuOpen.value = false
 }
@@ -77,6 +83,7 @@ watch(
     mobileOpen.value = false
     mobileInfoOpen.value = false
     infoMenuOpen.value = false
+    searchOpen.value = false
   }
 )
 
@@ -109,7 +116,7 @@ useHead(() => ({
       <div class="page-shell flex h-16 items-center gap-4 md:h-[72px]">
         <AppLogo />
 
-        <div class="hidden min-w-0 flex-1 justify-center lg:flex">
+        <div class="hidden min-w-0 flex-1 justify-center xl:flex">
           <nav class="flex items-center gap-0.5" aria-label="Navigasi utama">
             <template v-for="item in navigation" :key="item.to">
               <div v-if="item.children?.length" data-info-menu class="relative">
@@ -175,19 +182,30 @@ useHead(() => ({
           </nav>
         </div>
 
-        <div class="ml-2 hidden shrink-0 items-center gap-2 lg:flex">
-          <NuxtLink
-            to="/lacak"
+        <div class="ml-2 hidden shrink-0 items-center gap-2 xl:flex">
+          <button
+            type="button"
             class="grid h-11 w-11 place-items-center rounded-lg text-slate-500 transition hover:bg-white hover:text-charcoal"
-            aria-label="Lacak permohonan"
-            title="Lacak permohonan"
+            aria-label="Buka pencarian"
+            title="Cari (Ctrl+K)"
+            @click="searchOpen = true"
           >
             <Search :size="17" aria-hidden="true" />
-          </NuxtLink>
+          </button>
+          <AppButton to="/lacak" variant="secondary" size="sm" class="site-nav-cta whitespace-nowrap">Lacak Permohonan</AppButton>
           <AppButton to="/layanan" size="sm" class="site-nav-cta whitespace-nowrap">Ajukan Layanan</AppButton>
         </div>
 
-        <div class="ml-auto flex items-center gap-2 lg:hidden">
+        <div class="ml-auto flex items-center gap-2 xl:hidden">
+          <button
+            type="button"
+            class="grid h-11 w-11 place-items-center rounded-lg border border-line-warm bg-white text-charcoal transition hover:border-slate-300"
+            aria-label="Buka pencarian"
+            title="Cari"
+            @click="searchOpen = true"
+          >
+            <Search :size="19" aria-hidden="true" />
+          </button>
           <AppButton to="/layanan" size="sm" class="site-nav-cta hidden whitespace-nowrap sm:inline-flex">Ajukan Layanan</AppButton>
           <button
             type="button"
@@ -212,7 +230,7 @@ useHead(() => ({
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="mobileOpen" id="mobile-navigation" class="fixed inset-0 z-[90] bg-soft-white lg:hidden">
+        <div v-if="mobileOpen" id="mobile-navigation" class="fixed inset-0 z-[90] bg-soft-white xl:hidden">
           <div class="flex h-full flex-col">
             <div class="flex h-[64px] items-center justify-between border-b border-line-warm px-5">
               <AppLogo />
@@ -349,6 +367,7 @@ useHead(() => ({
       </div>
     </footer>
 
+    <GlobalSearchDialog v-model="searchOpen" />
     <ToastHost />
   </div>
 </template>

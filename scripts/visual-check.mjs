@@ -60,6 +60,7 @@ const publicPages = [
   ['/layanan/pembuatan-email-institusi', 'service-detail'],
   ['/ekosistem-digital', 'ecosystem'],
   ['/ekosistem-digital/portal-pegawai-green-team', 'ecosystem-detail'],
+  ['/pencarian?q=layanan', 'search'],
   ['/dokumen', 'documents'],
   ['/dokumen/sop-pengajuan-layanan-digital', 'document-detail'],
   ['/publikasi', 'publications'],

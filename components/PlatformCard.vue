@@ -21,13 +21,13 @@ const audienceLabel = computed(() => props.platform.audiences.slice(0, 2).join('
     class="group overflow-hidden border border-line-warm bg-white transition duration-hover ease-unu hover:border-unu-green/35"
     :class="featured ? 'grid rounded-2xl lg:grid-cols-[1.08fr_1fr]' : 'flex h-full flex-col rounded-xl'"
   >
-    <NuxtLink :to="detailPath" class="block overflow-hidden" :class="featured ? 'aspect-[16/10] lg:aspect-auto lg:h-full' : 'aspect-[16/10]'">
-      <PlatformVisual :platform="platform" :eager="featured" class="transition duration-image ease-unu group-hover:scale-[1.015]" />
+    <NuxtLink :to="detailPath" :aria-label="`Lihat detail ${platform.name}`" class="block overflow-hidden" :class="featured ? 'aspect-[16/10] lg:aspect-auto lg:h-full' : 'aspect-[16/10]'">
+      <PlatformVisual :platform="platform" :eager="featured" overlay-label class="transition duration-image ease-unu group-hover:scale-[1.015]" />
     </NuxtLink>
 
     <div class="flex flex-1 flex-col p-5" :class="featured ? 'sm:p-6 lg:p-8' : ''">
+      <h3 class="sr-only">{{ platform.name }}</h3>
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-dark">{{ platform.category }}</span>
         <span
           class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide"
           :class="statusClasses[platform.status] || 'border-admin-border bg-slate-50 text-slate-600'"
@@ -37,10 +37,7 @@ const audienceLabel = computed(() => props.platform.audiences.slice(0, 2).join('
         </span>
       </div>
 
-      <h3 class="mt-4 text-[19px] font-semibold leading-[1.25] tracking-[-0.025em]" :class="featured ? 'sm:text-[26px]' : ''">
-        <NuxtLink :to="detailPath" class="transition-colors duration-micro hover:text-unu-green">{{ platform.name }}</NuxtLink>
-      </h3>
-      <p class="mt-2 line-clamp-2 text-[14px] leading-6 text-slate-600 sm:text-[15px]">{{ platform.description }}</p>
+      <p class="mb-5 mt-3 line-clamp-2 text-[14px] leading-6 text-slate-600 sm:text-[15px]">{{ platform.description }}</p>
 
       <div class="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-line-warm pt-4" :class="featured ? 'mt-6' : 'mt-5'">
         <p v-if="audienceLabel" class="min-w-0 truncate text-[12px] leading-5 text-slate-500">{{ audienceLabel }}</p>
