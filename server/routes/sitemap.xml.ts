@@ -1,4 +1,4 @@
-import { Article, DigitalPlatform, Document, Page, Program, Service } from '../models'
+import { Article, DigitalPlatform, Document, Page, Service } from '../models'
 
 interface Entry {
   loc: string
@@ -21,14 +21,13 @@ export default defineEventHandler(async (event) => {
       Document.find({ published: true, archived: false }).select('slug updatedAt').lean(),
       Article.find({ status: 'published', ...visible }).select('slug updatedAt').lean(),
       Page.find({ published: true, ...visible }).select('slug updatedAt').lean(),
-      Program.find({}).select('slug updatedAt').lean(),
       DigitalPlatform.find({ published: true, ...visible }).select('slug updatedAt').lean()
     ])
   } catch {
     // Never serve an empty sitemap because the CMS was unreachable.
     throw createError({ statusCode: 503, statusMessage: 'Sitemap sementara tidak tersedia.' })
   }
-  const [services, documents, articles, pages, programs, platforms] = data
+  const [services, documents, articles, pages, platforms] = data
 
   // Static pages carry no reliable modification date, so no <lastmod> is emitted for them.
   const entries: Entry[] = [
@@ -43,7 +42,6 @@ export default defineEventHandler(async (event) => {
     ...services.map((item) => ({ loc: `/layanan/${item.slug}`, lastmod: item.updatedAt })),
     ...documents.map((item) => ({ loc: `/dokumen/${item.slug}`, lastmod: item.updatedAt })),
     ...articles.map((item) => ({ loc: `/publikasi/${item.slug}`, lastmod: item.updatedAt })),
-    ...programs.map((item) => ({ loc: `/program/${item.slug}`, lastmod: item.updatedAt })),
     ...pages.filter((item) => item.slug !== 'tentang-kami').map((item) => ({ loc: `/halaman/${item.slug}`, lastmod: item.updatedAt }))
   ]
 

@@ -1,5 +1,5 @@
 import mongoose, { Schema, type Model, type Types } from 'mongoose'
-import { DOCUMENT_CATEGORIES, PLATFORM_STATUSES, PROGRAM_CATEGORIES, REQUEST_STATUSES, SERVICE_CATEGORIES } from '../../shared/types'
+import { DOCUMENT_CATEGORIES, PLATFORM_STATUSES, REQUEST_STATUSES, SERVICE_CATEGORIES } from '../../shared/types'
 
 const models = mongoose.models as Record<string, Model<any>>
 
@@ -349,21 +349,6 @@ const digitalPlatformSchema = new Schema(
   { timestamps: true }
 )
 
-const programSchema = new Schema(
-  {
-    title: { type: String, required: true, trim: true, maxlength: 180 },
-    slug: { type: String, required: true, unique: true },
-    category: { type: String, enum: PROGRAM_CATEGORIES, required: true },
-    summary: { type: String, required: true, maxlength: 400 },
-    content: { type: String, default: '' },
-    status: { type: String, enum: ['Direncanakan', 'Berjalan', 'Selesai'], default: 'Direncanakan' },
-    order: { type: Number, default: 0 },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    isSeedData: { type: Boolean, default: false }
-  },
-  { timestamps: true }
-)
-
 const articleSchema = new Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 200 },
@@ -489,7 +474,6 @@ export const TeamGroup = defineModel('TeamGroup', teamGroupSchema)
 export const TeamMember = defineModel('TeamMember', teamMemberSchema)
 export const PlatformCategory = defineModel('PlatformCategory', platformCategorySchema)
 export const DigitalPlatform = defineModel('DigitalPlatform', digitalPlatformSchema)
-export const Program = defineModel('Program', programSchema)
 export const Article = defineModel('Article', articleSchema)
 export const Page = defineModel('Page', pageSchema)
 export const SiteSetting = defineModel('SiteSetting', siteSettingSchema)

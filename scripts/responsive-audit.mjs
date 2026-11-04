@@ -36,7 +36,6 @@ const extraPublicPages = [
   ['/tentang', 'about'],
   ['/dokumen/sop-pengajuan-layanan-digital', 'document-detail'],
   ['/publikasi/menata-layanan-digital-satu-alur-jelas', 'publication-detail'],
-  ['/program/penyederhanaan-alur-pengajuan-layanan', 'program-detail'],
   ['/tentang-kami/tim', 'team'],
   ['/masuk', 'login'],
   ['/lacak', 'tracking']

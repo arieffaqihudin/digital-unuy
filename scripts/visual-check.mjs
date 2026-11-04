@@ -91,7 +91,6 @@ const adminPages = [
   ['/admin/layanan/baru', 'admin-service-new'],
   ['/admin/ekosistem', 'admin-ecosystem'],
   ['/admin/tim', 'admin-team'],
-  ['/admin/program', 'admin-programs'],
   ['/admin/publikasi', 'admin-publications'],
   ['/admin/halaman', 'admin-pages'],
   ['/admin/dokumen', 'admin-documents'],

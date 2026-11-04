@@ -116,7 +116,8 @@ useSeoMeta({ title: 'Halaman & Profil', robots: 'noindex, nofollow' })
         <div><label class="admin-label">Slug</label><input v-model="form.slug" class="field-input font-mono text-xs" placeholder="otomatis" /></div>
         <div><label class="admin-label">Status</label><select v-model="form.published" class="field-input"><option :value="true">Publik</option><option :value="false">Draft</option></select></div>
         <div class="sm:col-span-2"><label class="admin-label">Ringkasan</label><textarea v-model="form.excerpt" rows="2" class="field-input" maxlength="400" /></div>
-        <div class="sm:col-span-2"><label class="admin-label">Konten</label><textarea v-model="form.content" rows="12" class="field-input font-mono text-xs" placeholder="Markdown atau HTML dasar…" /><p class="field-help">Konten disanitasi sebelum disimpan.</p></div>
+        <div v-if="form.slug === 'tentang-kami'" class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900 sm:col-span-2">Halaman Tentang dirancang sebagai konten editorial tetap. Dari sini hanya <strong>SEO</strong> dan <strong>ringkasan</strong> (cadangan deskripsi) yang dipakai; kolom Konten tidak ditampilkan di website.</div>
+        <div v-else class="sm:col-span-2"><label class="admin-label">Konten</label><textarea v-model="form.content" rows="12" class="field-input font-mono text-xs" placeholder="Markdown atau HTML dasar…" /><p class="field-help">Konten disanitasi sebelum disimpan.</p></div>
         <SeoFields v-model="form.seo" :fallback-title="form.title ? `${form.title} | UNU Yogyakarta` : ''" :fallback-description="form.excerpt" :path="form.slug ? `/halaman/${form.slug}` : '/halaman/…'" />
       </div>
       <template #footer><div class="flex justify-end gap-2"><AppButton variant="secondary" @click="modalOpen = false">Batal</AppButton><AppButton :loading="saving" @click="save">Simpan</AppButton></div></template>

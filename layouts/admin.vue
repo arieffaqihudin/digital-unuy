@@ -17,7 +17,6 @@ import {
   Newspaper,
   Users,
   UsersRound,
-  Workflow,
   X
 } from 'lucide-vue-next'
 import type { Permission } from '~/shared/types'
@@ -69,7 +68,6 @@ const menuGroups: {
     items: [
       { label: 'Publikasi', to: '/admin/publikasi', icon: Newspaper, permission: 'content.manage' },
       { label: 'Ekosistem Digital', to: '/admin/ekosistem', icon: Globe2, permission: 'content.manage' },
-      { label: 'Program', to: '/admin/program', icon: Workflow, permission: 'content.manage' },
       { label: 'Halaman & Profil', to: '/admin/halaman', icon: FileText, permission: 'content.manage' },
       { label: 'Tim Kami', to: '/admin/tim', icon: UsersRound, permission: 'content.manage' }
     ]

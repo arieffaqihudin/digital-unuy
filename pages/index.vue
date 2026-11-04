@@ -6,7 +6,6 @@ import type {
   DigitalPlatformDTO,
   DocumentDTO,
   PlatformCategoryDTO,
-  ProgramDTO,
   ServiceDTO,
   SiteSettingsDTO
 } from '~/shared/types'
@@ -16,7 +15,6 @@ interface HomeResponse {
   services: ServiceDTO[]
   platforms: DigitalPlatformDTO[]
   platformCategories: PlatformCategoryDTO[]
-  programs: ProgramDTO[]
   documents: DocumentDTO[]
   articles: ArticleDTO[]
   counts: { services: number; platforms: number }

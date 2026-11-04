@@ -266,18 +266,6 @@ export interface DigitalPlatformDTO {
   updatedAt: string
 }
 
-export interface ProgramDTO {
-  id: string
-  title: string
-  slug: string
-  category: string
-  summary: string
-  content: string
-  status: 'Direncanakan' | 'Berjalan' | 'Selesai'
-  order: number
-  updatedAt: string
-}
-
 export interface ArticleDTO {
   seo?: SeoDTO
   id: string
@@ -388,14 +376,6 @@ export const PLATFORM_CATEGORIES = [
   'Operasional & Tata Kelola',
   'Pengabdian & Pengembangan Masyarakat',
   'Platform & Infrastruktur Digital'
-]
-
-export const PROGRAM_CATEGORIES = [
-  'Digitalisasi Layanan',
-  'Integrasi Data',
-  'Pengembangan Sistem',
-  'Tata Kelola Digital',
-  'Penguatan Kapasitas Digital'
 ]
 
 export const SERVICE_CATEGORIES = [

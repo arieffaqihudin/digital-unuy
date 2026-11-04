@@ -59,7 +59,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 
 ### Website publik
 
-- Beranda dengan hero, layanan unggulan, profil direktorat, ekosistem, program, dokumen, capaian, publikasi, dan footer dari database/CMS.
+- Beranda dengan hero, layanan unggulan, profil direktorat, ekosistem, dokumen, capaian, publikasi, dan footer dari database/CMS.
 - Katalog layanan dengan pencarian, filter kategori, pagination, loading, empty state, dan detail layanan.
 - Detail layanan: sasaran, persyaratan, dokumen, prosedur, estimasi waktu, SOP terkait, status ketersediaan.
 - Halaman ekosistem digital dengan empat kategori, filter sasaran pengguna, showcase produk unggulan, detail produk, dan modul terintegrasi.
@@ -110,7 +110,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Antrean tindakan dan permohonan terbaru.
 - Manajemen permohonan: filter, pencarian, detail, penugasan, perubahan status tervalidasi, catatan internal/publik, lampiran, timeline.
 - Manajemen layanan: CRUD metadata, aktif/nonaktif, unggulan, urutan, form builder berversi, penghubung dokumen.
-- CMS: platform ekosistem, program, publikasi, halaman/profil, dan Tim Kami (anggota, foto, urutan, publikasi, serta empat kelompok final).
+- CMS: platform ekosistem, publikasi, halaman/profil, dan Tim Kami (anggota, foto, urutan, publikasi, serta empat kelompok final).
 - Dokumentasi: unggah, metadata, publish/unpublish, arsip, versi baru, hubungkan ke layanan.
 - Pengguna: buat, edit, aktif/nonaktif, kirim ulang aktivasi.
 - RBAC aktif di server. Menu **Hak Akses** dan **Pengaturan** tidak ditampilkan di sidebar sesuai keputusan produk.
@@ -197,7 +197,6 @@ shared/
 - `GET /api/admin/documents/:id/download`
 - `GET|POST /api/admin/platforms`, `PATCH|DELETE /api/admin/platforms/:id`
 - `GET|POST /api/admin/platform-categories`, `PATCH|DELETE /api/admin/platform-categories/:id`
-- `GET|POST /api/admin/programs`, `PATCH /api/admin/programs/:id`
 - `GET|POST /api/admin/articles`, `GET|PATCH /api/admin/articles/:id`
 - `GET|POST /api/admin/pages`, `PATCH /api/admin/pages/:id`
 - `GET|POST /api/admin/users`, `PATCH /api/admin/users/:id`, `POST /api/admin/users/:id/resend`

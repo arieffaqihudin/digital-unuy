@@ -4,7 +4,6 @@ import type {
   DocumentDTO,
   FormField,
   PlatformCategoryDTO,
-  ProgramDTO,
   RequestDetailDTO,
   RequestListItem,
   ServiceDTO,
@@ -159,20 +158,6 @@ export function serializePlatformCategory(category: any): PlatformCategoryDTO {
   }
 }
 
-
-export function serializeProgram(program: any): ProgramDTO {
-  return {
-    id: String(program._id),
-    title: program.title,
-    slug: program.slug,
-    category: program.category,
-    summary: program.summary,
-    content: program.content || '',
-    status: program.status,
-    order: Number(program.order || 0),
-    updatedAt: toIso(program.updatedAt)
-  }
-}
 
 export function serializeArticle(article: any): ArticleDTO {
   return {

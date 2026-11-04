@@ -34,7 +34,7 @@ export const PERMISSION_META: {
     key: 'content.manage',
     label: 'Mengelola konten website',
     group: 'Konten & Layanan',
-    description: 'Mengelola halaman, program, ekosistem digital, publikasi, dan capaian.'
+    description: 'Mengelola halaman, ekosistem digital, publikasi, dan capaian.'
   },
   {
     key: 'documents.manage',
