@@ -91,7 +91,7 @@ usePageSeo({
             </div>
             <div>
               <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-gold-dark">Kategori</p>
-              <p class="mt-2 text-[15px] leading-6 text-slate-700">{{ platform.category }}</p>
+              <p class="mt-2 text-[15px] leading-6 text-slate-700"><NuxtLink v-if="platform.categorySlug" :to="{ path: '/ekosistem-digital', query: { category: platform.categorySlug } }" class="underline-offset-4 hover:text-unu-green hover:underline">{{ platform.category }}</NuxtLink><template v-else>{{ platform.category }}</template></p>
             </div>
             <div v-if="platform.benefits">
               <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-gold-dark">Manfaat utama</p>
