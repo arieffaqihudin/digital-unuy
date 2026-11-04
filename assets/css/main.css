@@ -72,7 +72,7 @@
 
 @layer components {
   .page-shell {
-    @apply mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-[1360px] px-5 sm:px-6 lg:px-8 xl:px-12;
   }
 
   .page-shell-wide {
@@ -315,7 +315,7 @@
   }
 
   .site-nav-link {
-    @apply whitespace-nowrap text-[14px] font-semibold leading-[1.4];
+    @apply whitespace-nowrap text-[14px] font-medium leading-[1.4];
   }
 
   .site-nav-cta {

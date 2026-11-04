@@ -24,8 +24,8 @@ useHead({
 
 <template>
   <section class="relative overflow-hidden bg-ivory pb-16 sm:pb-20 lg:pb-24" aria-labelledby="hero-title">
-    <div class="mx-auto w-full max-w-[1360px] px-5 pt-12 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
-      <div class="grid items-center gap-10 lg:min-h-[480px] lg:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] lg:gap-14 xl:gap-16">
+    <div class="page-shell pt-12 sm:pt-16 lg:pt-20">
+      <div class="grid items-center gap-10 lg:min-h-[480px] lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:gap-14 xl:gap-16">
         <!-- Left: editorial copy -->
         <div class="max-w-[600px]">
           <p class="eyebrow-editorial animate-fade-up">{{ heroContent.eyebrow }}</p>
@@ -51,7 +51,7 @@ useHead({
         </div>
 
         <!-- Right: Digital Campus Ecosystem visual -->
-        <figure class="mx-auto w-full max-w-[620px] animate-fade-up [animation-delay:200ms] lg:max-w-none">
+        <figure class="w-full max-w-[620px] animate-fade-up [animation-delay:200ms] lg:max-w-none">
           <img
             :src="visual.src"
             :srcset="visual.srcset"
@@ -67,7 +67,7 @@ useHead({
       </div>
 
       <!-- Impact preview, continuation of the hero -->
-      <div class="mx-auto mt-12 max-w-[1180px] sm:mt-16">
+      <div id="dampak" class="mt-12 scroll-mt-24 sm:mt-16">
         <div v-reveal class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <p id="impact-title" class="eyebrow-editorial">{{ impactContent.eyebrow }}</p>
           <NuxtLink v-if="impactPageAvailable" :to="impactContent.cta.to" class="link-arrow">

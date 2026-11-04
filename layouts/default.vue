@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUpRight, ChevronDown, LogOut, Menu, Search, ShieldCheck, X } from 'lucide-vue-next'
+import { ArrowUpRight, ChevronDown, CircleUserRound, LogOut, Menu, Search, ShieldCheck, X } from 'lucide-vue-next'
 
 const route = useRoute()
 const { settings, ensureSite } = useSite()
@@ -7,22 +7,25 @@ const { user, fetchSession, logout, isStaff } = useAuth()
 const mobileOpen = ref(false)
 const userMenuOpen = ref(false)
 const userMenu = ref<HTMLElement | null>(null)
-const teamMenuOpen = ref(false)
+const infoMenuOpen = ref(false)
+const mobileInfoOpen = ref(false)
 
 const navigation = [
   { label: 'Beranda', to: '/' },
-  {
-    label: 'Tentang Kami',
-    to: '/tentang',
-    children: [
-      { label: 'Profil Direktorat', to: '/tentang' },
-      { label: 'Tim Kami', to: '/tentang-kami/tim' }
-    ]
-  },
   { label: 'Layanan Digital', to: '/layanan' },
   { label: 'Ekosistem Digital', to: '/ekosistem-digital' },
-  { label: 'Panduan & Dokumen', to: '/dokumen' },
-  { label: 'Publikasi', to: '/publikasi' }
+  {
+    label: 'Informasi',
+    to: '/tentang',
+    activeWhen: ['/tentang', '/tentang-kami', '/dokumen', '/publikasi'],
+    children: [
+      { label: 'Tentang Kami', to: '/tentang' },
+      { label: 'Tim Kami', to: '/tentang-kami/tim' },
+      { label: 'Dampak Transformasi', to: '/#dampak' },
+      { label: 'Panduan & Dokumen', to: '/dokumen' },
+      { label: 'Publikasi', to: '/publikasi' }
+    ]
+  }
 ]
 
 await useAsyncData('layout-bootstrap', async () => {
@@ -30,64 +33,61 @@ await useAsyncData('layout-bootstrap', async () => {
   return true
 })
 
-const isActive = (to: string) =>
-  to === '/tentang'
-    ? route.path === '/tentang' || route.path.startsWith('/tentang-kami')
-    : to === '/'
-      ? route.path === '/'
-      : route.path.startsWith(to)
-const initials = computed(() =>
-  (user.value?.name || '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
-)
+const isActive = (item: { to: string; activeWhen?: string[] }) => {
+  if (item.activeWhen?.length) return item.activeWhen.some((path) => route.path === path || route.path.startsWith(`${path}/`))
+  return item.to === '/' ? route.path === '/' : route.path.startsWith(item.to)
+}
+const hasAdminAccess = computed(() => isStaff.value && Boolean(user.value?.permissions?.length))
 
 function closeMobile() {
   mobileOpen.value = false
+  mobileInfoOpen.value = false
 }
 
 function handleDocumentClick(event: MouseEvent) {
   if (userMenuOpen.value && userMenu.value && !userMenu.value.contains(event.target as Node)) {
     userMenuOpen.value = false
   }
-  if (teamMenuOpen.value) {
-    const menu = document.querySelector('[data-team-menu]')
-    if (menu && !menu.contains(event.target as Node)) teamMenuOpen.value = false
+  if (infoMenuOpen.value) {
+    const menu = document.querySelector('[data-info-menu]')
+    if (menu && !menu.contains(event.target as Node)) infoMenuOpen.value = false
   }
 }
 
-function closeTeamMenu() {
-  teamMenuOpen.value = false
+function closeInfoMenu() {
+  infoMenuOpen.value = false
 }
 
 function handleDocumentKeydown(event: KeyboardEvent) {
   if (event.key !== 'Escape') return
-  if (teamMenuOpen.value) {
-    teamMenuOpen.value = false
+  if (infoMenuOpen.value) {
+    infoMenuOpen.value = false
     return
   }
   if (userMenuOpen.value) userMenuOpen.value = false
 }
 
-async function focusFirstTeamLink() {
+async function focusFirstInfoLink() {
   await nextTick()
-  document.querySelector<HTMLElement>('[data-team-menu] [role="menu"] a')?.focus()
+  document.querySelector<HTMLElement>('[data-info-menu] [role="menu"] a')?.focus()
 }
 
 watch(mobileOpen, (open) => {
   if (!import.meta.client) return
   document.body.style.overflow = open ? 'hidden' : ''
+  if (open) {
+    const infoNav = navigation.find((item) => item.label === 'Informasi')
+    if (infoNav) mobileInfoOpen.value = isActive(infoNav)
+  }
 })
 
 watch(
   () => route.fullPath,
   () => {
     mobileOpen.value = false
+    mobileInfoOpen.value = false
     userMenuOpen.value = false
-    teamMenuOpen.value = false
+    infoMenuOpen.value = false
   }
 )
 
@@ -120,71 +120,73 @@ useHead(() => ({
       <div class="page-shell flex h-16 items-center gap-4 md:h-[72px]">
         <AppLogo />
 
-        <nav class="ml-auto hidden shrink-0 items-center gap-0.5 xl:flex" aria-label="Navigasi utama">
-          <template v-for="item in navigation" :key="item.to">
-            <div v-if="item.children?.length" data-team-menu class="relative">
-              <button
-                type="button"
-                class="site-nav-link relative inline-flex min-h-[44px] items-center gap-1 px-2 transition"
-                :class="isActive(item.to) ? 'text-charcoal' : 'text-slate-500 hover:text-charcoal'"
-                :aria-expanded="teamMenuOpen"
-                aria-haspopup="menu"
-                @click.stop="teamMenuOpen = !teamMenuOpen"
-                @keydown.down.prevent="teamMenuOpen = true; focusFirstTeamLink()"
-                @keydown.esc="closeTeamMenu"
+        <div class="hidden min-w-0 flex-1 justify-center lg:flex">
+          <nav class="flex items-center gap-0.5" aria-label="Navigasi utama">
+            <template v-for="item in navigation" :key="item.to">
+              <div v-if="item.children?.length" data-info-menu class="relative">
+                <button
+                  type="button"
+                  class="site-nav-link relative inline-flex min-h-[44px] items-center gap-1 px-2 transition"
+                  :class="isActive(item) ? 'text-charcoal' : 'text-slate-500 hover:text-charcoal'"
+                  :aria-expanded="infoMenuOpen"
+                  aria-haspopup="menu"
+                  @click.stop="infoMenuOpen = !infoMenuOpen"
+                  @keydown.down.prevent="infoMenuOpen = true; focusFirstInfoLink()"
+                  @keydown.esc="closeInfoMenu"
+                >
+                  {{ item.label }}
+                  <ChevronDown :size="13" class="transition" :class="infoMenuOpen ? 'rotate-180' : ''" aria-hidden="true" />
+                  <span
+                    v-if="isActive(item)"
+                    class="absolute inset-x-2 bottom-0 h-[2px] rounded-full bg-unu-green"
+                    aria-hidden="true"
+                  />
+                </button>
+                <Transition
+                  enter-active-class="transition duration-150 ease-out"
+                  enter-from-class="translate-y-1 opacity-0"
+                  enter-to-class="translate-y-0 opacity-100"
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-to-class="translate-y-1 opacity-0"
+                >
+                  <div
+                    v-if="infoMenuOpen"
+                    class="absolute right-0 top-[calc(100%+2px)] w-64 overflow-hidden rounded-xl border border-line-warm bg-white p-1.5 shadow-soft"
+                    role="menu"
+                    @keydown.esc="closeInfoMenu"
+                  >
+                    <NuxtLink
+                      v-for="child in item.children"
+                      :key="child.to"
+                      :to="child.to"
+                      class="flex min-h-[44px] items-center rounded-lg px-3 text-[14px] font-medium transition hover:bg-soft-white"
+                      :class="route.path === child.to || (child.to !== '/' && route.path.startsWith(`${child.to}/`)) ? 'text-unu-green' : 'text-slate-600'"
+                      role="menuitem"
+                      @click="closeInfoMenu"
+                    >
+                      {{ child.label }}
+                    </NuxtLink>
+                  </div>
+                </Transition>
+              </div>
+              <NuxtLink
+                v-else
+                :to="item.to"
+                class="site-nav-link relative inline-flex min-h-[44px] items-center px-2 transition"
+                :class="isActive(item) ? 'text-charcoal' : 'text-slate-500 hover:text-charcoal'"
               >
                 {{ item.label }}
-                <ChevronDown :size="13" class="transition" :class="teamMenuOpen ? 'rotate-180' : ''" aria-hidden="true" />
                 <span
-                  v-if="isActive(item.to)"
+                  v-if="isActive(item)"
                   class="absolute inset-x-2 bottom-0 h-[2px] rounded-full bg-unu-green"
                   aria-hidden="true"
                 />
-              </button>
-              <Transition
-                enter-active-class="transition duration-150 ease-out"
-                enter-from-class="translate-y-1 opacity-0"
-                enter-to-class="translate-y-0 opacity-100"
-                leave-active-class="transition duration-100 ease-in"
-                leave-to-class="translate-y-1 opacity-0"
-              >
-                <div
-                  v-if="teamMenuOpen"
-                  class="absolute left-0 top-[calc(100%+2px)] w-56 overflow-hidden rounded-xl border border-line-warm bg-white p-1.5 shadow-soft"
-                  role="menu"
-                  @keydown.esc="closeTeamMenu"
-                >
-                  <NuxtLink
-                    v-for="child in item.children"
-                    :key="child.to"
-                    :to="child.to"
-                    class="flex min-h-[44px] items-center rounded-lg px-3 text-[14px] font-medium transition hover:bg-soft-white"
-                    :class="route.path === child.to ? 'text-unu-green' : 'text-slate-600'"
-                    role="menuitem"
-                    @click="closeTeamMenu"
-                  >
-                    {{ child.label }}
-                  </NuxtLink>
-                </div>
-              </Transition>
-            </div>
-            <NuxtLink
-              v-else
-              :to="item.to"
-              class="site-nav-link relative inline-flex min-h-[44px] items-center px-2 transition"
-              :class="isActive(item.to) ? 'text-charcoal' : 'text-slate-500 hover:text-charcoal'"
-            >
-              {{ item.label }}
-              <span
-                v-if="isActive(item.to)"
-                class="absolute inset-x-2 bottom-0 h-[2px] rounded-full bg-unu-green"
-                aria-hidden="true"
-              />
-            </NuxtLink>
-          </template>
-        </nav>
+              </NuxtLink>
+            </template>
+          </nav>
+        </div>
 
-        <div class="ml-2 hidden shrink-0 items-center gap-2 xl:flex">
+        <div class="ml-2 hidden shrink-0 items-center gap-2 lg:flex">
           <NuxtLink
             to="/lacak"
             class="grid h-11 w-11 place-items-center rounded-lg text-slate-500 transition hover:bg-white hover:text-charcoal"
@@ -197,14 +199,14 @@ useHead(() => ({
           <div v-if="user" ref="userMenu" class="relative">
             <button
               type="button"
-              class="flex min-h-[44px] items-center gap-2 rounded-lg border border-line-warm bg-white py-1.5 pl-1.5 pr-3 text-sm font-semibold transition hover:border-slate-300"
+              class="grid h-11 w-11 place-items-center rounded-lg border border-line-warm bg-white text-slate-500 transition hover:border-slate-300 hover:text-charcoal"
               :aria-expanded="userMenuOpen"
               aria-haspopup="menu"
+              aria-label="Menu akun"
+              title="Menu akun"
               @click.stop="userMenuOpen = !userMenuOpen"
             >
-              <span class="grid h-8 w-8 place-items-center rounded-md bg-unu-green-soft text-[12px] font-bold text-unu-green">{{ initials }}</span>
-              <span class="hidden max-w-[90px] truncate text-[14px] 2xl:block">{{ user.name.split(' ')[0] }}</span>
-              <ChevronDown :size="13" class="text-slate-400" aria-hidden="true" />
+              <CircleUserRound :size="19" aria-hidden="true" />
             </button>
             <Transition
               enter-active-class="transition duration-150 ease-out"
@@ -215,22 +217,18 @@ useHead(() => ({
             >
               <div
                 v-if="userMenuOpen"
-                class="absolute right-0 top-[calc(100%+8px)] w-64 overflow-hidden rounded-xl border border-line-warm bg-white p-2 shadow-soft"
+                class="absolute right-0 top-[calc(100%+8px)] w-56 overflow-hidden rounded-xl border border-line-warm bg-white p-2 shadow-soft"
                 role="menu"
               >
-                <div class="border-b border-line-warm px-3 pb-3 pt-2">
-                  <p class="truncate text-sm font-semibold">{{ user.name }}</p>
-                  <p class="mt-0.5 truncate text-[14px] text-slate-500">{{ user.email }}</p>
-                </div>
-                <NuxtLink to="/lacak" class="flex min-h-[44px] items-center rounded-lg px-3 text-sm font-medium transition hover:bg-soft-white" role="menuitem">
-                  Lacak Permohonan
+                <NuxtLink to="/lacak" class="flex min-h-[44px] items-center rounded-lg px-3 text-[14px] font-medium transition hover:bg-soft-white" role="menuitem">
+                  Permohonan Saya
                 </NuxtLink>
-                <NuxtLink v-if="isStaff" to="/admin" class="flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-sm font-medium transition hover:bg-soft-white" role="menuitem">
+                <NuxtLink v-if="hasAdminAccess" to="/admin" class="flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-[14px] font-medium transition hover:bg-soft-white" role="menuitem">
                   <ShieldCheck :size="15" aria-hidden="true" /> Dashboard Admin
                 </NuxtLink>
                 <button
                   type="button"
-                  class="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 text-sm font-medium text-red-700 transition hover:bg-red-50"
+                  class="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 text-[14px] font-medium text-red-700 transition hover:bg-red-50"
                   role="menuitem"
                   @click="logout"
                 >
@@ -239,10 +237,20 @@ useHead(() => ({
               </div>
             </Transition>
           </div>
+          <NuxtLink
+            v-else
+            to="/masuk"
+            class="grid h-11 w-11 place-items-center rounded-lg border border-line-warm bg-white text-slate-500 transition hover:border-slate-300 hover:text-charcoal"
+            aria-label="Masuk ke akun"
+            title="Masuk ke akun"
+          >
+            <CircleUserRound :size="19" aria-hidden="true" />
+          </NuxtLink>
+
           <AppButton to="/layanan" size="sm" class="site-nav-cta ml-1 whitespace-nowrap">Ajukan Layanan</AppButton>
         </div>
 
-        <div class="ml-auto flex items-center gap-2 xl:hidden">
+        <div class="ml-auto flex items-center gap-2 lg:hidden">
           <AppButton to="/layanan" size="sm" class="site-nav-cta hidden whitespace-nowrap sm:inline-flex">Ajukan Layanan</AppButton>
           <button
             type="button"
@@ -267,7 +275,7 @@ useHead(() => ({
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="mobileOpen" id="mobile-navigation" class="fixed inset-0 z-[90] bg-soft-white xl:hidden">
+        <div v-if="mobileOpen" id="mobile-navigation" class="fixed inset-0 z-[90] bg-soft-white lg:hidden">
           <div class="flex h-full flex-col">
             <div class="flex h-[64px] items-center justify-between border-b border-line-warm px-5">
               <AppLogo />
@@ -283,35 +291,50 @@ useHead(() => ({
             <nav class="flex-1 overflow-y-auto px-5 py-5" aria-label="Navigasi mobile">
               <ul class="space-y-0.5">
                 <li v-for="(item, index) in navigation" :key="item.to">
+                  <template v-if="item.children?.length">
+                    <button
+                      type="button"
+                      class="flex min-h-[52px] w-full items-center justify-between border-l-2 px-4 text-left text-[15px] font-semibold transition"
+                      :class="isActive(item) ? 'border-unu-green bg-white text-charcoal' : 'border-transparent text-slate-600 hover:bg-white/70'"
+                      :aria-expanded="mobileInfoOpen"
+                      @click="mobileInfoOpen = !mobileInfoOpen"
+                    >
+                      <span><span class="mr-3 text-[14px] font-bold tabular-nums text-slate-400">0{{ index + 1 }}</span>{{ item.label }}</span>
+                      <ChevronDown :size="16" class="text-slate-400 transition" :class="mobileInfoOpen ? 'rotate-180' : ''" aria-hidden="true" />
+                    </button>
+                    <div v-show="mobileInfoOpen" class="ml-8 border-l border-line-warm pl-3">
+                      <NuxtLink
+                        v-for="child in item.children"
+                        :key="child.to"
+                        :to="child.to"
+                        class="flex min-h-[44px] items-center text-[14px] font-medium transition"
+                        :class="route.path === child.to || (child.to !== '/' && route.path.startsWith(`${child.to}/`)) ? 'text-unu-green' : 'text-slate-500 hover:text-charcoal'"
+                        @click="closeMobile"
+                      >
+                        {{ child.label }}
+                      </NuxtLink>
+                    </div>
+                  </template>
                   <NuxtLink
+                    v-else
                     :to="item.to"
                     class="flex min-h-[52px] items-center justify-between border-l-2 px-4 text-[15px] font-semibold transition"
-                    :class="isActive(item.to) ? 'border-unu-green bg-white text-charcoal' : 'border-transparent text-slate-600 hover:bg-white/70'"
+                    :class="isActive(item) ? 'border-unu-green bg-white text-charcoal' : 'border-transparent text-slate-600 hover:bg-white/70'"
+                    @click="closeMobile"
                   >
                     <span><span class="mr-3 text-[14px] font-bold tabular-nums text-slate-400">0{{ index + 1 }}</span>{{ item.label }}</span>
-                    <span v-if="isActive(item.to)" class="h-1.5 w-1.5 rounded-full bg-unu-green" aria-hidden="true" />
+                    <span v-if="isActive(item)" class="h-1.5 w-1.5 rounded-full bg-unu-green" aria-hidden="true" />
                   </NuxtLink>
-                  <div v-if="item.children?.length" class="ml-8 border-l border-line-warm pl-3">
-                    <NuxtLink
-                      v-for="child in item.children.filter((child) => child.to !== item.to)"
-                      :key="child.to"
-                      :to="child.to"
-                      class="flex min-h-[44px] items-center text-[14px] font-medium transition"
-                      :class="route.path === child.to ? 'text-unu-green' : 'text-slate-500 hover:text-charcoal'"
-                      @click="closeMobile"
-                    >
-                      {{ child.label }}
-                    </NuxtLink>
-                  </div>
                 </li>
               </ul>
               <div class="my-5 h-px bg-line-warm" />
               <div class="grid gap-2">
-                <AppButton to="/lacak" variant="secondary" block @click="closeMobile">Lacak Permohonan</AppButton>
+                <AppButton to="/lacak" variant="secondary" block @click="closeMobile">{{ user ? 'Permohonan Saya' : 'Lacak Permohonan' }}</AppButton>
                 <template v-if="user">
-                  <AppButton v-if="isStaff" to="/admin" variant="secondary" block @click="closeMobile">Dashboard Admin</AppButton>
+                  <AppButton v-if="hasAdminAccess" to="/admin" variant="secondary" block @click="closeMobile">Dashboard Admin</AppButton>
                   <button type="button" class="min-h-[44px] text-sm font-semibold text-red-700" @click="logout">Keluar</button>
                 </template>
+                <AppButton v-else to="/masuk" variant="secondary" block @click="closeMobile">Masuk</AppButton>
                 <AppButton to="/layanan" block @click="closeMobile">Ajukan Layanan</AppButton>
               </div>
               <div class="mt-5 border-t border-line-warm pt-4">
