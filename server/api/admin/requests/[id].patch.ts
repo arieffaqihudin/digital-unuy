@@ -221,9 +221,7 @@ export default defineEventHandler(async (event) => {
 
   if (email) {
     const siteUrl = useRuntimeConfig().siteUrl
-    const destination = account
-      ? `${siteUrl}/permohonan-saya/${String(request._id)}`
-      : `${siteUrl}/lacak?ticket=${encodeURIComponent(request.ticketNumber)}`
+    const destination = `${siteUrl}/lacak?ticket=${encodeURIComponent(request.ticketNumber)}`
     const result = await sendEmail({
       template: email.template,
       to: requester.email,
@@ -231,7 +229,7 @@ export default defineEventHandler(async (event) => {
       heading: email.heading,
       reference: request.ticketNumber,
       preheader: `Pembaruan permohonan ${request.ticketNumber}.`,
-      bodyHtml: `${email.body}<p style="margin:24px 0;"><a href="${escapeHtml(destination)}" style="display:inline-block;background:#337449;color:#fff;text-decoration:none;padding:13px 20px;border-radius:10px;font-weight:700;">Buka Pelacakan Permohonan</a></p>${account ? '' : '<p style="font-size:12px;color:#68625C;">Masukkan ID permohonan dan token akses yang Anda simpan saat pengajuan.</p>'}`
+      bodyHtml: `${email.body}<p style="margin:24px 0;"><a href="${escapeHtml(destination)}" style="display:inline-block;background:#337449;color:#fff;text-decoration:none;padding:13px 20px;border-radius:10px;font-weight:700;">Buka Pelacakan Permohonan</a></p><p style="font-size:12px;color:#68625C;">Masukkan ID permohonan dan token akses yang Anda simpan saat pengajuan.</p>`
     })
     emailStatus = result.ok ? (result.simulated ? 'simulated' : 'sent') : 'failed'
   }

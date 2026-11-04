@@ -28,7 +28,6 @@ const UPLOAD_ROOT = resolve(process.cwd(), process.env.NUXT_UPLOAD_DIR || '.data
 const RESET = process.argv.includes('--reset')
 const SEED_PASSWORD_ADMIN = process.env.SEED_ADMIN_PASSWORD || 'Admin#Unu2026'
 const SEED_PASSWORD_PETUGAS = process.env.SEED_PETUGAS_PASSWORD || 'Petugas#2026'
-const SEED_PASSWORD_PEMOHON = process.env.SEED_PEMOHON_PASSWORD || 'Pemohon#2026'
 
 if (process.env.NODE_ENV === 'production') {
   console.error('Seed ditolak: jangan menjalankan seed development di NODE_ENV=production.')
@@ -97,19 +96,21 @@ await Permission.bulkWrite(
     }
   }))
 )
-for (const slug of ['superadmin', 'admin', 'pemohon'] as const) {
+await Role.deleteOne({ slug: 'pemohon' })
+await User.deleteOne({ email: 'pemohon@digital.unu.local' })
+await User.deleteOne({ email: 'nonaktif@digital.unu.local' })
+
+for (const slug of ['superadmin', 'admin'] as const) {
   await Role.updateOne(
     { slug },
     {
       $set: {
         slug,
-        label: slug === 'superadmin' ? 'Superadmin' : slug === 'admin' ? 'Admin/Petugas' : 'Pemohon',
+        label: slug === 'superadmin' ? 'Superadmin' : 'Admin/Petugas',
         description:
           slug === 'superadmin'
             ? 'Akses penuh terhadap administrasi sistem.'
-            : slug === 'admin'
-              ? 'Petugas operasional layanan dan konten.'
-              : 'Pemohon layanan digital.',
+            : 'Petugas operasional layanan dan konten.',
         permissions: ROLE_PERMISSIONS[slug],
         isSystem: true
       }
@@ -121,7 +122,7 @@ for (const slug of ['superadmin', 'admin', 'pemohon'] as const) {
 async function upsertUser(input: {
   name: string
   email: string
-  role: 'superadmin' | 'admin' | 'pemohon'
+  role: 'superadmin' | 'admin'
   password: string
   active: boolean
 }) {
@@ -159,27 +160,6 @@ await upsertUser({
   password: SEED_PASSWORD_PETUGAS,
   active: true
 })
-await upsertUser({
-  name: 'Pemohon Contoh',
-  email: 'pemohon@digital.unu.local',
-  role: 'pemohon',
-  password: SEED_PASSWORD_PEMOHON,
-  active: true
-})
-await User.updateOne(
-  { email: 'nonaktif@digital.unu.local' },
-  {
-    $set: {
-      name: 'Pengguna Nonaktif',
-      email: 'nonaktif@digital.unu.local',
-      role: 'pemohon',
-      active: false,
-      passwordHash: '',
-      isSeedData: true
-    }
-  },
-  { upsert: true }
-)
 
 await SiteSetting.findOneAndUpdate(
   { key: 'global' },
@@ -828,7 +808,7 @@ Tautan pelacakan dapat membuka data permohonan. Simpan dan gunakan secara pribad
 
 ## Alternatif
 
-Pemohon yang masuk ke akun dapat membuka menu **Permohonan Saya** untuk melihat detail tanpa memasukkan token.`,
+Pemohon tidak perlu membuat akun. Simpan ID permohonan dan token akses untuk membuka halaman Lacak Permohonan.`,
     categoryOrder: 3
   }
 ]
@@ -1052,9 +1032,7 @@ console.log('Seed development selesai. Data contoh ditandai isSeedData.')
 console.log('Akun pengembangan:')
 console.log(`  superadmin@digital.unu.local / ${SEED_PASSWORD_ADMIN}`)
 console.log(`  petugas@digital.unu.local    / ${SEED_PASSWORD_PETUGAS}`)
-console.log(`  pemohon@digital.unu.local    / ${SEED_PASSWORD_PEMOHON}`)
-console.log('  nonaktif@digital.unu.local   / (tanpa kata sandi, nonaktif)')
-console.log('Ganti kredensial dan nonaktifkan devSeedMode sebelum produksi.')
+console.log('Ganti kredensial sebelum produksi.')
 console.log('')
 
 await mongoose.disconnect()

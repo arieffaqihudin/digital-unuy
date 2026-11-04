@@ -154,15 +154,13 @@ for (const viewport of viewports) {
 
 const authenticatedViewports = viewports.filter((item) => ['390', '768', '1024', '1440'].includes(item.name))
 
-const applicantContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
-const applicantPage = await applicantContext.newPage()
-await login(applicantPage, 'pemohon@digital.unu.local', 'Pemohon#2026', '/permohonan-saya')
+const guestContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
+const guestPage = await guestContext.newPage()
 for (const viewport of authenticatedViewports) {
-  await applicantPage.setViewportSize({ width: viewport.width, height: viewport.height })
-  await inspect(applicantPage, '/layanan/pembuatan-email-institusi/ajukan', 'request-form', viewport.name)
-  await inspect(applicantPage, '/permohonan-saya', 'my-requests', viewport.name)
+  await guestPage.setViewportSize({ width: viewport.width, height: viewport.height })
+  await inspect(guestPage, '/layanan/pembuatan-email-institusi/ajukan', 'request-form', viewport.name)
 }
-await applicantContext.close()
+await guestContext.close()
 
 const adminContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
 const adminPage = await adminContext.newPage()

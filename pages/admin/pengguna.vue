@@ -33,7 +33,7 @@ const editingId = ref('')
 const saving = ref(false)
 const busyId = ref('')
 const errorMessage = ref('')
-const form = reactive({ name: '', email: '', role: 'pemohon' as RoleSlug, active: false })
+const form = reactive({ name: '', email: '', role: 'admin' as RoleSlug, active: false })
 let timer: ReturnType<typeof setTimeout> | null = null
 
 async function load() {
@@ -78,7 +78,7 @@ function statusClass(user: AdminUser) {
 
 function openCreate() {
   editingId.value = ''
-  Object.assign(form, { name: '', email: '', role: 'pemohon', active: false })
+  Object.assign(form, { name: '', email: '', role: 'admin', active: false })
   errorMessage.value = ''
   modalOpen.value = true
 }
@@ -161,7 +161,7 @@ useSeoMeta({ title: 'Pengguna', robots: 'noindex, nofollow' })
 
     <div class="grid gap-3 rounded-xl border border-admin-border bg-white p-4 lg:grid-cols-[1fr_180px_180px_auto]">
       <div class="relative"><Search :size="16" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-admin-muted" /><input v-model="search" type="search" class="field-input pl-10" placeholder="Cari nama atau email…" aria-label="Cari pengguna" /></div>
-      <select v-model="roleFilter" class="field-input" aria-label="Filter role"><option value="">Semua role</option><option value="superadmin">Superadmin</option><option value="admin">Admin/Petugas</option><option value="pemohon">Pemohon</option></select>
+      <select v-model="roleFilter" class="field-input" aria-label="Filter role"><option value="">Semua role</option><option value="superadmin">Superadmin</option><option value="admin">Admin/Petugas</option></select>
       <select v-model="activeFilter" class="field-input" aria-label="Filter status"><option value="">Semua status</option><option value="true">Aktif</option><option value="false">Nonaktif</option></select>
       <span class="self-center px-2 text-[14px] text-admin-muted">{{ result?.total ?? 0 }} pengguna</span>
     </div>
@@ -182,7 +182,7 @@ useSeoMeta({ title: 'Pengguna', robots: 'noindex, nofollow' })
         <div v-if="errorMessage" class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-900">{{ errorMessage }}</div>
         <div><label class="admin-label">Nama lengkap</label><input v-model="form.name" class="field-input" maxlength="120" /></div>
         <div><label class="admin-label">Email</label><input v-model="form.email" type="email" class="field-input" maxlength="180" :disabled="Boolean(editingId) && form.active" /><p class="field-help">Email akun aktif tidak dapat diubah tanpa verifikasi.</p></div>
-        <div v-if="can('roles.manage')"><label class="admin-label">Role</label><select v-model="form.role" class="field-input"><option value="pemohon">Pemohon</option><option value="admin">Admin/Petugas</option><option value="superadmin">Superadmin</option></select><p class="field-help">Perubahan role berlaku pada permintaan berikutnya dan dicatat di audit log. Sistem mencegah perubahan role akun sendiri.</p></div>
+        <div v-if="can('roles.manage')"><label class="admin-label">Role</label><select v-model="form.role" class="field-input"><option value="admin">Admin/Petugas</option><option value="superadmin">Superadmin</option></select><p class="field-help">Perubahan role berlaku pada permintaan berikutnya dan dicatat di audit log. Sistem mencegah perubahan role akun sendiri.</p></div>
         <div v-else class="rounded-lg border border-admin-border bg-slate-50 p-3 text-xs text-admin-muted">Anda tidak memiliki izin mengubah role.</div>
       </div>
       <template #footer><div class="flex justify-end gap-2"><AppButton variant="secondary" @click="modalOpen = false">Batal</AppButton><AppButton :loading="saving" @click="save">Simpan</AppButton></div></template>

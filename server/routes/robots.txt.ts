@@ -5,7 +5,6 @@ export default defineEventHandler((event) => {
   return `User-agent: *
 Allow: /
 Disallow: /admin
-Disallow: /permohonan-saya
 Disallow: /masuk
 Disallow: /aktivasi
 Disallow: /lacak

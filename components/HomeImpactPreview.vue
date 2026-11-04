@@ -11,7 +11,7 @@ const formatNumber = (value: number) => new Intl.NumberFormat('id-ID').format(va
   <section class="bg-ivory pb-16 pt-6 sm:pb-20 lg:pb-28" aria-labelledby="impact-title">
     <div class="page-shell">
       <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
-        <div class="max-w-[560px]">
+        <div v-reveal class="max-w-[560px]">
           <p class="eyebrow-editorial">{{ impactContent.eyebrow }}</p>
           <h2 id="impact-title" class="section-title mt-4">{{ impactContent.heading }}</h2>
           <p class="mt-5 text-[16px] leading-[1.7] text-slate-600">{{ impactContent.description }}</p>
@@ -24,8 +24,9 @@ const formatNumber = (value: number) => new Intl.NumberFormat('id-ID').format(va
         <div>
           <dl class="grid gap-x-10 sm:grid-cols-2">
             <div
-              v-for="metric in impactMetrics"
+              v-for="(metric, index) in impactMetrics"
               :key="metric.label"
+              v-reveal="100 + index * 90"
               class="border-t border-charcoal/15 pb-8 pt-5"
             >
               <dd class="metric-figure">
@@ -37,7 +38,7 @@ const formatNumber = (value: number) => new Intl.NumberFormat('id-ID').format(va
               </dd>
             </div>
           </dl>
-          <p class="border-t border-charcoal/15 pt-4 text-[12px] leading-5 text-slate-600">{{ impactContent.source }}</p>
+          <p v-reveal="500" class="border-t border-charcoal/15 pt-4 text-[12px] leading-5 text-slate-600">{{ impactContent.source }}</p>
         </div>
       </div>
     </div>

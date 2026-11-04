@@ -41,7 +41,6 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/admin/**': { ssr: true },
-    '/permohonan-saya/**': { ssr: true },
     '/masuk': { ssr: true },
     '/aktivasi': { ssr: true },
     '/api/**': { cors: false }

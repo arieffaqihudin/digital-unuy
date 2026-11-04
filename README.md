@@ -35,8 +35,6 @@ Data seed diberi penanda `isSeedData`. Pengajuan layanan dapat dilakukan tanpa m
 |---|---|---|
 | Superadmin | `superadmin@digital.unu.local` | `Admin#Unu2026` |
 | Admin/Petugas | `petugas@digital.unu.local` | `Petugas#2026` |
-| Pemohon | `pemohon@digital.unu.local` | `Pemohon#2026` |
-| Nonaktif | `nonaktif@digital.unu.local` | — (tanpa kata sandi) |
 
 Jangan gunakan kredensial ini di produksi. Ganti kata sandi dan bersihkan data seed sebelum go-live.
 
@@ -81,7 +79,7 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Aktivasi mengirim tautan sekali pakai 48 jam; token hanya disimpan sebagai hash.
 - Token aktivasi tidak bisa dipakai ulang, dapat dikirim ulang tanpa membuat akun duplikat.
 - Akun nonaktif tidak dapat membuat sesi/login.
-- Role: Superadmin, Admin/Petugas, Pemohon.
+- Role: Superadmin dan Admin/Petugas. Akun pemohon tidak digunakan; pengajuan dilakukan tanpa login.
 - Role & permission dapat diubah superadmin untuk role non-superadmin.
 - Admin tidak dapat menonaktifkan/menurunkan role akun sendiri; perlindungan superadmin aktif terakhir.
 - Semua perubahan sensitif masuk audit log.
@@ -94,7 +92,6 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 - Formulir dibuat dari konfigurasi layanan di database (text, textarea, number, email, select, radio, checkbox, date, file).
 - Conditional field sederhana (`showIf`) didukung.
 - Validasi server-side: required, tipe, panjang, email, pattern, opsi, ukuran/MIME file.
-- Draft formulir tersimpan di MongoDB dan dipulihkan saat pengguna login.
 - File divalidasi MIME, ekstensi, magic bytes, ukuran, dan disimpan privat dengan nama acak.
 - Idempotency key mencegah duplikasi akibat klik berulang.
 - Nomor tiket unik dengan format `UNU-DTD-YYMM-XXXXXX`.
@@ -141,13 +138,13 @@ Tanpa SMTP pada development, email ditulis ke `.data/mail-outbox/*.json` dan log
 pages/
   index.vue, tentang.vue, layanan/, ekosistem-digital.vue,
   dokumen/, publikasi/, masuk.vue, aktivasi.vue, lacak.vue,
-  permohonan-saya/, halaman/, admin/
+  tentang-kami/tim.vue, halaman/, admin/
 layouts/
   default.vue, admin.vue
 components/
   layout, form, card, status, modal, toast, form builder, service editor
 server/
-  api/auth, api/services, api/requests, api/documents,
+  api/auth, api/services, api/documents,
   api/articles, api/platforms, api/pages, api/track,
   api/admin/*, routes/sitemap.xml.ts, routes/robots.txt.ts
   models/index.ts
@@ -182,16 +179,10 @@ shared/
 - `GET /api/auth/session`
 - `POST /api/auth/activate`
 
-### Pemohon
+### Pengajuan publik
 
 - `POST /api/services/:slug/requests`
-- `GET /api/requests/mine`
-- `GET /api/requests/:id`
-- `POST /api/requests/:id/comments`
-- `POST /api/requests/:id/respond`
-- `POST /api/requests/:id/attachments`
-- `GET /api/requests/attachments/:id`
-- `GET|PUT|DELETE /api/requests/drafts/:serviceSlug`
+- `GET /api/requests/attachments/:id` (khusus staf berizin)
 
 ### Admin
 
@@ -220,16 +211,16 @@ shared/
 Dengan server development berjalan:
 
 ```bash
-npm run test:e2e         # 89 pemeriksaan API & alur end-to-end
+npm run test:e2e         # 84 pemeriksaan API & alur end-to-end
 npm run test:visual      # 44 pemeriksaan render & error console
-npm run test:responsive  # 132 kombinasi halaman × 10 viewport (320–1920px)
+npm run test:responsive  # 128 kombinasi halaman × 10 viewport (320–1920px)
 ```
 
 Hasil yang sudah dijalankan pada lingkungan ini:
 
-- **E2E:** 89/89 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
+- **E2E:** 84/84 lulus — publik, katalog, filter, tracking, aktivasi, token sekali pakai, pengajuan, idempotensi, draft, kelengkapan, timeline, lampiran privat, RBAC, CSRF, versi formulir, snapshot, dokumen publish/unpublish, XSS sanitization, audit, notifikasi.
 - **Visual:** 44/44 lulus — halaman publik, admin desktop/mobile, form pengajuan, permohonan saya. Tidak ada page error atau console error.
-- **Responsive:** 132/132 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
+- **Responsive:** 128/128 lulus — 10 viewport (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920), halaman publik, form, tracking, dan admin. Tidak ada horizontal overflow, heading clipping, atau 4xx.
 - **Login standalone:** layout autentikasi tanpa public header/footer/sidebar, split-screen 50:50, light mode permanen, diuji pada 320–1440px.
 
 Screenshot pengujian disimpan di `.data/screenshots/`.

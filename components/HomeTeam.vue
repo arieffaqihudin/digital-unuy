@@ -22,14 +22,16 @@ const members = computed(() => {
       <HomeSectionHead
         eyebrow="Tim Transformasi Digital"
         title="Orang-orang di balik transformasi."
-        description="Tim yang merancang, membangun, dan merawat layanan digital universitas."
+        title-id="team-title"
       >
         <template #action>
           <NuxtLink to="/tentang-kami/tim" class="link-arrow">Lihat seluruh tim →</NuxtLink>
         </template>
       </HomeSectionHead>
       <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-4">
-        <TeamMemberCard v-for="member in members" :key="member.id" :member="member" />
+        <div v-for="(member, index) in members" :key="member.id" v-reveal="index * 70">
+          <TeamMemberCard :member="member" compact />
+        </div>
       </div>
     </div>
   </section>

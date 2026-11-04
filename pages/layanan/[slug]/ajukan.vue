@@ -7,8 +7,6 @@ import {
   Clock3,
   FileText,
   Info,
-  Loader2,
-  Save,
   ShieldCheck
 } from 'lucide-vue-next'
 import type { DocumentDTO, FormField, ServiceDTO } from '~/shared/types'
@@ -31,8 +29,6 @@ const { data, error } = await useAsyncData<ServiceResponse>(`request-service-${r
   $fetch<ServiceResponse>(`/api/services/${route.params.slug}`)
 )
 const service = computed(() => data.value?.service)
-const { user, fetchSession } = useAuth()
-await fetchSession()
 
 if (!service.value) {
   throw createError({ statusCode: 404, statusMessage: 'Layanan tidak ditemukan.', fatal: true })
@@ -48,24 +44,17 @@ const errors = ref<Record<string, string>>({})
 const submitting = ref(false)
 const submitted = ref<SubmitResult | null>(null)
 const submitError = ref('')
-const requester = reactive({ name: user.value?.name || '', email: user.value?.email || '', phone: '' })
+const requester = reactive({ name: '', email: '', phone: '' })
 const requesterErrors = ref<Record<string, string>>({})
-const draftMessage = ref('')
-const draftLoaded = ref(false)
-const draftSaving = ref(false)
 const idempotencyKey = ref(
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `req-${Date.now()}-${Math.random().toString(36).slice(2)}`
 )
-let draftTimer: ReturnType<typeof setTimeout> | null = null
-let suppressDraft = true
-
 for (const field of fields.value) {
   form[field.key] = field.type === 'checkbox' ? false : ''
 }
 
-const { settings } = useSite()
 const api = useApi()
 const toast = useToast()
 
@@ -79,63 +68,6 @@ const visibleFields = computed(() => fields.value.filter(visible))
 const regularFields = computed(() => visibleFields.value.filter((field) => field.type !== 'file'))
 const fileFields = computed(() => visibleFields.value.filter((field) => field.type === 'file'))
 const hasFileFields = computed(() => fileFields.value.length > 0)
-
-onMounted(async () => {
-  if (!user.value) {
-    draftLoaded.value = true
-    suppressDraft = false
-    return
-  }
-  try {
-    const draft = await $fetch<{ data: Record<string, unknown>; updatedAt: string | null }>(
-      `/api/requests/drafts/${route.params.slug}`
-    )
-    if (draft.updatedAt) {
-      for (const [key, value] of Object.entries(draft.data)) {
-        if (key in form) form[key] = value
-      }
-      draftMessage.value = `Draft dipulihkan · ${new Date(draft.updatedAt).toLocaleString('id-ID')}`
-      toast.info('Draft dipulihkan', 'Isian formulir terakhir berhasil dimuat.')
-    }
-  } catch {
-    // Draft restoration is optional.
-  } finally {
-    draftLoaded.value = true
-    setTimeout(() => {
-      suppressDraft = false
-    }, 300)
-  }
-})
-
-watch(
-  form,
-  () => {
-    if (!user.value || suppressDraft || !draftLoaded.value || submitted.value) return
-    if (draftTimer) clearTimeout(draftTimer)
-    draftTimer = setTimeout(saveDraft, 1100)
-  },
-  { deep: true }
-)
-
-async function saveDraft() {
-  if (!user.value || submitting.value || submitted.value) return
-  draftSaving.value = true
-  try {
-    const payload: Record<string, unknown> = {}
-    for (const field of fields.value) {
-      if (field.type !== 'file' && field.key in form) payload[field.key] = form[field.key]
-    }
-    const result = await api<{ savedAt: string }>(`/api/requests/drafts/${route.params.slug}`, {
-      method: 'PUT',
-      body: { data: payload }
-    })
-    draftMessage.value = `Draft tersimpan otomatis · ${new Date(result.savedAt).toLocaleTimeString('id-ID')}`
-  } catch {
-    draftMessage.value = 'Draft belum tersimpan. Periksa koneksi.'
-  } finally {
-    draftSaving.value = false
-  }
-}
 
 function validate() {
   const next: Record<string, string> = {}
@@ -199,7 +131,6 @@ async function submit() {
   }
 
   submitting.value = true
-  if (draftTimer) clearTimeout(draftTimer)
   try {
     const formData = new FormData()
     const payload: Record<string, unknown> = {}
@@ -223,13 +154,6 @@ async function submit() {
     submitted.value = result
     toast.success('Permohonan terkirim', `ID permohonan ${result.ticketNumber}.`)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    if (user.value) {
-      try {
-        await api(`/api/requests/drafts/${route.params.slug}`, { method: 'DELETE' })
-      } catch {
-        // Draft cleanup failure does not affect the submitted request.
-      }
-    }
   } catch (error: any) {
     const serverErrors = error?.data?.data?.errors || error?.data?.errors
     if (serverErrors && typeof serverErrors === 'object') {
@@ -420,9 +344,8 @@ useSeoMeta({
 
             <div class="mt-8 flex flex-col gap-3 border-t border-line-warm pt-5 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex items-center gap-2 text-[12px] text-slate-500">
-                <Loader2 v-if="draftSaving" :size="13" class="animate-spin" aria-hidden="true" />
-                <Save v-else :size="13" aria-hidden="true" />
-                <span>{{ draftMessage || (user ? 'Draft isian disimpan otomatis.' : 'Tidak perlu akun untuk mengirim permohonan.') }}</span>
+                <ShieldCheck :size="13" class="text-unu-green" aria-hidden="true" />
+                <span>Tidak perlu akun untuk mengirim permohonan.</span>
               </div>
               <div class="flex flex-col gap-2 sm:flex-row">
                 <AppButton :to="`/layanan/${service.slug}`" variant="secondary">Batal</AppButton>
@@ -452,7 +375,6 @@ useSeoMeta({
                 <ul class="mt-5 space-y-3 border-t border-line-warm pt-5 text-[14px] leading-5 text-slate-600">
                   <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Pastikan data identitas dan unit kerja benar.</li>
                   <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Lampiran: PDF, PNG, JPG, WEBP, DOCX, XLSX, ZIP.</li>
-                  <li class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Lampiran tidak disimpan dalam draft.</li>
                   <li v-if="hasFileFields" class="flex gap-2.5"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-unu-green" aria-hidden="true" />Total lampiran maksimal 12 MB.</li>
                 </ul>
 

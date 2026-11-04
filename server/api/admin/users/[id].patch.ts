@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
     if (!actor.permissions.includes('roles.manage')) {
       throw createError({ statusCode: 403, statusMessage: 'Anda tidak memiliki izin mengubah role.' })
     }
-    if (!['superadmin', 'admin', 'pemohon'].includes(body.role)) {
+    if (!['superadmin', 'admin'].includes(body.role)) {
       throw createError({ statusCode: 422, statusMessage: 'Role pengguna tidak valid.' })
     }
     if (target.role === 'superadmin' && body.role !== 'superadmin') {

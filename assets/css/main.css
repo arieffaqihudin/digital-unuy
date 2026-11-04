@@ -12,6 +12,11 @@
     --color-sage: #d7d49a;
     --color-white: #ffffff;
     --header-height: 76px;
+    --motion-micro: 180ms;
+    --motion-hover: 220ms;
+    --motion-image: 400ms;
+    --motion-reveal: 450ms;
+    --ease-unu: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   html {
@@ -312,6 +317,55 @@
 }
 
 @layer utilities {
+  /* Reveal-on-scroll. Content is visible by default; `hidden` is only ever set by JS for below-the-fold elements. */
+  [data-reveal] {
+    transition:
+      opacity var(--motion-reveal) var(--ease-unu),
+      transform var(--motion-reveal) var(--ease-unu);
+  }
+
+  [data-reveal='hidden'] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .flow-line {
+    transform-origin: left center;
+    transition: transform 600ms var(--ease-unu) var(--flow-delay, 0ms);
+  }
+
+  [data-reveal='hidden'] .flow-line {
+    transform: scaleX(0);
+  }
+
+  .flow-arc {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 900ms var(--ease-unu) 350ms;
+  }
+
+  [data-reveal='hidden'] .flow-arc {
+    clip-path: inset(0 50% 0 50%);
+  }
+
+  .flow-node {
+    transition:
+      opacity var(--motion-reveal) var(--ease-unu) var(--flow-delay, 0ms),
+      transform var(--motion-reveal) var(--ease-unu) var(--flow-delay, 0ms);
+  }
+
+  [data-reveal='hidden'] .flow-node {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  .bar-fill {
+    transform-origin: left center;
+    transition: transform 900ms var(--ease-unu) 200ms;
+  }
+
+  [data-reveal='hidden'] .bar-fill {
+    transform: scaleX(0);
+  }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -335,6 +389,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal] .flow-line,
+  [data-reveal] .flow-arc,
+  [data-reveal] .flow-node,
+  [data-reveal] .bar-fill {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+
   *,
   *::before,
   *::after {

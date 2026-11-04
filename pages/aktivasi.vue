@@ -9,7 +9,6 @@ const showPassword = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const success = ref(false)
-const activatedRole = ref('pemohon')
 const api = useApi()
 const { fetchSession } = useAuth()
 
@@ -25,11 +24,10 @@ async function submit() {
   }
   loading.value = true
   try {
-    const result = await api<{ user: { role: string } }>('/api/auth/activate', {
+    await api('/api/auth/activate', {
       method: 'POST',
       body: { token: token.value, password: password.value }
     })
-    activatedRole.value = result.user.role
     await fetchSession(true)
     success.value = true
   } catch (error: any) {
@@ -51,7 +49,7 @@ useSeoMeta({ title: 'Aktivasi Akun', robots: 'noindex, nofollow' })
             <span class="grid h-14 w-14 place-items-center rounded-2xl bg-unu-green-soft text-unu-green"><CheckCircle2 :size="27" aria-hidden="true" /></span>
             <h1 class="mt-5 text-2xl font-semibold">Akun berhasil diaktifkan</h1>
             <p class="mt-2 text-sm leading-6 text-ink-muted">Kata sandi telah dibuat dan sesi Anda sudah aktif. Tautan aktivasi tidak dapat digunakan lagi.</p>
-            <AppButton :to="activatedRole === 'admin' || activatedRole === 'superadmin' ? '/admin' : '/permohonan-saya'" size="lg" block class="mt-6">
+            <AppButton to="/admin" size="lg" block class="mt-6">
               Lanjut ke portal <template #right><ArrowRight :size="16" /></template>
             </AppButton>
           </template>

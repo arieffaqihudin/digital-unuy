@@ -19,6 +19,14 @@ for (const width of widths) {
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
   await page.goto(`${base}/`, { waitUntil: 'networkidle' })
   await page.waitForTimeout(700)
+  await page.evaluate(async () => {
+    for (let y = 0; y < document.documentElement.scrollHeight; y += 500) {
+      window.scrollTo(0, y)
+      await new Promise((r) => setTimeout(r, 120))
+    }
+    window.scrollTo(0, 0)
+  })
+  await page.waitForTimeout(900)
   const m = await page.evaluate(() => {
     const h1 = document.querySelector('h1')
     const header = document.querySelector('header')

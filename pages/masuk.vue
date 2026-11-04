@@ -24,9 +24,8 @@ async function submit() {
   }
   loading.value = true
   try {
-    const user = await login(email.value.trim().toLowerCase(), password.value)
-    const destination =
-      safeRedirect.value || (['admin', 'superadmin'].includes(user.role) ? '/admin' : '/permohonan-saya')
+    await login(email.value.trim().toLowerCase(), password.value)
+    const destination = safeRedirect.value || '/admin'
     await navigateTo(destination)
   } catch (error: any) {
     errorMessage.value =
@@ -44,7 +43,7 @@ useSeoMeta({ title: 'Masuk', robots: 'noindex, nofollow' })
     <p class="text-[12px] font-semibold uppercase tracking-[0.15em] text-unu-green">Portal Layanan Digital</p>
     <h1 class="mt-3 text-[30px] font-bold leading-[1.2] tracking-[-0.03em] text-admin-text sm:text-[32px]">Selamat Datang</h1>
     <p class="mt-3 text-[15px] leading-[1.65] text-slate-500">
-      Masuk untuk mengajukan layanan, memantau permohonan, dan berkomunikasi dengan petugas.
+      Masuk untuk mengelola layanan, memproses permohonan, dan mengelola konten website.
     </p>
 
     <div
@@ -108,7 +107,7 @@ useSeoMeta({ title: 'Masuk', robots: 'noindex, nofollow' })
     </form>
 
     <p class="mt-5 text-center text-[13px] leading-[1.55] text-slate-500">
-      Akun dibuat dan diaktifkan oleh administrator direktorat.
+      Portal ini khusus administrator dan petugas direktorat.
     </p>
 
     <div class="mt-8 border-t border-admin-border pt-5">

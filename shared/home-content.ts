@@ -14,6 +14,7 @@ export const heroContent = {
   secondaryCta: { label: 'Ajukan Layanan', to: '/layanan' },
   visual: {
     src: '/images/home/portal-layanan.webp',
+    srcset: '/images/home/portal-layanan-1080.webp 1080w, /images/home/portal-layanan.webp 2160w',
     width: 2160,
     height: 1170,
     alt: 'Tangkapan layar halaman Layanan Digital pada portal Transformasi Digital UNU Yogyakarta',
@@ -24,8 +25,7 @@ export const heroContent = {
 export const impactContent = {
   eyebrow: 'Dampak Transformasi',
   heading: 'Bukan Sekadar Membangun Sistem. Menghadirkan Perubahan Nyata.',
-  description:
-    'Dari proses akademik hingga operasional kampus, transformasi digital mulai menghadirkan pekerjaan yang lebih terintegrasi, terdokumentasi, dan terukur.',
+  description: 'Dari proses akademik hingga operasional kampus, hasil transformasi digital mulai terukur.',
   cta: { label: 'Lihat Dampak Transformasi', to: '/dampak' },
   source: 'Sumber: presentasi Transformasi Digital UNU Yogyakarta. Data per periode yang tertera, bukan data real-time.'
 }
@@ -46,22 +46,75 @@ export const impactMetrics: ImpactMetric[] = [
 export const approachContent = {
   eyebrow: 'Pendekatan Transformasi',
   heading: 'Satu ekosistem, tiga siklus yang saling terhubung.',
-  description:
-    'Teknologi dirancang mengikuti perjalanan orang di kampus, bukan mengikuti struktur sistem.',
+  loopLabel: 'Satu ekosistem',
   cycles: [
     {
       title: 'Mahasiswa',
-      text: 'Perjalanan akademik dari awal studi hingga kelulusan, termasuk penerbitan ijazah dan SKPI.'
+      icon: 'academic',
+      text: 'Dari awal studi hingga kelulusan.',
+      examples: ['Ijazah & SKPI']
     },
     {
       title: 'Dosen & Pegawai',
-      text: 'Pekerjaan akademik dan kepegawaian sehari-hari, seperti portofolio perkuliahan dan presensi.'
+      icon: 'users',
+      text: 'Pekerjaan akademik dan kepegawaian.',
+      examples: ['Portofolio perkuliahan', 'Presensi pegawai']
     },
     {
       title: 'Institusi',
-      text: 'Tata kelola, dokumen, dan pengambilan keputusan yang bertumpu pada data terdokumentasi.'
+      icon: 'landmark',
+      text: 'Tata kelola berbasis data terdokumentasi.',
+      examples: ['Dokumen digital']
     }
   ]
+}
+
+export interface ShowcaseScreen {
+  key: string
+  tab: string
+  caption: string
+  src: string
+  srcset: string
+  alt: string
+}
+
+export const showcaseContent = {
+  eyebrow: 'Ekosistem Digital',
+  heading: 'Platform yang menyusun layanan kampus.',
+  product: {
+    eyebrow: 'Produk unggulan',
+    name: 'Portal Layanan Digital',
+    cluster: 'Layanan & Tata Kelola Digital',
+    summary: 'Satu pintu untuk mengajukan layanan TI, melacak status, dan membaca panduan.',
+    status: 'Pilot',
+    cta: { label: 'Buka Portal Layanan', to: '/layanan' }
+  },
+  screens: [
+    {
+      key: 'layanan',
+      tab: 'Katalog Layanan',
+      caption: 'Telusuri layanan TI dan ajukan permohonan.',
+      src: '/images/home/portal-layanan.webp',
+      srcset: '/images/home/portal-layanan-1080.webp 1080w, /images/home/portal-layanan.webp 2160w',
+      alt: 'Tangkapan layar katalog Layanan Digital pada portal UNU Yogyakarta'
+    },
+    {
+      key: 'lacak',
+      tab: 'Pelacakan',
+      caption: 'Pantau status dengan nomor tiket dan token akses.',
+      src: '/images/home/portal-lacak.webp',
+      srcset: '/images/home/portal-lacak-1080.webp 1080w, /images/home/portal-lacak.webp 2160w',
+      alt: 'Tangkapan layar halaman Lacak Permohonan pada portal UNU Yogyakarta'
+    },
+    {
+      key: 'dokumen',
+      tab: 'Dokumentasi',
+      caption: 'Baca SOP, panduan, dan kebijakan layanan.',
+      src: '/images/home/portal-dokumen.webp',
+      srcset: '/images/home/portal-dokumen-1080.webp 1080w, /images/home/portal-dokumen.webp 2160w',
+      alt: 'Tangkapan layar halaman Panduan & Dokumen pada portal UNU Yogyakarta'
+    }
+  ] as ShowcaseScreen[]
 }
 
 export const caseStudyContent = {

@@ -10,7 +10,7 @@ const formatNumber = (value: number) => new Intl.NumberFormat('id-ID').format(va
 <template>
   <section class="bg-charcoal text-white" aria-labelledby="case-title">
     <div class="page-shell grid gap-12 py-16 md:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20 lg:py-24">
-      <div class="max-w-[520px]">
+      <div v-reveal class="max-w-[520px]">
         <p class="eyebrow-editorial !text-sage">{{ study.eyebrow }}</p>
         <h2 id="case-title" class="section-title mt-4 !text-white">{{ study.heading }}</h2>
         <p class="mt-5 text-[16px] leading-[1.7] text-white/70">{{ study.description }}</p>
@@ -23,13 +23,13 @@ const formatNumber = (value: number) => new Intl.NumberFormat('id-ID').format(va
         />
       </div>
 
-      <div>
+      <div v-reveal="120">
         <p class="metric-figure !text-white" style="font-size: clamp(4.5rem, 3rem + 7vw, 8.5rem)">
           {{ percent }}<span class="ml-1 text-[0.5em] text-gold-soft">%</span>
         </p>
         <div class="mt-8" role="img" :aria-label="`${study.produced} dari ${study.total} portofolio dihasilkan otomatis`">
           <div class="h-2 w-full overflow-hidden rounded-full bg-white/15">
-            <div class="h-full rounded-full bg-gold-soft" :style="{ width: fill }" />
+            <div class="bar-fill h-full rounded-full bg-gold-soft" :style="{ width: fill }" />
           </div>
           <div class="mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[14px] leading-6">
             <p class="font-semibold text-white">

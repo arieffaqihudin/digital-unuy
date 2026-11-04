@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TeamMemberDTO } from '~/shared/types'
 
-const props = defineProps<{ member: TeamMemberDTO }>()
+const props = withDefaults(defineProps<{ member: TeamMemberDTO; compact?: boolean }>(), { compact: false })
 const initials = computed(() =>
   props.member.name
     .split(/\s+/)
@@ -31,8 +31,8 @@ const initials = computed(() =>
     <div class="pt-4">
       <h3 class="text-[18px] font-semibold leading-[1.3] tracking-[-0.015em] text-charcoal">{{ member.name }}</h3>
       <p class="mt-1 text-[14px] leading-5 text-slate-600">{{ member.position }}</p>
-      <p v-if="member.unit" class="mt-1.5 text-[12px] leading-5 text-slate-400">{{ member.unit }}</p>
-      <p v-if="member.bio" class="mt-2.5 line-clamp-3 text-[14px] leading-6 text-slate-500">{{ member.bio }}</p>
+      <p v-if="member.unit && !compact" class="mt-1.5 text-[12px] leading-5 text-slate-400">{{ member.unit }}</p>
+      <p v-if="member.bio && !compact" class="mt-2.5 line-clamp-3 text-[14px] leading-6 text-slate-500">{{ member.bio }}</p>
     </div>
   </article>
 </template>

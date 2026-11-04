@@ -4,7 +4,7 @@ import { ROLE_LABELS, ROLE_PERMISSIONS, type RoleSlug } from '../../../../shared
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'roles.manage')
   const roles = await Role.find({}).sort({ slug: 1 }).lean()
-  const slugs: RoleSlug[] = ['superadmin', 'admin', 'pemohon']
+  const slugs: RoleSlug[] = ['superadmin', 'admin']
   return {
     roles: slugs.map((slug) => {
       const role = roles.find((item) => item.slug === slug)

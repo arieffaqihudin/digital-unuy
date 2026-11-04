@@ -9,13 +9,22 @@ const chromePath =
 const outDir = resolve(process.cwd(), 'public', 'images', 'home')
 await mkdir(outDir, { recursive: true })
 
+const shots = [
+  ['portal-layanan', '/layanan'],
+  ['portal-lacak', '/lacak'],
+  ['portal-dokumen', '/dokumen']
+]
+
 const browser = await chromium.launch({ executablePath: chromePath, headless: true })
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1.5 })
 const page = await context.newPage()
-await page.goto(`${base}/layanan`, { waitUntil: 'networkidle' })
-await page.waitForTimeout(500)
-const png = await page.screenshot({ clip: { x: 0, y: 72, width: 1440, height: 780 } })
+for (const [name, path] of shots) {
+  await page.goto(`${base}${path}`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('main h1', { timeout: 30000 })
+  await page.waitForTimeout(800)
+  const png = await page.screenshot({ clip: { x: 0, y: 73, width: 1440, height: 780 } })
+  await sharp(png).webp({ quality: 84 }).toFile(resolve(outDir, `${name}.webp`))
+  await sharp(png).resize({ width: 1080 }).webp({ quality: 82 }).toFile(resolve(outDir, `${name}-1080.webp`))
+  console.log(`saved ${name}`)
+}
 await browser.close()
-
-await sharp(png).webp({ quality: 84 }).toFile(resolve(outDir, 'portal-layanan.webp'))
-console.log('saved public/images/home/portal-layanan.webp')

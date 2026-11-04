@@ -15,6 +15,12 @@ export default defineEventHandler(async (event) => {
   if (!user || !user.passwordHash) {
     throw createError({ statusCode: 401, statusMessage: 'Email atau kata sandi tidak sesuai.' })
   }
+  if (!['admin', 'superadmin'].includes(user.role)) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Akun ini tidak memiliki akses ke portal administrator.'
+    })
+  }
   if (!user.active) {
     throw createError({
       statusCode: 403,

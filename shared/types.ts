@@ -1,4 +1,4 @@
-export type RoleSlug = 'superadmin' | 'admin' | 'pemohon'
+export type RoleSlug = 'superadmin' | 'admin'
 
 export type Permission =
   | 'requests.read'
@@ -343,8 +343,7 @@ export const SERVICE_CATEGORIES = [
 
 export const ROLE_LABELS: Record<RoleSlug, string> = {
   superadmin: 'Superadmin',
-  admin: 'Admin/Petugas',
-  pemohon: 'Pemohon'
+  admin: 'Admin/Petugas'
 }
 
 export const ROLE_PERMISSIONS: Record<RoleSlug, Permission[]> = {
@@ -369,8 +368,7 @@ export const ROLE_PERMISSIONS: Record<RoleSlug, Permission[]> = {
     'content.manage',
     'documents.manage',
     'notifications.read'
-  ],
-  pemohon: []
+  ]
 }
 
 export const STATUS_META: Record<

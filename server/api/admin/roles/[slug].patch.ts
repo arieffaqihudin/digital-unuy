@@ -5,7 +5,7 @@ import { ROLE_LABELS, ROLE_PERMISSIONS, type RoleSlug } from '../../../../shared
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'roles.manage')
   const slug = String(getRouterParam(event, 'slug') || '')
-  if (!['admin', 'pemohon'].includes(slug)) {
+  if (slug !== 'admin') {
     throw createError({ statusCode: 409, statusMessage: 'Role superadmin bersifat tetap dan tidak dapat diubah.' })
   }
   const body = await readBody(event)

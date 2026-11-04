@@ -6,8 +6,9 @@ withDefaults(
   defineProps<{
     article: ArticleDTO
     variant?: 'default' | 'featured' | 'compact'
+    hideExcerpt?: boolean
   }>(),
-  { variant: 'default' }
+  { variant: 'default', hideExcerpt: false }
 )
 const { formatDate } = useFormat()
 </script>
@@ -78,6 +79,7 @@ const { formatDate } = useFormat()
         <NuxtLink :to="`/publikasi/${article.slug}`">{{ article.title }}</NuxtLink>
       </h3>
       <p
+        v-if="!hideExcerpt"
         class="mt-2 text-slate-600"
         :class="variant === 'featured' ? 'max-w-xl text-[14px] leading-7' : 'line-clamp-2 text-[12px] leading-5'"
       >

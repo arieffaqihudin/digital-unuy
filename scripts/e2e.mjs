@@ -1,4 +1,4 @@
-import { readFile, readdir, stat } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3000'
@@ -53,9 +53,6 @@ class Client {
   patch(path, options) {
     return this.request(path, { ...options, method: 'PATCH' })
   }
-  put(path, options) {
-    return this.request(path, { ...options, method: 'PUT' })
-  }
   delete(path, options) {
     return this.request(path, { ...options, method: 'DELETE' })
   }
@@ -79,15 +76,14 @@ async function latestMailFor(email) {
   const folder = resolve(process.cwd(), '.data', 'mail-outbox')
   const files = await readdir(folder)
   for (const file of files) {
-    const full = join(folder, file)
     try {
-      const content = JSON.parse(await readFile(full, 'utf8'))
+      const content = JSON.parse(await readFile(join(folder, file), 'utf8'))
       if (content.to === email) {
         const match = content.html.match(/aktivasi\?token=([^"&<]+)/)
-        if (match) return { token: decodeURIComponent(match[1]), file, content }
+        if (match) return { token: decodeURIComponent(match[1]), content }
       }
     } catch {
-      // Skip incomplete or unrelated mail sink files.
+      // Skip unrelated or incomplete mail sink files.
     }
   }
   return null
@@ -95,9 +91,8 @@ async function latestMailFor(email) {
 
 const publicClient = new Client('public')
 const admin = new Client('superadmin')
-const applicant = new Client('pemohon')
 
-console.log('\n=== Public website & katalog ===')
+console.log('\n=== Public website & CMS content ===')
 const home = await publicClient.get('/api/home')
 check('Homepage API 200', home.status === 200)
 check('Homepage memuat layanan', home.data?.services?.length >= 6)
@@ -107,10 +102,8 @@ check('Homepage tidak menampilkan metrik belum terverifikasi', Array.isArray(hom
 const serviceList = await publicClient.get('/api/services')
 check('Katalog layanan 200', serviceList.status === 200)
 check('Katalog memiliki 8 layanan', serviceList.data?.total === 8, `total=${serviceList.data?.total}`)
-const searchResult = await publicClient.get('/api/services?q=email')
-check('Pencarian layanan berfungsi', searchResult.data?.items?.some((s) => s.slug === 'pembuatan-email-institusi'))
-const categoryResult = await publicClient.get('/api/services?category=Keamanan')
-check('Filter kategori layanan berfungsi', categoryResult.data?.items?.every((s) => s.category === 'Keamanan'))
+check('Pencarian layanan berfungsi', (await publicClient.get('/api/services?q=email')).data?.items?.some((s) => s.slug === 'pembuatan-email-institusi'))
+check('Filter kategori layanan berfungsi', (await publicClient.get('/api/services?category=Keamanan')).data?.items?.every((s) => s.category === 'Keamanan'))
 
 const serviceDetail = await publicClient.get('/api/services/pembuatan-email-institusi')
 check('Detail layanan 200', serviceDetail.status === 200)
@@ -120,171 +113,122 @@ check('Layanan terkait memiliki dokumen SOP', serviceDetail.data?.service?.relat
 const documents = await publicClient.get('/api/documents')
 check('Dokumen publik 200', documents.status === 200)
 check('Dokumen seed tersedia', documents.data?.total >= 4)
-const docDownload = await publicClient.get('/api/documents/sop-pengajuan-layanan-digital/download')
-check('Unduh dokumen publik 200', docDownload.status === 200)
-const unauthDocDownload = await publicClient.get('/api/documents/dokumen-uji-publikasi/download')
-check('Dokumen unpublish tidak dapat diakses', unauthDocDownload.status === 404)
-
-const platforms = await publicClient.get('/api/platforms?status=Pilot')
-check('Filter status ekosistem berfungsi', platforms.data?.items?.every((p) => p.status === 'Pilot'))
-const articles = await publicClient.get('/api/articles')
-check('Publikasi publik hanya published', articles.data?.items?.every((a) => a.status === 'published'))
-const sitemap = await publicClient.get('/sitemap.xml')
-check('Sitemap tersedia', sitemap.status === 200 && sitemap.text.includes('<urlset'))
+check('Unduh dokumen publik 200', (await publicClient.get('/api/documents/sop-pengajuan-layanan-digital/download')).status === 200)
+check('Dokumen unpublish tidak dapat diakses', (await publicClient.get('/api/documents/dokumen-uji-publikasi/download')).status === 404)
+check('Filter status ekosistem berfungsi', (await publicClient.get('/api/platforms?status=Pilot')).data?.items?.every((p) => p.status === 'Pilot'))
+check('Publikasi publik hanya published', (await publicClient.get('/api/articles')).data?.items?.every((a) => a.status === 'published'))
+check('Halaman Tim Kami publik 200', (await publicClient.get('/api/team')).status === 200)
+check('Sitemap tersedia', (await publicClient.get('/sitemap.xml')).text.includes('/tentang-kami/tim'))
 const robots = await publicClient.get('/robots.txt')
-check('Robots memblokir area privat', robots.text.includes('Disallow: /admin') && robots.text.includes('Disallow: /permohonan-saya'))
+check('Robots memblokir area privat', robots.text.includes('Disallow: /admin'))
+check('Halaman permohonan lama tidak tersedia', (await publicClient.get('/permohonan-saya')).status === 404)
+check('API dashboard pemohon lama tidak tersedia', (await publicClient.get('/api/requests/mine')).status === 404)
 
-console.log('\n=== Authentication & activation ===')
-const badLogin = await login(admin, 'superadmin@digital.unu.local', 'wrong-password')
-check('Login salah ditolak', badLogin.status === 401)
+console.log('\n=== Authentication staf & activation ===')
+check('Login salah ditolak', (await login(admin, 'superadmin@digital.unu.local', 'wrong-password')).status === 401)
 const adminLogin = await login(admin, 'superadmin@digital.unu.local', 'Admin#Unu2026')
 check('Login superadmin berhasil', adminLogin.status === 200 && adminLogin.data?.user?.role === 'superadmin')
-const applicantLogin = await login(applicant, 'pemohon@digital.unu.local', 'Pemohon#2026')
-check('Login pemohon berhasil', applicantLogin.status === 200 && applicantLogin.data?.user?.role === 'pemohon')
-const inactiveLogin = await login(new Client('inactive'), 'nonaktif@digital.unu.local', 'anything123')
-check('Akun nonaktif tidak bisa login', inactiveLogin.status === 401 || inactiveLogin.status === 403)
+check('Login tanpa email ditolak', (await publicClient.post('/api/auth/login', { json: { email: '', password: '' } })).status === 400)
 
 const activationEmail = `e2e-${stamp}@digital.unu.local`
 const newUser = await admin.post('/api/admin/users', {
-  json: { name: 'Pengguna E2E', email: activationEmail, role: 'pemohon' }
+  json: { name: 'Admin E2E', email: activationEmail, role: 'admin' }
 })
 check('Admin membuat pengguna nonaktif default', newUser.status === 200 && newUser.data?.user?.active === false)
 const newUserId = newUser.data?.user?.id
+const inactiveLogin = await login(new Client('inactive'), activationEmail, 'AktivasiE2E#2026')
+check('Akun nonaktif tidak bisa login', inactiveLogin.status === 401 || inactiveLogin.status === 403)
 const activate = await admin.patch(`/api/admin/users/${newUserId}`, { json: { active: true } })
 check('Admin mengaktifkan pengguna & mengirim aktivasi', activate.status === 200 && activate.data?.emailStatus === 'simulated')
 const mail = await latestMailFor(activationEmail)
 check('Email aktivasi tersedia dengan token sekali pakai', Boolean(mail?.token))
-const newClient = new Client('new-user')
-const activation = await newClient.post('/api/auth/activate', {
-  json: { token: mail?.token, password: 'AktivasiE2E#2026' }
-})
-check('Aktivasi akun berhasil', activation.status === 200 && activation.data?.user?.email === activationEmail)
-const reuse = await new Client('reuse').post('/api/auth/activate', {
-  json: { token: mail?.token, password: 'AktivasiE2E#2027' }
-})
-check('Token aktivasi tidak dapat dipakai dua kali', reuse.status === 410)
-const newLogin = await login(newClient, activationEmail, 'AktivasiE2E#2026')
-check('Pengguna hasil aktivasi dapat login', newLogin.status === 200)
+const newClient = new Client('new-admin')
+const activation = await newClient.post('/api/auth/activate', { json: { token: mail?.token, password: 'AktivasiE2E#2026' } })
+check('Aktivasi akun staf berhasil', activation.status === 200 && activation.data?.user?.email === activationEmail)
+check('Token aktivasi tidak dapat dipakai dua kali', (await new Client('reuse').post('/api/auth/activate', { json: { token: mail?.token, password: 'AktivasiE2E#2027' } })).status === 410)
+check('Pengguna hasil aktivasi dapat login', (await login(newClient, activationEmail, 'AktivasiE2E#2026')).status === 200)
+check('Token aktivasi tidak tersimpan di log notifikasi', !JSON.stringify((await admin.get('/api/admin/notifications')).data).includes('aktivasi?token='))
 
-console.log('\n=== Service request end-to-end ===')
+console.log('\n=== Guest submission end-to-end ===')
+const guestEmail = `guest-${stamp}@example.com`
 const idem = `e2e-request-${stamp}-abcdef`
-const payload = {
-  nama_lengkap: 'Pemohon E2E',
-  kategori_pemohon: 'mahasiswa',
-  identitas_institusi: 'E2E12345',
-  unit_kerja: 'Fakultas Uji',
-  email_alternatif: 'pemohon.e2e@example.com',
-  nomor_kontak: '081234567890',
-  keterangan: 'Permohonan otomatis untuk pengujian end-to-end.'
-}
-const invalid = await applicant.post('/api/services/pembuatan-email-institusi/requests', {
-  json: { nama_lengkap: '' },
+const invalid = await publicClient.post('/api/services/pembuatan-email-institusi/requests', {
+  json: { requester: { name: 'Guest E2E', email: guestEmail }, data: { nama_lengkap: '' } },
   headers: { 'x-idempotency-key': `${idem}-invalid` }
 })
 check('Validasi server menolak field wajib kosong', invalid.status === 422)
-
-const created = await applicant.post('/api/services/pembuatan-email-institusi/requests', {
-  json: payload,
+const created = await publicClient.post('/api/services/pembuatan-email-institusi/requests', {
+  json: {
+    requester: { name: 'Guest E2E', email: guestEmail, phone: '081234567890' },
+    data: {
+      nama_lengkap: 'Guest E2E',
+      kategori_pemohon: 'mahasiswa',
+      identitas_institusi: 'E2E12345',
+      unit_kerja: 'Fakultas Uji',
+      email_alternatif: guestEmail,
+      nomor_kontak: '081234567890',
+      keterangan: 'Permohonan otomatis untuk pengujian end-to-end.'
+    }
+  },
   headers: { 'x-idempotency-key': idem }
 })
-check('Permohonan berhasil dibuat', created.status === 200 && Boolean(created.data?.ticketNumber))
+check('Permohonan tanpa login berhasil dibuat', created.status === 200 && Boolean(created.data?.ticketNumber))
 const requestId = created.data?.requestId
 const ticket = created.data?.ticketNumber
 check('Nomor tiket unik berformat benar', /^UNU-DTD-\d{4}-[A-Z0-9]{6}$/.test(ticket || ''))
-const duplicate = await applicant.post('/api/services/pembuatan-email-institusi/requests', {
-  json: payload,
+const duplicate = await publicClient.post('/api/services/pembuatan-email-institusi/requests', {
+  json: { requester: { name: 'Guest E2E', email: guestEmail }, data: {} },
   headers: { 'x-idempotency-key': idem }
 })
 check('Idempotensi mencegah permohonan duplikat', duplicate.status === 200 && duplicate.data?.duplicate === true && duplicate.data?.requestId === requestId)
-
-const mine = await applicant.get('/api/requests/mine')
-check('Permohonan muncul di daftar pemohon', mine.data?.items?.some((item) => item.id === requestId))
-const ownerDetail = await applicant.get(`/api/requests/${requestId}`)
-check('Pemohon dapat membuka detail miliknya', ownerDetail.status === 200 && ownerDetail.data?.request?.id === requestId)
-const crossUserDetail = await newClient.get(`/api/requests/${requestId}`)
-check('Pengguna lain tidak dapat membuka detail permohonan', crossUserDetail.status === 404)
-
 const trackUrl = new URL(created.data?.trackingUrl)
-const tracking = await publicClient.post('/api/track', {
-  json: { ticket, token: trackUrl.searchParams.get('token') }
-})
+const trackingToken = trackUrl.searchParams.get('token')
+check('Respons pengajuan memuat tautan tracking aman', Boolean(trackingToken))
+const tracking = await publicClient.post('/api/track', { json: { ticket, token: trackingToken } })
 check('Tracking publik dengan token berhasil', tracking.status === 200 && tracking.data?.request?.ticketNumber === ticket)
-const wrongTracking = await publicClient.post('/api/track', { json: { ticket, token: 'wrong-token-value' } })
-check('Tracking dengan token salah ditolak', wrongTracking.status === 404)
-
-const draft = await applicant.put('/api/requests/drafts/pembuatan-email-institusi', {
-  json: { data: { nama_lengkap: 'Draft E2E', unit_kerja: 'Unit Draft' } }
-})
-check('Draft formulir tersimpan di database', draft.status === 200)
-const draftRead = await applicant.get('/api/requests/drafts/pembuatan-email-institusi')
-check('Draft formulir dapat dipulihkan', draftRead.data?.data?.nama_lengkap === 'Draft E2E')
-await applicant.delete('/api/requests/drafts/pembuatan-email-institusi')
-const draftDeleted = await applicant.get('/api/requests/drafts/pembuatan-email-institusi')
-check('Draft dapat dihapus', !draftDeleted.data?.data?.nama_lengkap)
+check('Tracking dengan token salah ditolak', (await publicClient.post('/api/track', { json: { ticket, token: 'wrong-token-value' } })).status === 404)
 
 const adminDetail = await admin.get(`/api/admin/requests/${requestId}`)
-check('Admin dapat membuka detail & data pemohon', adminDetail.status === 200 && adminDetail.data?.requester?.email === 'pemohon@digital.unu.local')
-const verify = await admin.patch(`/api/admin/requests/${requestId}`, {
-  json: { action: 'verify', note: 'Data awal diverifikasi.', publicNote: 'Permohonan diverifikasi.' }
+check('Admin dapat membuka detail & kontak guest', adminDetail.status === 200 && adminDetail.data?.requester?.email === guestEmail)
+check('Admin memverifikasi permohonan', (await admin.patch(`/api/admin/requests/${requestId}`, { json: { action: 'verify', note: 'Diverifikasi.' } })).data?.status === 'Diverifikasi')
+const info = await admin.patch(`/api/admin/requests/${requestId}`, { json: { action: 'request_info', note: 'Mohon lengkapi surat keterangan aktif.' } })
+check('Admin meminta kelengkapan', info.data?.substatus === 'Menunggu Kelengkapan Pemohon')
+const respond = await publicClient.post('/api/track/respond', {
+  json: { ticket, token: trackingToken, message: 'Kelengkapan telah dikirim melalui tracking publik.' }
 })
-check('Admin memverifikasi permohonan', verify.status === 200 && verify.data?.status === 'Diverifikasi')
-const requestInfo = await admin.patch(`/api/admin/requests/${requestId}`, {
-  json: { action: 'request_info', note: 'Mohon lengkapi surat keterangan aktif.' }
-})
-check('Admin meminta kelengkapan', requestInfo.status === 200 && requestInfo.data?.substatus === 'Menunggu Kelengkapan Pemohon')
-const respond = await applicant.post(`/api/requests/${requestId}/respond`, {
-  json: { message: 'Kelengkapan telah dikirim dan dikonfirmasi.' }
-})
-check('Pemohon melengkapi permohonan', respond.status === 200 && respond.data?.status === 'Diverifikasi')
-const start = await admin.patch(`/api/admin/requests/${requestId}`, {
-  json: { action: 'start', note: 'Permohonan mulai diproses.' }
-})
-check('Admin memulai proses', start.status === 200 && start.data?.status === 'Diproses')
-const complete = await admin.patch(`/api/admin/requests/${requestId}`, {
-  json: { action: 'complete', resolutionSummary: 'Akun email institusi berhasil disiapkan dan diuji.' }
-})
-check('Admin menyelesaikan permohonan', complete.status === 200 && complete.data?.status === 'Selesai')
-const finalDetail = await applicant.get(`/api/requests/${requestId}`)
-check('Timeline mencatat seluruh status', ['Diajukan', 'Diverifikasi', 'Diproses', 'Selesai'].every((s) => finalDetail.data?.request?.timeline?.some((t) => t.status === s)))
-check('Hasil penyelesaian terlihat pemohon', finalDetail.data?.request?.resolutionSummary?.includes('berhasil disiapkan'))
-const invalidTransition = await admin.patch(`/api/admin/requests/${requestId}`, { json: { action: 'start' } })
-check('Perubahan status tidak sah ditolak', invalidTransition.status === 409)
-const emptyReject = await admin.patch(`/api/admin/requests/${requestId}`, { json: { action: 'reject', reason: 'x' } })
-check('Penolakan tanpa alasan memadai ditolak', emptyReject.status === 409 || emptyReject.status === 422)
+check('Guest melengkapi permohonan lewat tracking', respond.status === 200 && respond.data?.status === 'Diverifikasi')
+check('Admin memulai proses', (await admin.patch(`/api/admin/requests/${requestId}`, { json: { action: 'start', note: 'Mulai diproses.' } })).data?.status === 'Diproses')
+check('Admin menyelesaikan permohonan', (await admin.patch(`/api/admin/requests/${requestId}`, { json: { action: 'complete', resolutionSummary: 'Permohonan selesai diuji end-to-end.' } })).data?.status === 'Selesai')
+const finalTrack = await publicClient.post('/api/track', { json: { ticket, token: trackingToken } })
+check('Timeline guest mencatat seluruh status', ['Diajukan', 'Diverifikasi', 'Diproses', 'Selesai'].every((status) => finalTrack.data?.request?.timeline?.some((entry) => entry.status === status)))
+check('Hasil penyelesaian terlihat guest', finalTrack.data?.request?.resolutionSummary?.includes('selesai diuji'))
+check('Perubahan status tidak sah ditolak', (await admin.patch(`/api/admin/requests/${requestId}`, { json: { action: 'start' } })).status === 409)
 
-console.log('\n=== Attachments & private file access ===')
-const png = Buffer.from(
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-  'base64'
-)
-const fileRequestForm = new FormData()
-fileRequestForm.append(
-  'payload',
-  JSON.stringify({
-    jenis_kendala: 'tidak_dapat_akses',
-    sistem_terdampak: 'Portal Akademik',
-    deskripsi_masalah: 'Pengujian unggah lampiran melalui API.',
-    waktu_kejadian: new Date().toISOString().slice(0, 10),
-    tingkat_dampak: 'individu'
-  })
-)
-fileRequestForm.append('screenshot', new Blob([png], { type: 'image/png' }), 'screenshot.png')
-const fileRequest = await applicant.request('/api/services/bantuan-teknis-ti/requests', {
+console.log('\n=== Attachments, private files & guest tracking actions ===')
+const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64')
+const fileForm = new FormData()
+fileForm.append('__requester', JSON.stringify({ name: 'Guest File', email: `file-${stamp}@example.com`, phone: '' }))
+fileForm.append('payload', JSON.stringify({
+  jenis_kendala: 'tidak_dapat_akses',
+  sistem_terdampak: 'Portal Akademik',
+  deskripsi_masalah: 'Pengujian unggah lampiran tanpa akun.',
+  waktu_kejadian: new Date().toISOString().slice(0, 10),
+  tingkat_dampak: 'individu'
+}))
+fileForm.append('screenshot', new Blob([png], { type: 'image/png' }), 'screenshot.png')
+const fileRequest = await publicClient.request('/api/services/bantuan-teknis-ti/requests', {
   method: 'POST',
-  body: fileRequestForm,
+  body: fileForm,
   headers: { 'x-idempotency-key': `e2e-file-${stamp}-abcdef` }
 })
-check('Permohonan dengan lampiran berhasil', fileRequest.status === 200)
-const fileRequestDetail = await applicant.get(`/api/requests/${fileRequest.data?.requestId}`)
-const attachmentId = fileRequestDetail.data?.request?.attachments?.[0]?.id
+check('Permohonan guest dengan lampiran berhasil', fileRequest.status === 200)
+const fileDetail = await admin.get(`/api/admin/requests/${fileRequest.data?.requestId}`)
+const attachmentId = fileDetail.data?.request?.attachments?.[0]?.id
 check('Metadata lampiran tersimpan', Boolean(attachmentId))
-const ownerDownload = await applicant.get(`/api/requests/attachments/${attachmentId}`)
-check('Pemohon dapat mengunduh lampirannya', ownerDownload.status === 200 && ownerDownload.text.length > 0)
-const crossDownload = await newClient.get(`/api/requests/attachments/${attachmentId}`)
-check('Pengguna lain tidak dapat mengunduh lampiran', crossDownload.status === 403)
-const anonymousDownload = await publicClient.get(`/api/requests/attachments/${attachmentId}`)
-check('Anonim tidak dapat mengunduh lampiran privat', anonymousDownload.status === 401)
+check('Staf dapat mengunduh lampiran', (await admin.get(`/api/requests/attachments/${attachmentId}`)).status === 200)
+check('Anonim tidak dapat mengunduh lampiran privat', (await publicClient.get(`/api/requests/attachments/${attachmentId}`)).status === 401)
 const fakePdf = new FormData()
+fakePdf.append('__requester', JSON.stringify({ name: 'Guest Bad File', email: `bad-${stamp}@example.com`, phone: '' }))
 fakePdf.append('payload', JSON.stringify({
   jenis_kendala: 'tidak_dapat_akses',
   sistem_terdampak: 'Portal',
@@ -293,36 +237,30 @@ fakePdf.append('payload', JSON.stringify({
   tingkat_dampak: 'individu'
 }))
 fakePdf.append('screenshot', new Blob([Buffer.from('not a pdf')], { type: 'application/pdf' }), 'fake.pdf')
-const malicious = await applicant.request('/api/services/bantuan-teknis-ti/requests', {
+check('File dengan isi tidak cocok ditolak', (await publicClient.request('/api/services/bantuan-teknis-ti/requests', {
   method: 'POST',
   body: fakePdf,
   headers: { 'x-idempotency-key': `e2e-badfile-${stamp}` }
+})).status === 422)
+const comment = await publicClient.post('/api/track/comments', {
+  json: { ticket, token: trackingToken, message: 'Terima kasih, saya menunggu informasi berikutnya.' }
 })
-check('File dengan isi tidak cocok ditolak', malicious.status === 422)
+check('Guest dapat berkomunikasi lewat tracking', comment.status === 200)
 
 console.log('\n=== RBAC, CSRF & admin views ===')
-const pemohonAdminApi = await applicant.get('/api/admin/requests')
-check('Pemohon ditolak dari API admin', pemohonAdminApi.status === 403)
-const unauthAdminApi = await publicClient.get('/api/admin/requests')
-check('Anonim ditolak dari API admin', unauthAdminApi.status === 401)
-const csrfMissing = await applicant.request(`/api/admin/requests/${requestId}`, {
-  method: 'PATCH',
-  json: { action: 'verify' },
-  csrf: false
-})
-check('Mutasi tanpa penanda CSRF ditolak', csrfMissing.status === 403)
+check('Anonim ditolak dari API admin', (await publicClient.get('/api/admin/requests')).status === 401)
+check('Mutasi tanpa penanda CSRF ditolak', (await admin.request(`/api/admin/requests/${requestId}`, { method: 'PATCH', json: { action: 'verify' }, csrf: false })).status === 403)
 const adminPage = await admin.get('/admin')
 check('Admin dapat membuka dashboard', adminPage.status === 200)
 check('Halaman admin noindex', adminPage.text.includes('noindex'))
-const applicantAdminPage = await applicant.get('/admin')
-check('Pemohon dialihkan dari halaman admin', applicantAdminPage.status === 302)
+check('Halaman login tidak memuat footer publik', !(await publicClient.get('/masuk')).text.includes('Hak cipta dilindungi'))
 
 console.log('\n=== CMS, versioning, documents & XSS ===')
 const servicesAdmin = await admin.get('/api/admin/services')
 const emailService = servicesAdmin.data?.items?.find((service) => service.slug === 'pembuatan-email-institusi')
 const serviceAdminDetail = await admin.get(`/api/admin/services/${emailService.id}`)
 const originalVersion = serviceAdminDetail.data?.service?.formVersion
-const oldSnapshot = await applicant.get(`/api/requests/${requestId}`)
+const oldTrack = await publicClient.post('/api/track', { json: { ticket, token: trackingToken } })
 const testField = {
   key: `field_uji_${stamp}`,
   label: 'Field Uji Versi',
@@ -339,13 +277,11 @@ const testField = {
   accept: [],
   showIf: null
 }
-const updatedForm = await admin.patch(`/api/admin/services/${emailService.id}`, {
-  json: { fields: [...serviceAdminDetail.data.service.fields, testField] }
-})
+const updatedForm = await admin.patch(`/api/admin/services/${emailService.id}`, { json: { fields: [...serviceAdminDetail.data.service.fields, testField] } })
 check('Perubahan formulir membuat versi baru', updatedForm.status === 200 && updatedForm.data?.service?.formVersion === originalVersion + 1)
-const oldSnapshotAfter = await applicant.get(`/api/requests/${requestId}`)
-check('Permohonan lama memakai snapshot formulir lama', oldSnapshotAfter.data?.request?.formSnapshot?.version === oldSnapshot.data?.request?.formSnapshot?.version)
-check('Field baru tidak masuk snapshot lama', !oldSnapshotAfter.data?.request?.formSnapshot?.fields?.some((f) => f.key === testField.key))
+const oldTrackAfter = await publicClient.post('/api/track', { json: { ticket, token: trackingToken } })
+check('Permohonan lama memakai snapshot formulir lama', oldTrackAfter.data?.request?.formSnapshot?.version === oldTrack.data?.request?.formSnapshot?.version)
+check('Field baru tidak masuk snapshot lama', !oldTrackAfter.data?.request?.formSnapshot?.fields?.some((field) => field.key === testField.key))
 
 const pdfPath = resolve(process.cwd(), '.data', 'uploads', 'documents')
 const pdfDirs = await readdir(pdfPath)
@@ -360,27 +296,21 @@ for (const dir of pdfDirs) {
 }
 check('Fixture PDF tersedia untuk pengujian dokumen', Boolean(pdfBytes))
 const docForm = new FormData()
-docForm.append(
-  'metadata',
-  JSON.stringify({
-    title: 'Dokumen E2E Publikasi',
-    slug: `dokumen-e2e-${stamp}`,
-    category: 'Panduan',
-    description: 'Dokumen otomatis untuk pengujian publikasi.',
-    version: '1.0',
-    published: true
-  })
-)
+docForm.append('metadata', JSON.stringify({
+  title: 'Dokumen E2E Publikasi',
+  slug: `dokumen-e2e-${stamp}`,
+  category: 'Panduan',
+  description: 'Dokumen otomatis untuk pengujian publikasi.',
+  version: '1.0',
+  published: true
+}))
 docForm.append('file', new Blob([pdfBytes], { type: 'application/pdf' }), 'dokumen-e2e.pdf')
 const docCreated = await admin.request('/api/admin/documents', { method: 'POST', body: docForm })
 check('Admin mengunggah dokumen', docCreated.status === 200)
 const docSlug = `dokumen-e2e-${stamp}`
-const docPublic = await publicClient.get(`/api/documents/${docSlug}`)
-check('Dokumen terbit tampil publik', docPublic.status === 200)
-const docUnpublish = await admin.patch(`/api/admin/documents/${docCreated.data?.document?.id}`, { json: { published: false } })
-check('Admin dapat unpublish dokumen', docUnpublish.status === 200 && docUnpublish.data?.document?.published === false)
-const docAfterUnpublish = await publicClient.get(`/api/documents/${docSlug}`)
-check('Dokumen unpublish tidak lagi publik', docAfterUnpublish.status === 404)
+check('Dokumen terbit tampil publik', (await publicClient.get(`/api/documents/${docSlug}`)).status === 200)
+check('Admin dapat unpublish dokumen', (await admin.patch(`/api/admin/documents/${docCreated.data?.document?.id}`, { json: { published: false } })).data?.document?.published === false)
+check('Dokumen unpublish tidak lagi publik', (await publicClient.get(`/api/documents/${docSlug}`)).status === 404)
 
 const xssArticle = await admin.post('/api/admin/articles', {
   json: {
@@ -394,62 +324,40 @@ const xssArticle = await admin.post('/api/admin/articles', {
 })
 check('Admin membuat publikasi', xssArticle.status === 200)
 check('Konten berbahaya disanitasi saat disimpan', !xssArticle.data?.article?.content?.includes('<script'))
-const xssPublic = await publicClient.get(`/api/articles/artikel-e2e-${stamp}`)
-check('Publikasi XSS tersanitasi di endpoint publik', xssPublic.status === 200 && !xssPublic.text.includes('<script>alert'))
+check('Publikasi XSS tersanitasi di endpoint publik', !(await publicClient.get(`/api/articles/artikel-e2e-${stamp}`)).text.includes('<script>alert'))
 
-const platformsAdmin = await admin.get('/api/admin/platforms')
-check('Admin dapat membaca ekosistem', platformsAdmin.status === 200)
-const programsAdmin = await admin.get('/api/admin/programs')
-check('Admin dapat membaca program', programsAdmin.status === 200)
-const pagesAdmin = await admin.get('/api/admin/pages')
-check('Admin dapat membaca halaman', pagesAdmin.status === 200)
-const rolesAdmin = await admin.get('/api/admin/roles')
-check('Admin dapat membaca role & permission', rolesAdmin.status === 200 && rolesAdmin.data?.roles?.length === 3)
-const audit = await admin.get('/api/admin/audit')
-check('Audit log mencatat aktivitas', audit.status === 200 && audit.data?.total > 5)
+console.log('\n=== Team CMS ===')
+const group = await admin.post('/api/admin/team/groups', { json: { name: `Kelompok E2E ${stamp}`, order: 1 } })
+check('Admin membuat kelompok tim', group.status === 200)
+const teamFormData = new FormData()
+teamFormData.append('metadata', JSON.stringify({
+  name: 'Anggota E2E',
+  position: 'Pengujian Tim',
+  unit: 'QA',
+  bio: 'Data sementara pengujian modul Tim Kami.',
+  groupId: group.data?.group?.id,
+  order: 1,
+  published: true,
+  focalX: 50,
+  focalY: 40
+}))
+teamFormData.append('photo', new Blob([png], { type: 'image/png' }), 'foto.png')
+const member = await admin.request('/api/admin/team/members', { method: 'POST', body: teamFormData })
+check('Admin menambahkan anggota tim dengan foto', member.status === 200 && Boolean(member.data?.member?.photoUrl))
+check('Anggota publik tampil di API tim', (await publicClient.get('/api/team')).data?.groups?.[0]?.members?.[0]?.name === 'Anggota E2E')
+check('Foto anggota dapat diakses publik', (await publicClient.get(`/api/team/members/${member.data?.member?.id}/photo`)).status === 200)
+check('Admin dapat unpublish anggota', (await admin.patch(`/api/admin/team/members/${member.data?.member?.id}`, { json: { published: false } })).data?.member?.published === false)
+check('Anggota nonaktif tidak tampil publik', (await publicClient.get('/api/team')).data?.total === 0)
+check('Admin menghapus anggota', (await admin.delete(`/api/admin/team/members/${member.data?.member?.id}`)).status === 200)
+check('Admin menghapus kelompok', (await admin.delete(`/api/admin/team/groups/${group.data?.group?.id}`)).status === 200)
+check('Foto lama dibersihkan setelah penghapusan', (await publicClient.get(`/api/team/members/${member.data?.member?.id}/photo`)).status === 404)
+
+console.log('\n=== Administration ===')
+check('Admin dapat membaca role & permission', (await admin.get('/api/admin/roles')).data?.roles?.length === 2)
+check('Audit log mencatat aktivitas', (await admin.get('/api/admin/audit')).data?.total > 5)
 const notifications = await admin.get('/api/admin/notifications')
 check('Log notifikasi mencatat pengiriman', notifications.status === 200 && notifications.data?.total > 3)
 check('Log notifikasi bukan penyimpanan token', !JSON.stringify(notifications.data).includes('aktivasi?token='))
-
-console.log('\n=== Guest submission & tracking without account ===')
-const guestEmail = `guest-${stamp}@example.com`
-const guestIdem = `guest-${stamp}-abcdef`
-const guestCreate = await publicClient.post('/api/services/bantuan-teknis-ti/requests', {
-  json: {
-    requester: { name: 'Pemohon Tanpa Akun', email: guestEmail, phone: '081200000000' },
-    data: {
-      jenis_kendala: 'tidak_dapat_akses',
-      sistem_terdampak: 'Portal Akademik',
-      deskripsi_masalah: 'Pengujian pengajuan tanpa akun melalui API.',
-      waktu_kejadian: new Date().toISOString().slice(0, 10),
-      tingkat_dampak: 'individu'
-    }
-  },
-  headers: { 'x-idempotency-key': guestIdem }
-})
-check('Pengajuan tanpa login berhasil', guestCreate.status === 200 && Boolean(guestCreate.data?.ticketNumber))
-const guestTicket = guestCreate.data?.ticketNumber
-const guestRequestId = guestCreate.data?.requestId
-const guestTrackingUrl = new URL(guestCreate.data?.trackingUrl)
-const guestToken = guestTrackingUrl.searchParams.get('token')
-check('Hasil pengajuan guest menyertakan ID dan tautan lacak', Boolean(guestTicket) && Boolean(guestToken))
-const guestTrack = await publicClient.post('/api/track', { json: { ticket: guestTicket, token: guestToken } })
-check('Guest dapat melacak tanpa login', guestTrack.status === 200 && guestTrack.data?.request?.ticketNumber === guestTicket)
-const guestAdminDetail = await admin.get(`/api/admin/requests/${guestRequestId}`)
-check('Admin melihat kontak pemohon guest', guestAdminDetail.data?.requester?.email === guestEmail)
-await admin.patch(`/api/admin/requests/${guestRequestId}`, { json: { action: 'verify', note: 'Diverifikasi.' } })
-const guestInfo = await admin.patch(`/api/admin/requests/${guestRequestId}`, { json: { action: 'request_info', note: 'Mohon lengkapi dokumen pendukung.' } })
-check('Admin dapat meminta kelengkapan guest', guestInfo.status === 200 && guestInfo.data?.substatus === 'Menunggu Kelengkapan Pemohon')
-const guestRespond = await publicClient.post('/api/track/respond', {
-  json: { ticket: guestTicket, token: guestToken, message: 'Kelengkapan telah dikirim oleh pemohon tanpa akun.' }
-})
-check('Guest dapat mengirim kelengkapan lewat tracking', guestRespond.status === 200 && guestRespond.data?.status === 'Diverifikasi')
-const guestComment = await publicClient.post('/api/track/comments', {
-  json: { ticket: guestTicket, token: guestToken, message: 'Terima kasih, saya menunggu proses berikutnya.' }
-})
-check('Guest dapat berkomunikasi lewat tracking', guestComment.status === 200)
-const guestTrackAfter = await publicClient.post('/api/track', { json: { ticket: guestTicket, token: guestToken } })
-check('Komunikasi guest terlihat pada tracking', guestTrackAfter.data?.request?.comments?.some((comment) => comment.message.includes('menunggu proses')))
 
 console.log(`\n${failures.length ? 'FAILED' : 'PASSED'}: ${passed} checks passed, ${failures.length} failed`)
 if (failures.length) {

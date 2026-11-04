@@ -36,7 +36,7 @@ const userSchema = new Schema(
     name: { type: String, required: true, trim: true, maxlength: 120 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
     passwordHash: { type: String, default: '', select: false },
-    role: { type: String, enum: ['superadmin', 'admin', 'pemohon'], default: 'pemohon', index: true },
+    role: { type: String, enum: ['superadmin', 'admin'], default: 'admin', index: true },
     active: { type: Boolean, default: false, index: true },
     emailVerifiedAt: { type: Date, default: null },
     lastLoginAt: { type: Date, default: null },
@@ -177,16 +177,6 @@ const requestStatusHistorySchema = new Schema(
   },
   { timestamps: true }
 )
-
-const requestDraftSchema = new Schema(
-  {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    service: { type: Schema.Types.ObjectId, ref: 'Service', required: true, index: true },
-    data: { type: Schema.Types.Mixed, default: {} }
-  },
-  { timestamps: true }
-)
-requestDraftSchema.index({ user: 1, service: 1 }, { unique: true })
 
 const requestCommentSchema = new Schema(
   {
@@ -424,7 +414,6 @@ export const ActivationToken = defineModel('ActivationToken', activationTokenSch
 export const Service = defineModel('Service', serviceSchema)
 export const ServiceFormVersion = defineModel('ServiceFormVersion', serviceFormVersionSchema)
 export const ServiceRequest = defineModel('ServiceRequest', serviceRequestSchema)
-export const RequestDraft = defineModel('RequestDraft', requestDraftSchema)
 export const RequestStatusHistory = defineModel('RequestStatusHistory', requestStatusHistorySchema)
 export const RequestComment = defineModel('RequestComment', requestCommentSchema)
 export const RequestAttachment = defineModel('RequestAttachment', requestAttachmentSchema)
@@ -445,7 +434,7 @@ export type UserDoc = Types.Subdocument & {
   name: string
   email: string
   passwordHash?: string
-  role: 'superadmin' | 'admin' | 'pemohon'
+  role: 'superadmin' | 'admin'
   active: boolean
   createdAt: Date
 }

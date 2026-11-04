@@ -81,7 +81,7 @@ useSeoMeta({ title: 'Hak Akses', robots: 'noindex, nofollow' })
         <div class="flex items-start justify-between gap-3 border-b border-admin-border p-5">
           <div>
             <div class="flex items-center gap-2"><ShieldCheck :size="16" class="text-unu-green" /><h3 class="text-sm font-semibold">{{ role.label }}</h3></div>
-            <p class="mt-1 text-[14px] text-admin-muted">{{ role.slug === 'admin' ? 'Petugas yang menangani permohonan dan konten.' : 'Pemohon yang mengajukan dan memantau layanan.' }}</p>
+            <p class="mt-1 text-[14px] text-admin-muted">{{ role.slug === 'admin' ? 'Petugas yang menangani permohonan dan konten.' : '' }}</p>
           </div>
           <span class="rounded-full border border-admin-border bg-slate-50 px-2.5 py-1 text-[12px] font-bold">{{ selected[role.slug]?.length || 0 }} izin</span>
         </div>

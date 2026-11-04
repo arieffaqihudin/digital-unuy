@@ -6,16 +6,16 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const name = String(body?.name || '').trim()
   const email = String(body?.email || '').trim().toLowerCase()
-  const role = String(body?.role || 'pemohon')
+  const role = String(body?.role || 'admin')
 
   if (name.length < 3) throw createError({ statusCode: 422, statusMessage: 'Nama pengguna minimal 3 karakter.' })
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 180) {
     throw createError({ statusCode: 422, statusMessage: 'Alamat email tidak valid.' })
   }
-  if (!['superadmin', 'admin', 'pemohon'].includes(role)) {
+  if (!['superadmin', 'admin'].includes(role)) {
     throw createError({ statusCode: 422, statusMessage: 'Role pengguna tidak valid.' })
   }
-  if (role !== 'pemohon' && !user.permissions.includes('roles.manage')) {
+  if (!user.permissions.includes('roles.manage')) {
     throw createError({ statusCode: 403, statusMessage: 'Anda tidak memiliki izin memberikan role staf.' })
   }
   if (await User.exists({ email })) {

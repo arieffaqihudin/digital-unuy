@@ -49,7 +49,7 @@ async function login(page, email, password) {
   await page.goto(`${base}/masuk`, { waitUntil: 'networkidle' })
   await page.fill('#login-email', email)
   await page.fill('#login-password', password)
-  await Promise.all([page.waitForURL(/\/(admin|permohonan-saya)/, { timeout: 15000 }), page.click('button[type="submit"]')])
+  await Promise.all([page.waitForURL(/\/admin/, { timeout: 15000 }), page.click('button[type="submit"]')])
   await page.waitForLoadState('networkidle')
 }
 
@@ -88,6 +88,7 @@ const adminPages = [
   ['/admin/layanan', 'admin-services'],
   ['/admin/layanan/baru', 'admin-service-new'],
   ['/admin/ekosistem', 'admin-ecosystem'],
+  ['/admin/tim', 'admin-team'],
   ['/admin/program', 'admin-programs'],
   ['/admin/publikasi', 'admin-publications'],
   ['/admin/halaman', 'admin-pages'],
@@ -117,12 +118,11 @@ for (const [path, name] of [
 }
 await mobileAdminContext.close()
 
-const applicantContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
-const applicantPage = await applicantContext.newPage()
-await login(applicantPage, 'pemohon@digital.unu.local', 'Pemohon#2026')
-await auditPage(applicantPage, '/layanan/pembuatan-email-institusi/ajukan', 'request-form-mobile', 'mobile')
-await auditPage(applicantPage, '/permohonan-saya', 'my-requests-mobile', 'mobile')
-await applicantContext.close()
+const guestContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
+const guestPage = await guestContext.newPage()
+await auditPage(guestPage, '/layanan/pembuatan-email-institusi/ajukan', 'request-form-mobile', 'mobile')
+await auditPage(guestPage, '/tentang-kami/tim', 'team-mobile', 'mobile')
+await guestContext.close()
 
 await browser.close()
 

@@ -50,6 +50,15 @@ export default <Partial<Config>>{
         soft: '0 24px 70px -40px rgba(28, 26, 26, 0.35)',
         card: '0 1px 2px rgba(28,26,26,0.03), 0 18px 45px -38px rgba(28,26,26,0.28)'
       },
+      transitionDuration: {
+        micro: '180ms',
+        hover: '220ms',
+        image: '400ms',
+        reveal: '450ms'
+      },
+      transitionTimingFunction: {
+        unu: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      },
       keyframes: {
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
