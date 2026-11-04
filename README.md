@@ -150,7 +150,7 @@ server/
   models/index.ts
   utils/{security,validation,uploads,email,serializers,audit,rate-limit}.ts
 scripts/
-  seed.ts, seed-team-members.ts, migrate-ecosystem.ts, ecosystem-data.ts,
+  seed.ts, seed-team-members.ts, restructure-team-groups.ts, migrate-ecosystem.ts, ecosystem-data.ts,
   e2e.mjs, visual-check.mjs, responsive-audit.mjs
 shared/
   types.ts, permissions.ts

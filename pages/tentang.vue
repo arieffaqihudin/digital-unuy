@@ -72,7 +72,9 @@ useSeoMeta({
       </div>
     </section>
 
-    <section class="section-space bg-white">
+    <HomeApproach hide-link />
+
+    <section class="section-space border-t border-line-warm bg-white">
       <div class="page-shell grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
         <div>
           <div v-if="page?.content" class="prose-unu" v-html="page.content" />

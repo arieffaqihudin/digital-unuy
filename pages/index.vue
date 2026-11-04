@@ -68,6 +68,7 @@ useHead(() => ({
 <template>
   <div>
     <HomeHero />
+    <HomeImpact />
     <HomeApproach />
     <HomeEcosystem :platforms="home?.platforms || []" :categories="home?.platformCategories || []" />
 
@@ -91,8 +92,6 @@ useHead(() => ({
         <EmptyState v-else class="mt-10" title="Belum ada layanan" description="Administrator dapat menambahkan layanan melalui dashboard." />
       </div>
     </section>
-
-    <HomeCaseStudy />
 
     <section v-if="home?.programs.length" id="program" class="section-space scroll-mt-24 bg-ivory" aria-labelledby="program-title">
       <div class="page-shell grid gap-10 lg:grid-cols-[0.65fr_1.35fr] lg:gap-16">
