@@ -2,7 +2,7 @@ import { chromium } from 'playwright-core'
 import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
-const base = process.env.BASE_URL || 'http://localhost:3000'
+const base = process.env.BASE_URL || 'http://localhost:3001'
 const chromePath =
   process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const out = resolve(process.cwd(), '.data', 'screenshots', 'home-redesign')

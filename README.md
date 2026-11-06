@@ -25,7 +25,7 @@ npm run seed:reset
 npm run dev
 ```
 
-Buka `http://localhost:3000`.
+Buka `http://localhost:3001`.
 
 ### Akun seed development
 
@@ -43,6 +43,7 @@ Jangan gunakan kredensial ini di produksi. Ganti kata sandi dan bersihkan data s
 | Variabel | Wajib | Keterangan |
 |---|---|---|
 | `NUXT_MONGODB_URI` | Ya | URI MongoDB/Atlas, default `mongodb://127.0.0.1:27017/digital_unuy` |
+| `NUXT_PORT` | Tidak | Port server development, default `3001` |
 | `NUXT_PUBLIC_SITE_URL` | Ya | URL publik untuk canonical, sitemap, dan tautan email |
 | `NUXT_SESSION_SECRET` | Ya di produksi | Secret deployment; sesi memakai token acak ber-hash di database |
 | `NUXT_UPLOAD_DIR` | Tidak | Direktori file privat, default `.data/uploads` |

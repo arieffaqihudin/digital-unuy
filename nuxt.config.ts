@@ -25,7 +25,7 @@ export default defineNuxtConfig({
     mongodbUri: process.env.NUXT_MONGODB_URI || 'mongodb://127.0.0.1:27017/digital_unuy',
     sessionSecret: process.env.NUXT_SESSION_SECRET || 'dev-only-change-this-session-secret',
     uploadDir: process.env.NUXT_UPLOAD_DIR || '.data/uploads',
-    siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3001',
     smtp: {
       host: process.env.NUXT_SMTP_HOST || '',
       port: Number(process.env.NUXT_SMTP_PORT || 587),
@@ -35,7 +35,7 @@ export default defineNuxtConfig({
       from: process.env.NUXT_EMAIL_FROM || 'Direktorat Transformasi Digital UNU Yogyakarta <no-reply@localhost>'
     },
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3001',
       environment: process.env.NODE_ENV || 'development'
     }
   },
